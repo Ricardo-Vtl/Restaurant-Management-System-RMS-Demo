@@ -104,6 +104,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion",
     target: { selector: "aside" },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     radius: 24,
     label: "Tu menú de módulos",
     intro: true,

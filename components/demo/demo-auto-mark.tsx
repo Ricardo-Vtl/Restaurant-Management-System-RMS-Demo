@@ -184,13 +184,12 @@ export function DemoAutoAdvance() {
  * cerrado y no se encima con la siguiente indicación.
  */
 export function DemoSidebarSync() {
-  const { active, state, currentStep } = useDemoTour();
+  const { active, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
   const openedRef = useRef(false);
 
-  // Abrir el drawer solo después de que el bottom-sheet de intro se confirmó.
-  const introReady = !currentStep.intro || state.introAckFor === currentStep.id;
-  const needs = !isDesktop && active && !!currentStep.needsSidebar && introReady;
+  // El drawer se abre al activarse el paso (en paralelo con el bottom-sheet).
+  const needs = !isDesktop && active && !!currentStep.needsSidebar;
 
   useEffect(() => {
     if (isDesktop) return;
@@ -242,12 +241,12 @@ export function DemoSidebarSync() {
  * abre UNA vez al activarse el paso y lo cierra al cambiar de paso.
  */
 export function DemoCartSync() {
-  const { active, state, currentStep } = useDemoTour();
+  const { active, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
   const openedRef = useRef(false);
 
-  const introReady = !currentStep.intro || state.introAckFor === currentStep.id;
-  const needs = !isDesktop && active && !!currentStep.needsCart && introReady;
+  // El carrito se abre al activarse el paso (en paralelo con el bottom-sheet).
+  const needs = !isDesktop && active && !!currentStep.needsCart;
 
   useEffect(() => {
     if (isDesktop) return;
