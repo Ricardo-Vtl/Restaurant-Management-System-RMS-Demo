@@ -95,7 +95,7 @@ export function TourWidget() {
           aria-controls={PANEL_ID}
           aria-label={open ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
           className={cn(
-            "fixed bottom-6 left-6 md:left-auto md:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
+            "fixed bottom-6 left-6 lg:left-auto lg:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
             active && !done && "animate-pulse-coral",
           )}
         >
@@ -120,7 +120,7 @@ export function TourWidget() {
               // Móvil: bottom sheet
               "bottom-0 left-0 right-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t p-5",
               // Desktop: panel lateral
-              "md:bottom-24 md:left-auto md:right-6 md:max-h-[calc(100dvh-8rem)] md:w-96 md:rounded-2xl md:border",
+              "lg:bottom-24 lg:left-auto lg:right-6 lg:max-h-[calc(100dvh-8rem)] lg:w-96 lg:rounded-2xl lg:border",
             )}
           >
             <div className="flex items-center justify-between gap-3">

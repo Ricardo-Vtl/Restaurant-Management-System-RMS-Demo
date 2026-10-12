@@ -43,8 +43,12 @@ export interface TourStep {
   target?: TourTarget;
   /** Elemento alternativo en móvil (cuando el target vive en el sidebar oculto). */
   mobileTarget?: TourTarget;
+  /** El target vive en el sidebar: en móvil el tour abre el drawer y lo resalta. */
+  needsSidebar?: boolean;
   /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
   radius?: number;
+  /** Fuerza la posición del label. "inside" para objetivos de alto completo (sidebar). */
+  labelPlacement?: "auto" | "inside";
   /** Etiqueta anclada al elemento (default "Haz clic aquí"). */
   label?: string;
   /** Etiqueta alternativa en móvil (cuando la acción no es un clic). */
@@ -91,7 +95,9 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion",
     target: { selector: "aside" },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     radius: 24,
+    labelPlacement: "inside",
     label: "Tu menú de módulos",
   },
   {
@@ -101,6 +107,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/mesas",
     target: { selector: 'a[href="/gestion/mesas"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Mesas",
     mobileLabel: "Estás en Mesas",
     completeOnRoute: true,
@@ -157,6 +164,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/cocina",
     target: { selector: 'a[href="/gestion/cocina"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Cocina",
     mobileLabel: "Estás en Cocina (KDS)",
     completeOnRoute: true,
@@ -177,6 +185,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/pedidos",
     target: { selector: 'a[href="/gestion/pedidos"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Pedidos",
     mobileLabel: "Estás en Pedidos",
     completeOnRoute: true,
@@ -206,6 +215,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/caja",
     target: { selector: 'a[href="/gestion/caja"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Caja",
     mobileLabel: "Estás en Caja",
     completeOnRoute: true,
@@ -226,6 +236,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/logistica",
     target: { selector: 'a[href="/gestion/logistica"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Inventario",
     mobileLabel: "Estás en Inventario",
     completeOnRoute: true,
@@ -237,6 +248,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/config",
     target: { selector: 'a[href="/gestion/config"]' },
     mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
     label: "Haz clic en Config",
     mobileLabel: "Estás en Configuración",
     completeOnRoute: true,

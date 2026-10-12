@@ -46,9 +46,11 @@ export function TourSpotlight() {
   const [rect, setRect] = useState<Rect | null>(null);
   const scrolledRef = useRef(false);
 
-  // En móvil el sidebar está oculto: los pasos de navegación usan mobileTarget.
+  // En móvil los pasos cuyo target vive en el sidebar usan ese selector (el tour
+  // abre el drawer); el resto usa el mobileTarget (encabezado de la página).
+  const useSidebarTarget = !isDesktop && !!currentStep.needsSidebar;
   const target = active
-    ? isDesktop
+    ? isDesktop || useSidebarTarget
       ? currentStep.target
       : currentStep.mobileTarget ?? currentStep.target
     : undefined;
@@ -128,13 +130,20 @@ export function TourSpotlight() {
   const labelH = labelSize.height || (isDesktop ? 30 : 46);
   const gap = isDesktop ? 12 : 32;
 
-  // Elige el lado con hueco suficiente; si ninguno lo tiene, el más amplio.
+  // Elige el lado con hueco suficiente; si ninguno lo tiene (objetivo de alto
+  // completo, p. ej. el sidebar), el label va dentro del hueco.
   const spaceBelow = viewportH - (rect.top + rect.height + PAD) - gap;
   const spaceAbove = rect.top - PAD - gap;
-  let placeAbove: boolean;
-  if (spaceBelow >= labelH) placeAbove = false;
-  else if (spaceAbove >= labelH) placeAbove = true;
-  else placeAbove = spaceAbove > spaceBelow;
+  const placeInside =
+    currentStep.labelPlacement === "inside" ||
+    (spaceBelow < labelH && spaceAbove < labelH && Math.max(spaceBelow, spaceAbove) < 16);
+
+  let placeAbove = false;
+  if (!placeInside) {
+    if (spaceBelow >= labelH) placeAbove = false;
+    else if (spaceAbove >= labelH) placeAbove = true;
+    else placeAbove = spaceAbove > spaceBelow;
+  }
 
   // Centrado sobre el objetivo, clampeado dentro del viewport.
   let labelLeft = (containerWidth - labelW) / 2;
@@ -176,16 +185,26 @@ export function TourSpotlight() {
       <div
         ref={labelRef}
         className={cn(
-          "absolute bg-navy px-3 py-1.5 text-center text-primary-foreground shadow-lg",
+          "absolute px-3 py-1.5 text-center shadow-lg",
           isDesktop ? "rounded-full text-xs font-medium" : "rounded-xl",
+          placeInside ? "bg-primary-foreground text-navy" : "bg-navy text-primary-foreground",
         )}
-        style={{
-          maxWidth: Math.min(viewportW - 16, 280),
-          left: labelLeft,
-          ...(placeAbove
-            ? { bottom: containerHeight + gap }
-            : { top: containerHeight + gap }),
-        }}
+        style={
+          placeInside
+            ? {
+                maxWidth: Math.min(viewportW - 32, Math.max(containerWidth - 32, 220)),
+                left: "50%",
+                top: 12,
+                transform: "translateX(-50%)",
+              }
+            : {
+                maxWidth: Math.min(viewportW - 16, 280),
+                left: labelLeft,
+                ...(placeAbove
+                  ? { bottom: containerHeight + gap }
+                  : { top: containerHeight + gap }),
+              }
+        }
       >
         {isDesktop ? (
           currentStep.label ?? "Haz clic aquí"

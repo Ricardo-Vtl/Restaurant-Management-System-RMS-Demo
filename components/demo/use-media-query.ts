@@ -23,4 +23,6 @@ export function useMediaQuery(query: string): boolean {
   return matches;
 }
 
-export const useIsDesktop = () => useMediaQuery("(min-width: 768px)");
+// Alineado con el breakpoint del sidebar del POS (`lg` = 1024px): por debajo, el
+// sidebar es un drawer oculto y el tour debe comportarse como móvil.
+export const useIsDesktop = () => useMediaQuery("(min-width: 1024px)");
