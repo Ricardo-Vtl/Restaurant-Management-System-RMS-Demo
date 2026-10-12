@@ -1,0 +1,215 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+
+
+/* Restaurant POS Theme - Coastal Modern */
+:root {
+  /* Deep Navy Blue #002147 */
+  --background: hsl(211 30% 96%);
+  --foreground: hsl(211 82% 7%);
+  /* Off-White #F8F9FA */
+  --card: hsl(211 37% 99%);
+  --card-foreground: hsl(211 82% 7%);
+  --popover: hsl(211 37% 99%);
+  --popover-foreground: hsl(211 82% 7%);
+  /* Deep Navy as primary */
+  --primary: hsl(210 96% 11%);
+  --primary-foreground: hsl(211 47% 98%);
+  /* Light gray secondary */
+  --secondary: hsl(211 30% 93%);
+  --secondary-foreground: hsl(210 96% 11%);
+  --muted: hsl(211 30% 93%);
+  --muted-foreground: hsl(211 10% 39%);
+  /* Coral Orange as accent (WCAG AA: darkened to 4.5:1 on light bg) */
+  --accent: hsl(360 64% 53%);
+  --accent-foreground: hsl(211 37% 99%);
+  --destructive: hsl(352 92% 43%);
+  --destructive-foreground: hsl(211 47% 98%);
+  --border: hsl(211 18% 87%);
+  --input: hsl(211 18% 87%);
+  --ring: hsl(1 91% 66%);
+  --chart-1: hsl(1 91% 66%);
+  --chart-2: hsl(210 96% 11%);
+  --chart-3: hsl(174 71% 22%);
+  --chart-4: hsl(44 83% 47%);
+  --chart-5: hsl(146 93% 28%);
+  --radius: 0.75rem;
+  --sidebar: hsl(210 96% 11%);
+  --sidebar-foreground: hsl(211 47% 98%);
+  --sidebar-primary: hsl(1 91% 66%);
+  --sidebar-primary-foreground: hsl(211 37% 99%);
+  --sidebar-accent: hsl(210 47% 19%);
+  --sidebar-accent-foreground: hsl(211 47% 98%);
+  --sidebar-border: hsl(210 47% 19%);
+  --sidebar-ring: hsl(1 91% 66%);
+  /* Custom colors */
+  --coral: hsl(360 64% 53%);
+  --navy: hsl(210 96% 11%);
+  --navy-light: hsl(210 47% 19%);
+  --cream: hsl(211 30% 96%);
+  --success: hsl(128 55% 43%);
+}
+
+.dark {
+  --background: hsl(211 82% 7%);
+  --foreground: hsl(211 30% 96%);
+  --card: hsl(210 96% 11%);
+  --card-foreground: hsl(211 30% 96%);
+  --popover: hsl(210 96% 11%);
+  --popover-foreground: hsl(211 30% 96%);
+  --primary: hsl(1 91% 66%);
+  --primary-foreground: hsl(211 82% 7%);
+  --secondary: hsl(210 47% 19%);
+  --secondary-foreground: hsl(211 30% 96%);
+  --muted: hsl(210 47% 19%);
+  --muted-foreground: hsl(211 11% 63%);
+  --accent: hsl(360 64% 53%);
+  --accent-foreground: hsl(211 82% 7%);
+  --destructive: hsl(352 92% 43%);
+  --destructive-foreground: hsl(211 30% 96%);
+  --border: hsl(210 47% 19%);
+  --input: hsl(210 47% 19%);
+  --ring: hsl(1 91% 66%);
+  --chart-1: hsl(1 91% 66%);
+  --chart-2: hsl(174 71% 22%);
+  --chart-3: hsl(44 83% 47%);
+  --chart-4: hsl(146 93% 28%);
+  --chart-5: hsl(7 94% 66%);
+  --sidebar: hsl(215 96% 5%);
+  --sidebar-foreground: hsl(211 30% 96%);
+  --sidebar-primary: hsl(1 91% 66%);
+  --sidebar-primary-foreground: hsl(211 82% 7%);
+  --sidebar-accent: hsl(210 63% 14%);
+  --sidebar-accent-foreground: hsl(211 30% 96%);
+  --sidebar-border: hsl(210 63% 14%);
+  --sidebar-ring: hsl(1 91% 66%);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), sans-serif;
+  --font-serif: var(--font-playfair), serif;
+  --font-mono: "SF Mono", "Monaco", "Menlo", "Consolas", monospace;
+  --color-coral: var(--coral);
+  --color-navy: var(--navy);
+  --color-navy-light: var(--navy-light);
+  --color-cream: var(--cream);
+  --color-success: var(--success);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --z-1: 1;
+  --z-100: 100;
+  --container-105: 420px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-dark {
+  background: rgba(0, 33, 71, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Hide scrollbar for horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pulse animation for cart */
+@keyframes pulse-coral {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 111, 97, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(255, 111, 97, 0);
+  }
+}
+
+.animate-pulse-coral {
+  animation: pulse-coral 2s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  nav, header, [role="banner"], .no-print,
+  button, [role="button"], [data-slot="button"] {
+    display: none !important;
+  }
+  body {
+    font-size: 12pt;
+    color: #000;
+    background: #fff;
+  }
+  .print-only { display: block !important; }
+}
