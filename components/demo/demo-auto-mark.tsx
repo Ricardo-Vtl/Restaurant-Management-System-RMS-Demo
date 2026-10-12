@@ -335,17 +335,23 @@ export function DemoAutoDismiss() {
       return;
     }
 
+    // Cierra el diálogo/sheet abierto por su botón de cierre accesible. El modal
+    // de mesa usa "Cerrar" y el Sheet de detalle usa "Close" (sr-only).
+    const clickClose = (labels: string[]) => {
+      const btn = Array.from(
+        document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+      ).find((b) => labels.includes((b.textContent ?? "").trim()));
+      btn?.click();
+    };
+
     if (state.completed.includes("send") && !handledRef.current.has("send")) {
       handledRef.current.add("send");
-      const closeBtn = Array.from(
-        document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
-      ).find((b) => (b.textContent ?? "").trim() === "Cerrar");
-      closeBtn?.click();
+      clickClose(["Cerrar"]);
     }
 
     if (state.completed.includes("deliver") && !handledRef.current.has("deliver")) {
       handledRef.current.add("deliver");
-      document.querySelector<HTMLButtonElement>('[data-slot="sheet-close"]')?.click();
+      clickClose(["Close", "Cerrar"]);
     }
   }, [active, state.completed]);
 
