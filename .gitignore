@@ -34,6 +34,10 @@ skills-lock.json
 .opencode/
 opencode.json
 
+# Local-only agent guide: never publish to the public repo (the sync's
+# `git add -A` would otherwise sweep it in). See AGENTS.md.
+AGENTS.md
+
 # Artefactos de sesiones Playwright MCP (snapshots/screenshots)
 .playwright-mcp/
 
