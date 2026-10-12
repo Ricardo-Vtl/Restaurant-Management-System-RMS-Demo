@@ -67,6 +67,12 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
 
   const filteredItems = navItems.filter((item) => item.roles.includes(currentUser.role));
 
+  // En móvil el sidebar es un drawer: al navegar hay que cerrarlo, o tapa el
+  // contenido. En escritorio (lg) queda fijo y no se toca.
+  const closeOnMobileNav = () => {
+    if (window.matchMedia("(max-width: 1023px)").matches) onToggle();
+  };
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -171,6 +177,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    onClick={closeOnMobileNav}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group",
                       isActive
@@ -228,7 +235,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
           {isOpen && (
             <div className="mt-3 flex gap-2">
               <Button variant="ghost" asChild className="flex-1 justify-center gap-2 py-2 rounded-lg bg-navy-light/20 text-primary-foreground/70 hover:text-primary-foreground">
-                <Link href="/"><Home className="size-4" /> Sitio</Link>
+                <Link href="/" onClick={closeOnMobileNav}><Home className="size-4" /> Sitio</Link>
               </Button>
               <Button variant="ghost" onClick={async () => { await logout(); router.push("/"); }} className="flex-1 justify-center gap-2 py-2 rounded-lg bg-navy-light/20 text-primary-foreground/70 hover:text-destructive">
                 <LogOut className="size-4" /> Salir
