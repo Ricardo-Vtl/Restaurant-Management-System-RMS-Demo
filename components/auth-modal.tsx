@@ -23,7 +23,9 @@ export function AuthModal() {
       setPin("");
       setError("");
       setIsLoading(false);
-      setTimeout(() => inputRef.current?.focus(), 100);
+      if (window.matchMedia("(pointer: fine)").matches) {
+        setTimeout(() => inputRef.current?.focus(), 100);
+      }
     }
   }, [isAuthModalOpen]);
 
@@ -71,7 +73,7 @@ export function AuthModal() {
 
   return (
     <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-      <DialogContent className="max-w-sm max-h-[90dvh] overflow-y-auto p-0">
+      <DialogContent className="max-w-sm max-h-[92dvh] gap-0 overflow-y-auto p-0">
         {currentUser ? (
           <>
             <div className="bg-navy p-8 text-center relative">
@@ -117,7 +119,7 @@ export function AuthModal() {
           </>
         ) : (
           <>
-            <div className="bg-navy p-6 text-center relative">
+            <div className="bg-navy p-5 sm:p-6 text-center relative">
               <div className="size-16 bg-coral rounded-full flex items-center justify-center mx-auto mb-4">
                 {isLoading ? (
                   <Loader2 className="size-8 text-accent-foreground animate-spin" />
@@ -131,8 +133,8 @@ export function AuthModal() {
               </DialogDescription>
             </div>
 
-            <div className="p-6">
-              <div className="flex justify-center gap-2 sm:gap-3 mb-6">
+            <div className="p-5 sm:p-6">
+              <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
@@ -154,13 +156,13 @@ export function AuthModal() {
                 </div>
               )}
 
-              <div className="grid grid-cols-3 gap-3">
+              <div data-pin-pad className="grid grid-cols-3 gap-3">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
                   <button
                     key={num}
                     disabled={isLoading}
                     onClick={() => handlePinInput(num.toString())}
-                    className="h-14 rounded-xl bg-muted hover:bg-muted/80 font-semibold text-xl transition-all active:scale-95 disabled:opacity-50"
+                    className="h-12 sm:h-14 rounded-xl bg-muted hover:bg-muted/80 font-semibold text-xl transition-all active:scale-95 disabled:opacity-50"
                   >
                     {num}
                   </button>
@@ -168,14 +170,14 @@ export function AuthModal() {
                 <button
                   disabled={isLoading}
                   onClick={handleClear}
-                  className="h-14 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium transition-all disabled:opacity-50"
+                  className="h-12 sm:h-14 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium transition-all disabled:opacity-50"
                 >
                   Borrar
                 </button>
                 <button
                   disabled={isLoading}
                   onClick={() => handlePinInput("0")}
-                  className="h-14 rounded-xl bg-muted hover:bg-muted/80 font-semibold text-xl transition-all active:scale-95 disabled:opacity-50"
+                  className="h-12 sm:h-14 rounded-xl bg-muted hover:bg-muted/80 font-semibold text-xl transition-all active:scale-95 disabled:opacity-50"
                 >
                   0
                 </button>
@@ -183,7 +185,7 @@ export function AuthModal() {
                   disabled={isLoading}
                   onClick={handleBackspace}
                   aria-label="Borrar dígito"
-                  className="h-14 rounded-xl bg-muted hover:bg-muted/80 transition-all disabled:opacity-50"
+                  className="h-12 sm:h-14 rounded-xl bg-muted hover:bg-muted/80 transition-all disabled:opacity-50"
                 >
                   <X className="size-5 mx-auto" aria-hidden="true" />
                 </button>
@@ -199,7 +201,7 @@ export function AuthModal() {
             <input
               ref={inputRef}
               type="text"
-              inputMode="numeric"
+              inputMode="none"
               pattern="[0-9]*"
               maxLength={6}
               value={pin}
