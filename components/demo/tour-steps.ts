@@ -19,6 +19,7 @@ export type TourStepId =
   | "deliver"
   | "caja-link"
   | "cobrar"
+  | "cobrar-pago"
   | "logistica"
   | "config"
   | "cierre";
@@ -229,10 +230,19 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "cobrar",
     title: "Cobra la cuenta",
-    body: "Elige método de pago (efectivo, tarjeta o transferencia) y confirma.",
+    body: "Abre el cierre de cuenta de la mesa.",
     href: "/gestion/caja",
     target: { text: "Cobrar Mesa" },
     label: "Cobra aquí",
+    completeWhen: { text: "Confirmar Cobro" },
+  },
+  {
+    id: "cobrar-pago",
+    title: "Confirma el cobro",
+    body: "Elige método de pago (efectivo, tarjeta o transferencia) y confirma.",
+    href: "/gestion/caja",
+    target: { text: "Confirmar Cobro" },
+    label: "Confirma el cobro",
     auto: "paid",
   },
   {
@@ -295,7 +305,7 @@ export const AUTO_STEP: Record<TourAutoCondition, TourStepId> = {
   login: "login",
   order: "send",
   delivered: "deliver",
-  paid: "cobrar",
+  paid: "cobrar-pago",
 };
 
 /**

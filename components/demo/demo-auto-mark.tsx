@@ -22,8 +22,8 @@ import { useIsDesktop } from "./use-media-query";
 
 // Ritmo del recorrido: más margen entre acciones automáticas para que dé tiempo
 // a leer (híbrido acción-trigger + tiempos holgados).
-const ADVANCE_DELAY_MS = 2500;
-const IDLE_ADVANCE_MS = 8000;
+const ADVANCE_DELAY_MS = 1200;
+const IDLE_ADVANCE_MS = 7000;
 
 export function DemoAuthAutoMark() {
   const { currentUser, isAuthModalOpen } = useAuth();
@@ -137,7 +137,7 @@ export function DemoDomAutoMark() {
     };
 
     check();
-    const id = window.setInterval(check, 500);
+    const id = window.setInterval(check, 250);
     return () => window.clearInterval(id);
   }, [active, currentStep, complete, isDesktop]);
 
@@ -198,44 +198,58 @@ export function DemoAutoAdvance() {
 
 /**
  * En móvil el sidebar es un drawer oculto (breakpoint lg). Para los pasos cuyo
- * target vive en el sidebar, el tour abre el drawer (click programático en la
- * hamburguesa del header) y lo cierra al salir. Solo lo cierra si fue el tour
- * quien lo abrió, y no lo reabre cuando el paso ya se completó.
+ * target vive en el sidebar, el tour lo abre UNA vez al activarse el paso (click
+ * en la hamburguesa del header) y lo cierra al cambiar de paso. No lo reabre
+ * dentro del mismo paso: si el usuario lo cierra al tocar un módulo, se queda
+ * cerrado y no se encima con la siguiente indicación.
  */
 export function DemoSidebarSync() {
-  const { active, state, currentStep } = useDemoTour();
+  const { active, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
-  const openedByTourRef = useRef(false);
+  const openedRef = useRef(false);
 
-  const done = state.completed.includes(currentStep.id);
-  const needs = !isDesktop && active && !!currentStep.needsSidebar && !done;
+  const needs = !isDesktop && active && !!currentStep.needsSidebar;
 
   useEffect(() => {
     if (isDesktop) return;
 
     const overlay = () => document.querySelector<HTMLElement>('[class*="bg-navy/50"]');
-    const isOpen = () => !!overlay();
-    const openDrawer = () =>
-      document
-        .querySelector<HTMLButtonElement>('button[aria-label="Abrir menú de navegación"]')
-        ?.click();
 
-    const tick = () => {
-      if (needs) {
-        if (!isOpen()) {
-          openDrawer();
-          openedByTourRef.current = true;
-        }
-      } else if (openedByTourRef.current) {
-        if (isOpen()) overlay()?.click();
-        openedByTourRef.current = false;
+    if (!needs) {
+      if (openedRef.current) {
+        overlay()?.click();
+        openedRef.current = false;
       }
+      return;
+    }
+
+    let attempts = 0;
+    let clicked = false;
+    const tick = (): boolean => {
+      if (overlay()) {
+        openedRef.current = true;
+        return true;
+      }
+      if (!clicked) {
+        const btn = document.querySelector<HTMLButtonElement>(
+          'button[aria-label="Abrir menú de navegación"]',
+        );
+        if (btn) {
+          btn.click();
+          clicked = true;
+          openedRef.current = true;
+        }
+      }
+      return false;
     };
 
-    tick();
-    const id = window.setInterval(tick, 300);
+    if (tick()) return;
+    const id = window.setInterval(() => {
+      attempts += 1;
+      if (tick() || attempts > 12) window.clearInterval(id);
+    }, 150);
     return () => window.clearInterval(id);
-  }, [isDesktop, needs]);
+  }, [isDesktop, needs, currentStep.id]);
 
   return null;
 }
@@ -243,45 +257,62 @@ export function DemoSidebarSync() {
 /**
  * En móvil la comanda es un drawer oculto dentro del modal de la mesa. Para los
  * pasos cuyo target vive en el carrito (p. ej. "Enviar a Cocina"), el tour lo
- * abre y lo cierra al salir — solo si fue el tour quien lo abrió.
+ * abre UNA vez al activarse el paso y lo cierra al cambiar de paso.
  */
 export function DemoCartSync() {
-  const { active, state, currentStep } = useDemoTour();
+  const { active, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
-  const openedByTourRef = useRef(false);
+  const openedRef = useRef(false);
 
-  const done = state.completed.includes(currentStep.id);
-  const needs = !isDesktop && active && !!currentStep.needsCart && !done;
+  const needs = !isDesktop && active && !!currentStep.needsCart;
 
   useEffect(() => {
     if (isDesktop) return;
 
-    const cart = () => document.querySelector<HTMLElement>('aside[aria-live="polite"]');
+    const cartEl = () => document.querySelector<HTMLElement>('aside[aria-live="polite"]');
+    // El carrito abre hacia la derecha: abierto ≈ left 0, cerrado ≈ ancho de pantalla.
     const isOpen = () => {
-      const el = cart();
-      return !!el && el.getBoundingClientRect().left > -8;
+      const el = cartEl();
+      return !!el && el.getBoundingClientRect().left < 8;
     };
-    const openCart = () =>
-      document.querySelector<HTMLButtonElement>('button[aria-label="Abrir carrito móvil"]')?.click();
     const closeCart = () =>
       document.querySelector<HTMLButtonElement>('button[aria-label="Cerrar carrito móvil"]')?.click();
 
-    const tick = () => {
-      if (needs) {
-        if (!isOpen()) {
-          openCart();
-          openedByTourRef.current = true;
-        }
-      } else if (openedByTourRef.current) {
+    if (!needs) {
+      if (openedRef.current) {
         if (isOpen()) closeCart();
-        openedByTourRef.current = false;
+        openedRef.current = false;
       }
+      return;
+    }
+
+    let attempts = 0;
+    let clicked = false;
+    const tick = (): boolean => {
+      if (isOpen()) {
+        openedRef.current = true;
+        return true;
+      }
+      if (!clicked) {
+        const btn = document.querySelector<HTMLButtonElement>(
+          'button[aria-label="Abrir carrito móvil"]',
+        );
+        if (btn) {
+          btn.click();
+          clicked = true;
+          openedRef.current = true;
+        }
+      }
+      return false;
     };
 
-    tick();
-    const id = window.setInterval(tick, 300);
+    if (tick()) return;
+    const id = window.setInterval(() => {
+      attempts += 1;
+      if (tick() || attempts > 12) window.clearInterval(id);
+    }, 150);
     return () => window.clearInterval(id);
-  }, [isDesktop, needs]);
+  }, [isDesktop, needs, currentStep.id]);
 
   return null;
 }

@@ -19,7 +19,7 @@ interface Rect {
 }
 
 const PAD = 6;
-const POLL_MS = 300;
+const POLL_MS = 200;
 
 // useLayoutEffect en cliente (mide antes del paint), useEffect en servidor (evita warning SSR).
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
