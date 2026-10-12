@@ -10,6 +10,7 @@
 //   • DemoAutoAdvance   — avanza solo tras detectar la acción del paso
 //   • DemoSidebarSync   — en móvil abre/cierra el drawer para los pasos del sidebar
 //   • DemoCartSync      — en móvil abre/cierra el carrito para los pasos de la comanda
+//   • DemoAutoDismiss   — cierra el modal/panel que la app deja abierto tras una acción
 
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -313,6 +314,40 @@ export function DemoCartSync() {
     }, 150);
     return () => window.clearInterval(id);
   }, [isDesktop, needs, currentStep.id]);
+
+  return null;
+}
+
+/**
+ * Cierra los overlays que la app deja abiertos tras completar una acción, para
+ * que el foco del siguiente paso no quede detrás (desktop y móvil):
+ *   • send    → cierra el modal de la mesa (comanda enviada)
+ *   • deliver → cierra el panel lateral del pedido (marcado como entregado)
+ */
+export function DemoAutoDismiss() {
+  const { active, state } = useDemoTour();
+  const handledRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!active) return;
+    if (state.completed.length === 0) {
+      handledRef.current.clear();
+      return;
+    }
+
+    if (state.completed.includes("send") && !handledRef.current.has("send")) {
+      handledRef.current.add("send");
+      const closeBtn = Array.from(
+        document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
+      ).find((b) => (b.textContent ?? "").trim() === "Cerrar");
+      closeBtn?.click();
+    }
+
+    if (state.completed.includes("deliver") && !handledRef.current.has("deliver")) {
+      handledRef.current.add("deliver");
+      document.querySelector<HTMLButtonElement>('[data-slot="sheet-close"]')?.click();
+    }
+  }, [active, state.completed]);
 
   return null;
 }
