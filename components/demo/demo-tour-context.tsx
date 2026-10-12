@@ -1,8 +1,8 @@
 "use client";
 
-// Estado del recorrido guiado de la demo, persistido en localStorage.
+// Estado del recorrido guiado de la demo, por documento (no persiste al recargar).
 // Los componentes de cada página (landing / gestión) montan su propio provider;
-// el estado se restaura desde storage al navegar entre páginas.
+// el singleton de módulo conserva el estado al navegar entre páginas.
 
 import {
   createContext,
@@ -17,16 +17,18 @@ import {
   DEFAULT_TOUR_STATE,
   TOUR_STEPS,
   clampStep,
-  parseStoredState,
   type StoredTourState,
   type TourStep,
   type TourStepId,
 } from "./tour-steps";
 
-const STORAGE_KEY = "rm-demo-tour:v1";
+// ponytail: estado por documento (no por navegador). El singleton de módulo se
+// conserva al navegar dentro de la SPA (landing↔gestión) y se reinicia al
+// recargar la página → la bienvenida siempre aparece al entrar.
+let memoryState: StoredTourState | null = null;
 
 interface DemoTourContextValue {
-  /** false hasta que el estado de localStorage se hidrata (evita mismatch SSR). */
+  /** false hasta que el estado de módulo se hidrata (evita mismatch SSR). */
   mounted: boolean;
   state: StoredTourState;
   /** Recorrido en curso (se inició y no se finalizó). */
@@ -50,20 +52,13 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const stored = parseStoredState(
-      typeof window === "undefined" ? null : window.localStorage.getItem(STORAGE_KEY),
-    );
-    if (stored) setState(stored);
+    if (memoryState) setState(memoryState);
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // localStorage bloqueado (modo privado): el recorrido funciona sin persistir.
-    }
+    memoryState = state;
   }, [state, mounted]);
 
   const start = useCallback(() => {

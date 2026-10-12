@@ -14,24 +14,34 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAllOrders } from "@/hooks/use-orders";
 import { useAuth } from "@/lib/store";
 import { useDemoTour } from "./demo-tour-context";
-import { AUTO_STEP, TOUR_STEPS, isAutoConditionMet, type TourAutoContext } from "./tour-steps";
+import { TOUR_STEPS, shouldAutoComplete, type TourAutoContext } from "./tour-steps";
 import { findTargetElement } from "./target-matcher";
 
 export function DemoAuthAutoMark() {
   const { currentUser, isAuthModalOpen } = useAuth();
-  const { active, complete } = useDemoTour();
+  const { active, currentStep, complete } = useDemoTour();
+
+  const ctx = useMemo<TourAutoContext>(
+    () => ({
+      authModalOpen: isAuthModalOpen,
+      loggedIn: !!currentUser,
+      hasNewOrder: false,
+      hasDeliveredOrder: false,
+      hasPaidOrder: false,
+    }),
+    [isAuthModalOpen, currentUser],
+  );
 
   useEffect(() => {
     if (!active) return;
-    if (isAuthModalOpen || currentUser) complete(AUTO_STEP.authModal);
-    if (currentUser) complete(AUTO_STEP.login);
-  }, [active, currentUser, isAuthModalOpen, complete]);
+    if (shouldAutoComplete(currentStep, ctx)) complete(currentStep.id);
+  }, [active, currentStep, ctx, complete]);
 
   return null;
 }
 
 export function DemoOrdersAutoMark() {
-  const { active, state, complete } = useDemoTour();
+  const { active, state, currentStep, complete } = useDemoTour();
   const { data: orders } = useAllOrders();
 
   const ctx = useMemo<TourAutoContext>(() => {
@@ -58,10 +68,8 @@ export function DemoOrdersAutoMark() {
 
   useEffect(() => {
     if (!active) return;
-    if (isAutoConditionMet("order", ctx)) complete(AUTO_STEP.order);
-    if (isAutoConditionMet("delivered", ctx)) complete(AUTO_STEP.delivered);
-    if (isAutoConditionMet("paid", ctx)) complete(AUTO_STEP.paid);
-  }, [active, ctx, complete]);
+    if (shouldAutoComplete(currentStep, ctx)) complete(currentStep.id);
+  }, [active, currentStep, ctx, complete]);
 
   return null;
 }
@@ -74,11 +82,13 @@ export function DemoRouteAutoMark() {
   const href = currentStep.href;
   const isRoute = !!href && href.startsWith("/");
 
-  // Navegación automática al módulo del paso.
+  // Navegación automática al módulo del paso. Los pasos "clic en el link" NO
+  // navegan solos: el usuario hace el clic y eso completa el paso.
   useEffect(() => {
     if (!active || !isRoute || !href) return;
+    if (currentStep.completeOnRoute) return;
     if (pathname !== href) router.push(href);
-  }, [active, isRoute, href, pathname, router]);
+  }, [active, isRoute, href, pathname, router, currentStep.completeOnRoute]);
 
   // Los pasos "clic en el link" se completan cuando la ruta coincide.
   useEffect(() => {

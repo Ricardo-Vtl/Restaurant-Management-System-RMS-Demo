@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   AUTO_STEP,
-  DEFAULT_TOUR_STATE,
   TOUR_STEPS,
   clampStep,
   isAutoConditionMet,
-  parseStoredState,
+  shouldAutoComplete,
   tourProgress,
   type TourAutoContext,
   type TourTarget,
@@ -73,30 +72,13 @@ describe("tour-steps", () => {
     }
   });
 
-  it("parseStoredState tolera basura y sanea el shape", () => {
-    expect(parseStoredState(null)).toBeNull();
-    expect(parseStoredState("no-json")).toBeNull();
-    expect(parseStoredState('"string"')).toBeNull();
-
-    const sane = parseStoredState(
-      JSON.stringify({
-        step: 999,
-        completed: ["login", "hack", 7],
-        startedAt: 123,
-        welcomeSeen: true,
-        hintShown: false,
-        panelOpen: true,
-      }),
-    );
-    expect(sane).toEqual({
-      welcomeSeen: true,
-      step: TOUR_STEPS.length - 1,
-      startedAt: null,
-      completed: ["login"],
-      hintShown: false,
-      panelOpen: true,
-    });
-
-    expect(parseStoredState("{}")).toEqual(DEFAULT_TOUR_STATE);
+  it("shouldAutoComplete solo marca el paso que declara la condición cumplida", () => {
+    const step = (id: string) => TOUR_STEPS.find((s) => s.id === id)!;
+    expect(shouldAutoComplete(step("landing"), CTX)).toBe(false);
+    expect(shouldAutoComplete(step("acceso"), CTX)).toBe(false);
+    expect(shouldAutoComplete(step("acceso"), { ...CTX, authModalOpen: true })).toBe(true);
+    expect(shouldAutoComplete(step("login"), { ...CTX, loggedIn: true })).toBe(true);
+    expect(shouldAutoComplete(step("send"), CTX)).toBe(false);
+    expect(shouldAutoComplete(step("send"), { ...CTX, hasNewOrder: true })).toBe(true);
   });
 });

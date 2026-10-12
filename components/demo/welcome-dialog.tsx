@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
 import { useDemoTour } from "./demo-tour-context";
+import { TOUR_STEPS } from "./tour-steps";
 
 const DEMO_PINS = [
   { role: "Admin", pin: "123456" },
@@ -56,7 +57,7 @@ export function WelcomeDialog() {
         <div className="p-6 flex flex-col gap-5">
           <p className="text-sm text-muted-foreground">
             Punto de venta, mesas, cocina en vivo, caja, inventario por recetas y
-            configuración white-label, en una sola aplicación. Te guío en 9 pasos o
+            configuración white-label, en una sola aplicación. Te guío en {TOUR_STEPS.length} pasos o
             explora por tu cuenta.
           </p>
 

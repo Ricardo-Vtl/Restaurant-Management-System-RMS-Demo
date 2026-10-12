@@ -151,7 +151,7 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La comanda ya está en preparación.",
     href: "/gestion/cocina",
     target: { selector: 'a[href="/gestion/cocina"]' },
-    label: "Ve a Cocina",
+    label: "Haz clic en Cocina",
     completeOnRoute: true,
   },
   {
@@ -169,7 +169,7 @@ export const TOUR_STEPS: TourStep[] = [
     body: "El pedido listo espera en Pedidos.",
     href: "/gestion/pedidos",
     target: { selector: 'a[href="/gestion/pedidos"]' },
-    label: "Ve a Pedidos",
+    label: "Haz clic en Pedidos",
     completeOnRoute: true,
   },
   {
@@ -196,7 +196,7 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La cuenta está lista para cobrar.",
     href: "/gestion/caja",
     target: { selector: 'a[href="/gestion/caja"]' },
-    label: "Ve a Caja",
+    label: "Haz clic en Caja",
     completeOnRoute: true,
   },
   {
@@ -214,7 +214,8 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Cada venta descontó insumos automáticamente; revisa el libro de movimientos.",
     href: "/gestion/logistica",
     target: { selector: 'a[href="/gestion/logistica"]' },
-    label: "Inventario",
+    label: "Haz clic en Inventario",
+    completeOnRoute: true,
   },
   {
     id: "config",
@@ -222,7 +223,8 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Nombre, colores, hero, horarios e impuestos sin tocar código.",
     href: "/gestion/config",
     target: { selector: 'a[href="/gestion/config"]' },
-    label: "White-label",
+    label: "Haz clic en Config",
+    completeOnRoute: true,
   },
   {
     id: "cierre",
@@ -263,6 +265,15 @@ export const AUTO_STEP: Record<TourAutoCondition, TourStepId> = {
   paid: "cobrar",
 };
 
+/**
+ * ¿El paso ACTUAL debe marcarse solo? Solo si declara una condición `auto` y esa
+ * condición ya se cumple. Anclar al paso actual (en vez de marcar pasos futuros)
+ * es lo que hace que cada acción avance el tour de forma consistente.
+ */
+export function shouldAutoComplete(step: TourStep, ctx: TourAutoContext): boolean {
+  return step.auto ? isAutoConditionMet(step.auto, ctx) : false;
+}
+
 export function clampStep(step: number): number {
   return Math.min(Math.max(step, 0), TOUR_STEPS.length - 1);
 }
@@ -288,29 +299,3 @@ export const DEFAULT_TOUR_STATE: StoredTourState = {
   hintShown: false,
   panelOpen: false,
 };
-
-/** Lee el estado persistido sin confiar en el shape (localStorage puede traer basura). */
-export function parseStoredState(raw: string | null): StoredTourState | null {
-  if (!raw) return null;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return null;
-    const p = parsed as Record<string, unknown>;
-    const ids = new Set<string>(TOUR_STEPS.map((s) => s.id));
-    return {
-      welcomeSeen: p.welcomeSeen === true,
-      step:
-        typeof p.step === "number" && Number.isFinite(p.step)
-          ? clampStep(Math.trunc(p.step))
-          : 0,
-      startedAt: typeof p.startedAt === "string" ? p.startedAt : null,
-      completed: Array.isArray(p.completed)
-        ? p.completed.filter((id): id is TourStepId => typeof id === "string" && ids.has(id))
-        : [],
-      hintShown: p.hintShown === true,
-      panelOpen: p.panelOpen === true,
-    };
-  } catch {
-    return null;
-  }
-}
