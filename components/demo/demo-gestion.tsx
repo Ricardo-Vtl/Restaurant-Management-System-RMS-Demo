@@ -1,20 +1,20 @@
 "use client";
 
 // Montaje del recorrido guiado dentro del POS (solo repo demo).
-// Aquí además corre el auto-marcado por órdenes reales (comanda/entrega/cobro).
+// Aquí además corre el auto-marcado por órdenes reales y por cambios del DOM.
 
-import { DemoAuthAutoMark, DemoOrdersAutoMark } from "./demo-auto-mark";
+import { DemoDomAutoMark, DemoOrdersAutoMark } from "./demo-auto-mark";
 import { DemoTourProvider } from "./demo-tour-context";
-import { TourWidget } from "./tour-widget";
+import { DemoTourRuntime } from "./demo-runtime";
 import { WelcomeDialog } from "./welcome-dialog";
 
 export function DemoGestion() {
   return (
     <DemoTourProvider>
-      <DemoAuthAutoMark />
+      <DemoTourRuntime />
       <DemoOrdersAutoMark />
+      <DemoDomAutoMark />
       <WelcomeDialog />
-      <TourWidget />
     </DemoTourProvider>
   );
 }

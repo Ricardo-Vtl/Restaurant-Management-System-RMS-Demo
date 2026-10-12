@@ -2,18 +2,16 @@
 
 // Montaje del recorrido guiado en la landing pública (solo repo demo).
 
-import { DemoAuthAutoMark } from "./demo-auto-mark";
 import { DemoTourProvider } from "./demo-tour-context";
+import { DemoTourRuntime } from "./demo-runtime";
 import { LoginHint } from "./login-hint";
-import { TourWidget } from "./tour-widget";
 import { WelcomeDialog } from "./welcome-dialog";
 
 export function DemoLanding() {
   return (
     <DemoTourProvider>
-      <DemoAuthAutoMark />
+      <DemoTourRuntime />
       <WelcomeDialog />
-      <TourWidget />
       <LoginHint />
     </DemoTourProvider>
   );

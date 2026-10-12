@@ -6,23 +6,51 @@ export type TourStepId =
   | "acceso"
   | "login"
   | "dashboard"
-  | "mesas"
-  | "cocina"
-  | "caja"
+  | "mesas-link"
+  | "mesa-1"
+  | "mesa-confirm"
+  | "product"
+  | "add-item"
+  | "send"
+  | "cocina-link"
+  | "kds-ready"
+  | "pedidos-link"
+  | "deliver-open"
+  | "deliver"
+  | "caja-link"
+  | "cobrar"
   | "logistica"
-  | "config";
+  | "config"
+  | "cierre";
 
 /** Condición que marca un paso como completado leyendo estado real de la app. */
 export type TourAutoCondition = "authModal" | "login" | "order" | "delivered" | "paid";
+
+export interface TourTarget {
+  /** Selector CSS (preferido: estable). */
+  selector?: string;
+  /** Texto visible o aria-label de un control (match exacto, luego parcial). */
+  text?: string;
+}
 
 export interface TourStep {
   id: TourStepId;
   title: string;
   body: string;
-  /** Deep link del paso (botón "Ir"). */
+  /** Ruta del módulo: el tour navega solo cuando el paso se activa. */
   href?: string;
-  /** Texto del botón "Ir". */
-  cta?: string;
+  /** Elemento que ilumina el spotlight (hueco exacto). */
+  target?: TourTarget;
+  /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
+  radius?: number;
+  /** Etiqueta anclada al elemento (default "Haz clic aquí"). */
+  label?: string;
+  /** Completa cuando este elemento aparece en el DOM. */
+  completeWhen?: TourTarget;
+  /** Completa cuando este elemento desaparece (tras haber aparecido). */
+  completeWhenGone?: TourTarget;
+  /** Completa cuando la ruta actual es el href (click del usuario en el link). */
+  completeOnRoute?: boolean;
   auto?: TourAutoCondition;
 }
 
@@ -32,18 +60,27 @@ export const TOUR_STEPS: TourStep[] = [
     title: "La landing pública",
     body: "Así ve tu cliente el menú: catálogo en vivo desde la base de datos, categorías, carrito y pedidos en línea.",
     href: "#menu",
-    cta: "Ver el menú",
+    target: { selector: "#menu" },
+    label: "Explora el menú",
   },
   {
     id: "acceso",
     title: "Acceso del personal",
-    body: "El panel es privado. Haz triple clic en el logo (arriba a la izquierda) para abrir el acceso con PIN.",
+    body: "El panel es privado: haz triple clic en el logo y se abre el teclado de PIN.",
+    href: "/",
+    target: { selector: "[data-demo-logo]" },
+    radius: 9999,
+    label: "Triple clic aquí",
     auto: "authModal",
   },
   {
     id: "login",
     title: "Tu PIN de acceso",
-    body: "Ingresa 123456 (admin). En el modal tienes también los PINs de mesero, cocina y caja para probar cada rol.",
+    body: "Ingresa 123456 (admin). En el modal tienes también los PINs de mesero, cocina y caja.",
+    href: "/",
+    target: { selector: '[role="dialog"]' },
+    radius: 24,
+    label: "Usa 123456",
     auto: "login",
   },
   {
@@ -51,45 +88,146 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Panel de control",
     body: "KPIs del día, ocupación de mesas y pedidos en curso. El menú lateral se adapta a cada rol.",
     href: "/gestion",
-    cta: "Ir al panel",
+    target: { selector: "aside" },
+    radius: 24,
+    label: "Tu menú de módulos",
   },
   {
-    id: "mesas",
-    title: "Mesas y comandas",
-    body: "Abre la Mesa 1, agrega platillos y envía la comanda a cocina.",
+    id: "mesas-link",
+    title: "Abre Mesas",
+    body: "Empecemos por el mapa de mesas.",
     href: "/gestion/mesas",
-    cta: "Abrir mesas",
+    target: { selector: 'a[href="/gestion/mesas"]' },
+    label: "Haz clic en Mesas",
+    completeOnRoute: true,
+  },
+  {
+    id: "mesa-1",
+    title: "Abre la Mesa 1",
+    body: "Cada mesa libre se abre desde su tarjeta.",
+    href: "/gestion/mesas",
+    target: { text: "Mesa 1" },
+    completeWhen: { text: "Confirmar y Abrir" },
+  },
+  {
+    id: "mesa-confirm",
+    title: "Asigna los comensales",
+    body: "Confirma y abre la mesa (4 comensales por defecto).",
+    href: "/gestion/mesas",
+    target: { text: "Confirmar y Abrir" },
+    label: "Confirma la mesa",
+    completeWhen: { text: "Enviar a Cocina" },
+  },
+  {
+    id: "product",
+    title: "Agrega un platillo",
+    body: "Toca un platillo del menú de la mesa para configurarlo.",
+    href: "/gestion/mesas",
+    target: { text: "Aguachile Tradicional" },
+    label: "Elige un platillo",
+    completeWhen: { text: "Añadir a la Mesa" },
+  },
+  {
+    id: "add-item",
+    title: "Añade a la comanda",
+    body: "Ajusta complementos si quieres y añádelo a la mesa.",
+    href: "/gestion/mesas",
+    target: { text: "Añadir a la Mesa" },
+    label: "Añádelo a la mesa",
+    completeWhen: { text: "Eliminar artículo del carrito" },
+  },
+  {
+    id: "send",
+    title: "Envía a cocina",
+    body: "La comanda aparece al instante en el KDS y descuenta inventario por receta.",
+    href: "/gestion/mesas",
+    target: { text: "Enviar a Cocina" },
+    label: "Envía la comanda",
     auto: "order",
   },
   {
-    id: "cocina",
+    id: "cocina-link",
     title: "Cocina en vivo (KDS)",
-    body: "Marca el platillo como listo y entrégalo: cocina y sala trabajan en tiempo real.",
+    body: "La comanda ya está en preparación.",
     href: "/gestion/cocina",
-    cta: "Ver cocina",
+    target: { selector: 'a[href="/gestion/cocina"]' },
+    label: "Ve a Cocina",
+    completeOnRoute: true,
+  },
+  {
+    id: "kds-ready",
+    title: "Marca el platillo como listo",
+    body: "Cuando esté listo, márcalo en el KDS.",
+    href: "/gestion/cocina",
+    target: { text: "como listo" },
+    label: "Marca listo",
+    completeWhenGone: { text: "como listo" },
+  },
+  {
+    id: "pedidos-link",
+    title: "Entrega el pedido",
+    body: "El pedido listo espera en Pedidos.",
+    href: "/gestion/pedidos",
+    target: { selector: 'a[href="/gestion/pedidos"]' },
+    label: "Ve a Pedidos",
+    completeOnRoute: true,
+  },
+  {
+    id: "deliver-open",
+    title: "Abre el detalle",
+    body: "Mira el pedido y sus platillos.",
+    href: "/gestion/pedidos",
+    target: { text: "Ver" },
+    label: "Abre el pedido",
+    completeWhen: { text: "→ Entregado" },
+  },
+  {
+    id: "deliver",
+    title: "Márcalo como entregado",
+    body: "Entregado el pedido, ya se puede cobrar.",
+    href: "/gestion/pedidos",
+    target: { text: "→ Entregado" },
+    label: "Márcalo entregado",
     auto: "delivered",
   },
   {
-    id: "caja",
-    title: "Caja y cobro",
-    body: "Cobra la cuenta de la mesa (efectivo, tarjeta o transferencia) y mira el resumen del día.",
+    id: "caja-link",
+    title: "Cobra la cuenta",
+    body: "La cuenta está lista para cobrar.",
     href: "/gestion/caja",
-    cta: "Ir a caja",
+    target: { selector: 'a[href="/gestion/caja"]' },
+    label: "Ve a Caja",
+    completeOnRoute: true,
+  },
+  {
+    id: "cobrar",
+    title: "Cobra la cuenta",
+    body: "Elige método de pago (efectivo, tarjeta o transferencia) y confirma.",
+    href: "/gestion/caja",
+    target: { text: "Cobrar Mesa" },
+    label: "Cobra aquí",
     auto: "paid",
   },
   {
     id: "logistica",
     title: "Inventario por recetas",
-    body: "Cada venta descuenta insumos automáticamente según la receta. Revisa el libro de movimientos.",
+    body: "Cada venta descontó insumos automáticamente; revisa el libro de movimientos.",
     href: "/gestion/logistica",
-    cta: "Ver inventario",
+    target: { selector: 'a[href="/gestion/logistica"]' },
+    label: "Inventario",
   },
   {
     id: "config",
-    title: "White-label y cierre",
-    body: "Nombre, colores, hero, horarios, impuestos y canales de pedido: todo sin tocar código. El código completo está en github.com/Ricardo-Vtl/restaurant-manager — gracias por probar la demo.",
+    title: "Todo es configurable",
+    body: "Nombre, colores, hero, horarios e impuestos sin tocar código.",
     href: "/gestion/config",
-    cta: "Ver configuración",
+    target: { selector: 'a[href="/gestion/config"]' },
+    label: "White-label",
+  },
+  {
+    id: "cierre",
+    title: "¡Recorrido completado!",
+    body: "Explora libremente. El código completo está en github.com/Ricardo-Vtl/restaurant-manager — gracias por probar la demo.",
   },
 ];
 
@@ -120,9 +258,9 @@ export function isAutoConditionMet(condition: TourAutoCondition, ctx: TourAutoCo
 export const AUTO_STEP: Record<TourAutoCondition, TourStepId> = {
   authModal: "acceso",
   login: "login",
-  order: "mesas",
-  delivered: "cocina",
-  paid: "caja",
+  order: "send",
+  delivered: "deliver",
+  paid: "cobrar",
 };
 
 export function clampStep(step: number): number {

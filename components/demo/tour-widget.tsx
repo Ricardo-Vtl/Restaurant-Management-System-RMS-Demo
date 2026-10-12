@@ -3,7 +3,6 @@
 // Widget flotante del recorrido guiado: botón "Guía" + panel de pasos.
 // No es modal: el visitante sigue pudiendo usar la app mientras la guía está abierta.
 
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, Compass, KeyRound, RotateCcw, X } from "lucide-react";
@@ -54,7 +53,7 @@ export function TourWidget() {
         aria-controls={PANEL_ID}
         aria-label={state.panelOpen ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
         className={cn(
-          "fixed bottom-6 left-6 md:left-auto md:right-6 z-40 size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
+          "fixed bottom-6 left-6 md:left-auto md:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
           active && !done && "animate-pulse-coral",
         )}
       >
@@ -73,7 +72,7 @@ export function TourWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-96 z-40 rounded-2xl border border-coral/30 bg-card p-5 shadow-2xl focus-visible:outline-none"
+            className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-96 z-[70] rounded-2xl border border-coral/30 bg-card p-5 shadow-2xl focus-visible:outline-none"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -95,7 +94,7 @@ export function TourWidget() {
             {!active ? (
               <div className="mt-4 flex flex-col gap-3">
                 <p className="text-sm text-muted-foreground">
-                  Te guío por los módulos clave de la demo (9 pasos) y marco solo lo que ya
+                  Te guío por los módulos clave de la demo ({total} pasos) y marco solo lo que ya
                   hiciste. Puedes cerrar y abrir la guía cuando quieras.
                 </p>
                 <Button onClick={start} className="w-full bg-coral hover:bg-coral/90">
@@ -114,7 +113,7 @@ export function TourWidget() {
                       <Check className="size-3" aria-hidden="true" />
                       Completado
                     </Badge>
-                  ) : currentStep.auto ? (
+                  ) : currentStep.auto || currentStep.completeWhen || currentStep.completeWhenGone || currentStep.completeOnRoute ? (
                     <Badge variant="outline" className="text-muted-foreground">
                       Se marca solo
                     </Badge>
@@ -159,12 +158,6 @@ export function TourWidget() {
                   >
                     <KeyRound className="size-4 mr-2" aria-hidden="true" />
                     Abrir acceso con PIN
-                  </Button>
-                )}
-
-                {currentStep.href && (
-                  <Button asChild variant="outline" className="mt-2 w-full">
-                    <Link href={currentStep.href}>{currentStep.cta ?? "Ir al módulo"}</Link>
                   </Button>
                 )}
 

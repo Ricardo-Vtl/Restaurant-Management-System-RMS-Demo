@@ -1,15 +1,21 @@
 "use client";
 
-// Auto-marcado de pasos leyendo estado real de la app:
+// Auto-marcado y automatización del recorrido leyendo estado real de la app:
 //   • DemoAuthAutoMark  — modal de acceso abierto / sesión iniciada (landing y gestión)
 //   • DemoOrdersAutoMark — comanda creada / entregada / cobrada (solo gestión,
 //     donde ya hay sesión y las órdenes son consultables)
+//   • DemoRouteAutoMark — navega solo al módulo del paso y completa los pasos
+//     cuyo avance es "el usuario hizo clic en el link" (completeOnRoute)
+//   • DemoDomAutoMark   — completa cuando un elemento aparece/desaparece del DOM
+//   • DemoAutoAdvance   — avanza solo ~1s después de detectar la acción del paso
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useAllOrders } from "@/hooks/use-orders";
 import { useAuth } from "@/lib/store";
 import { useDemoTour } from "./demo-tour-context";
-import { AUTO_STEP, isAutoConditionMet, type TourAutoContext } from "./tour-steps";
+import { AUTO_STEP, TOUR_STEPS, isAutoConditionMet, type TourAutoContext } from "./tour-steps";
+import { findTargetElement } from "./target-matcher";
 
 export function DemoAuthAutoMark() {
   const { currentUser, isAuthModalOpen } = useAuth();
@@ -56,6 +62,85 @@ export function DemoOrdersAutoMark() {
     if (isAutoConditionMet("delivered", ctx)) complete(AUTO_STEP.delivered);
     if (isAutoConditionMet("paid", ctx)) complete(AUTO_STEP.paid);
   }, [active, ctx, complete]);
+
+  return null;
+}
+
+export function DemoRouteAutoMark() {
+  const { active, currentStep, complete } = useDemoTour();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const href = currentStep.href;
+  const isRoute = !!href && href.startsWith("/");
+
+  // Navegación automática al módulo del paso.
+  useEffect(() => {
+    if (!active || !isRoute || !href) return;
+    if (pathname !== href) router.push(href);
+  }, [active, isRoute, href, pathname, router]);
+
+  // Los pasos "clic en el link" se completan cuando la ruta coincide.
+  useEffect(() => {
+    if (!active || !isRoute || !href) return;
+    if (currentStep.completeOnRoute && pathname === href) complete(currentStep.id);
+  }, [active, isRoute, href, currentStep.id, currentStep.completeOnRoute, pathname, complete]);
+
+  return null;
+}
+
+export function DemoDomAutoMark() {
+  const { active, currentStep, complete } = useDemoTour();
+  const seenRef = useRef(false);
+
+  useEffect(() => {
+    if (!active) return;
+    seenRef.current = false;
+
+    const check = () => {
+      if (currentStep.completeWhen && findTargetElement(currentStep.completeWhen)) {
+        complete(currentStep.id);
+      }
+      if (currentStep.completeWhenGone) {
+        const exists = findTargetElement(currentStep.completeWhenGone) !== null;
+        if (exists) seenRef.current = true;
+        else if (seenRef.current) complete(currentStep.id);
+      }
+    };
+
+    check();
+    const id = window.setInterval(check, 500);
+    return () => window.clearInterval(id);
+  }, [active, currentStep, complete]);
+
+  return null;
+}
+
+export function DemoAutoAdvance() {
+  const { active, state, currentStep, next, finish } = useDemoTour();
+  const entryRef = useRef<{ id: string; wasComplete: boolean } | null>(null);
+
+  // Registra si el paso ya estaba completo al entrar (evita re-avanzar al ir "Anterior").
+  useEffect(() => {
+    entryRef.current = {
+      id: currentStep.id,
+      wasComplete: state.completed.includes(currentStep.id),
+    };
+  }, [currentStep.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!active) return;
+    const entry = entryRef.current;
+    if (!entry || entry.id !== currentStep.id || entry.wasComplete) return;
+    if (!state.completed.includes(currentStep.id)) return;
+
+    const isLast = state.step >= TOUR_STEPS.length - 1;
+    const timer = window.setTimeout(() => {
+      if (isLast) finish();
+      else next();
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [active, state.completed, state.step, currentStep.id, next, finish]);
 
   return null;
 }

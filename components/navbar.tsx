@@ -60,7 +60,6 @@ export const Navbar = function Navbar() {
           {/* Logo with circular container */}
           <Link
             href="#inicio"
-            data-demo-logo
             className="flex items-center gap-3"
             onClick={(e) => {
               e.preventDefault();
@@ -69,6 +68,7 @@ export const Navbar = function Navbar() {
           >
             {/* Circular Logo Container */}
             <motion.div
+              data-demo-logo
               whileHover={{ scale: 1.05, rotate: 5 }}
               whileTap={{ scale: 0.95 }}
               className={cn(

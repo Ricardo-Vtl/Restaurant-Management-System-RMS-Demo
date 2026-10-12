@@ -8,6 +8,7 @@ import {
   parseStoredState,
   tourProgress,
   type TourAutoContext,
+  type TourTarget,
 } from "@/components/demo/tour-steps";
 
 const CTX: TourAutoContext = {
@@ -17,6 +18,11 @@ const CTX: TourAutoContext = {
   hasDeliveredOrder: false,
   hasPaidOrder: false,
 };
+
+function isValidTarget(target: TourTarget | undefined): boolean {
+  if (!target) return true;
+  return !!target.selector !== !!target.text;
+}
 
 describe("tour-steps", () => {
   it("las condiciones automáticas leen el estado real", () => {
@@ -40,9 +46,24 @@ describe("tour-steps", () => {
   it("los pasos tienen ids únicos y contenido", () => {
     const ids = TOUR_STEPS.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
+    expect(TOUR_STEPS.length).toBeGreaterThanOrEqual(15);
     for (const step of TOUR_STEPS) {
       expect(step.title.length).toBeGreaterThan(0);
       expect(step.body.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("los targets son selector O texto (nunca ambos ni vacíos)", () => {
+    for (const step of TOUR_STEPS) {
+      expect(isValidTarget(step.target)).toBe(true);
+      expect(isValidTarget(step.completeWhen)).toBe(true);
+      expect(isValidTarget(step.completeWhenGone)).toBe(true);
+    }
+  });
+
+  it("completeOnRoute solo aplica a rutas absolutas", () => {
+    for (const step of TOUR_STEPS) {
+      if (step.completeOnRoute) expect(step.href?.startsWith("/")).toBe(true);
     }
   });
 
