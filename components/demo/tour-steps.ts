@@ -41,10 +41,14 @@ export interface TourStep {
   href?: string;
   /** Elemento que ilumina el spotlight (hueco exacto). */
   target?: TourTarget;
+  /** Elemento alternativo en móvil (cuando el target vive en el sidebar oculto). */
+  mobileTarget?: TourTarget;
   /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
   radius?: number;
   /** Etiqueta anclada al elemento (default "Haz clic aquí"). */
   label?: string;
+  /** Etiqueta alternativa en móvil (cuando la acción no es un clic). */
+  mobileLabel?: string;
   /** Completa cuando este elemento aparece en el DOM. */
   completeWhen?: TourTarget;
   /** Completa cuando este elemento desaparece (tras haber aparecido). */
@@ -89,6 +93,7 @@ export const TOUR_STEPS: TourStep[] = [
     body: "KPIs del día, ocupación de mesas y pedidos en curso. El menú lateral se adapta a cada rol.",
     href: "/gestion",
     target: { selector: "aside" },
+    mobileTarget: { selector: "main h1" },
     radius: 24,
     label: "Tu menú de módulos",
   },
@@ -98,7 +103,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Empecemos por el mapa de mesas.",
     href: "/gestion/mesas",
     target: { selector: 'a[href="/gestion/mesas"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Mesas",
+    mobileLabel: "Estás en Mesas",
     completeOnRoute: true,
   },
   {
@@ -107,6 +114,7 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Cada mesa libre se abre desde su tarjeta.",
     href: "/gestion/mesas",
     target: { text: "Mesa 1" },
+    label: "Toca la Mesa 1",
     completeWhen: { text: "Confirmar y Abrir" },
   },
   {
@@ -151,7 +159,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La comanda ya está en preparación.",
     href: "/gestion/cocina",
     target: { selector: 'a[href="/gestion/cocina"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Cocina",
+    mobileLabel: "Estás en Cocina (KDS)",
     completeOnRoute: true,
   },
   {
@@ -169,7 +179,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "El pedido listo espera en Pedidos.",
     href: "/gestion/pedidos",
     target: { selector: 'a[href="/gestion/pedidos"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Pedidos",
+    mobileLabel: "Estás en Pedidos",
     completeOnRoute: true,
   },
   {
@@ -196,7 +208,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La cuenta está lista para cobrar.",
     href: "/gestion/caja",
     target: { selector: 'a[href="/gestion/caja"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Caja",
+    mobileLabel: "Estás en Caja",
     completeOnRoute: true,
   },
   {
@@ -214,7 +228,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Cada venta descontó insumos automáticamente; revisa el libro de movimientos.",
     href: "/gestion/logistica",
     target: { selector: 'a[href="/gestion/logistica"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Inventario",
+    mobileLabel: "Estás en Inventario",
     completeOnRoute: true,
   },
   {
@@ -223,7 +239,9 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Nombre, colores, hero, horarios e impuestos sin tocar código.",
     href: "/gestion/config",
     target: { selector: 'a[href="/gestion/config"]' },
+    mobileTarget: { selector: "main h1" },
     label: "Haz clic en Config",
+    mobileLabel: "Estás en Configuración",
     completeOnRoute: true,
   },
   {

@@ -16,6 +16,7 @@ import { useAuth } from "@/lib/store";
 import { useDemoTour } from "./demo-tour-context";
 import { TOUR_STEPS, shouldAutoComplete, type TourAutoContext } from "./tour-steps";
 import { findTargetElement } from "./target-matcher";
+import { useIsDesktop } from "./use-media-query";
 
 export function DemoAuthAutoMark() {
   const { currentUser, isAuthModalOpen } = useAuth();
@@ -78,17 +79,19 @@ export function DemoRouteAutoMark() {
   const { active, currentStep, complete } = useDemoTour();
   const pathname = usePathname();
   const router = useRouter();
+  const isDesktop = useIsDesktop();
 
   const href = currentStep.href;
   const isRoute = !!href && href.startsWith("/");
 
-  // Navegación automática al módulo del paso. Los pasos "clic en el link" NO
-  // navegan solos: el usuario hace el clic y eso completa el paso.
+  // Navegación automática al módulo del paso. En desktop los pasos "clic en el
+  // link" NO navegan solos (el usuario hace el clic); en móvil el sidebar está
+  // oculto, así que el tour navega solo y el label se ancla al encabezado.
   useEffect(() => {
     if (!active || !isRoute || !href) return;
-    if (currentStep.completeOnRoute) return;
+    if (currentStep.completeOnRoute && isDesktop) return;
     if (pathname !== href) router.push(href);
-  }, [active, isRoute, href, pathname, router, currentStep.completeOnRoute]);
+  }, [active, isRoute, href, pathname, router, currentStep.completeOnRoute, isDesktop]);
 
   // Los pasos "clic en el link" se completan cuando la ruta coincide.
   useEffect(() => {
@@ -129,6 +132,7 @@ export function DemoDomAutoMark() {
 export function DemoAutoAdvance() {
   const { active, state, currentStep, next, finish } = useDemoTour();
   const entryRef = useRef<{ id: string; wasComplete: boolean } | null>(null);
+  const isDesktop = useIsDesktop();
 
   // Registra si el paso ya estaba completo al entrar (evita re-avanzar al ir "Anterior").
   useEffect(() => {
@@ -151,6 +155,25 @@ export function DemoAutoAdvance() {
     }, 900);
     return () => window.clearTimeout(timer);
   }, [active, state.completed, state.step, currentStep.id, next, finish]);
+
+  // Móvil: recorrido 100% lineal, sin navegación manual. Los pasos sin acción
+  // (landing, dashboard, cierre) avanzan solos tras unos segundos.
+  useEffect(() => {
+    if (!active || isDesktop) return;
+    const hasAction = !!(
+      currentStep.auto ||
+      currentStep.completeWhen ||
+      currentStep.completeWhenGone ||
+      currentStep.completeOnRoute
+    );
+    if (hasAction) return;
+    const isLast = state.step >= TOUR_STEPS.length - 1;
+    const timer = window.setTimeout(() => {
+      if (isLast) finish();
+      else next();
+    }, 4500);
+    return () => window.clearTimeout(timer);
+  }, [active, isDesktop, currentStep, state.step, next, finish]);
 
   return null;
 }

@@ -9,6 +9,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
 import { findTargetElement } from "./target-matcher";
+import { useIsDesktop } from "./use-media-query";
 
 interface Rect {
   top: number;
@@ -38,10 +39,16 @@ function sameRect(a: Rect | null, b: Rect | null): boolean {
 export function TourSpotlight() {
   const { mounted, active, currentStep } = useDemoTour();
   const reduceMotion = useReducedMotion();
+  const isDesktop = useIsDesktop();
   const [rect, setRect] = useState<Rect | null>(null);
   const scrolledRef = useRef(false);
 
-  const target = active ? currentStep.target : undefined;
+  // En móvil el sidebar está oculto: los pasos de navegación usan mobileTarget.
+  const target = active
+    ? isDesktop
+      ? currentStep.target
+      : currentStep.mobileTarget ?? currentStep.target
+    : undefined;
 
   useEffect(() => {
     scrolledRef.current = false;
@@ -120,12 +127,30 @@ export function TourSpotlight() {
       />
       <div
         className={cn(
-          "absolute max-w-[80vw] rounded-full bg-navy px-3 py-1.5 text-center text-xs font-medium text-primary-foreground shadow-lg",
-          labelAbove ? "-top-10" : "-bottom-10",
+          "absolute max-w-[80vw] bg-navy px-3 py-1.5 text-center text-primary-foreground shadow-lg",
+          isDesktop ? "rounded-full text-xs font-medium" : "rounded-xl",
+          labelAbove
+            ? isDesktop
+              ? "-top-10"
+              : "-top-16"
+            : isDesktop
+              ? "-bottom-10"
+              : "-bottom-16",
           labelLeft ? "left-0" : "left-1/2 -translate-x-1/2",
         )}
       >
-        {currentStep.label ?? "Haz clic aquí"}
+        {isDesktop ? (
+          currentStep.label ?? "Haz clic aquí"
+        ) : (
+          <>
+            <span className="block text-[11px] font-semibold uppercase tracking-wide text-coral">
+              {currentStep.title}
+            </span>
+            <span className="mt-0.5 block text-xs font-medium">
+              {currentStep.mobileLabel ?? currentStep.label ?? "Sigue la guía"}
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

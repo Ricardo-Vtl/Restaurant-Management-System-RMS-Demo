@@ -1,7 +1,10 @@
 "use client";
 
-// Widget flotante del recorrido guiado: botón "Guía" + panel de pasos.
-// No es modal: el visitante sigue pudiendo usar la app mientras la guía está abierta.
+// Widget del recorrido guiado.
+//   • Desktop (≥ md): botón + panel lateral fijo (como siempre).
+//   • Móvil: sin panel siempre visible — la guía son los labels del spotlight.
+//     El botón "Guía" abre el panel como bottom sheet bajo demanda, con la
+//     opción de saltar el recorrido por completo.
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -13,6 +16,7 @@ import { useAuth } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
 import { TOUR_STEPS, clampStep, tourProgress } from "./tour-steps";
+import { useIsDesktop } from "./use-media-query";
 
 const PANEL_ID = "demo-tour-panel";
 
@@ -36,21 +40,34 @@ export function TourWidget() {
   const reduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLElement>(null);
   const dialogOpen = useDialogOpen();
+  const isDesktop = useIsDesktop();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const open = mounted && state.panelOpen;
+  const open = mounted && (isDesktop ? state.panelOpen : mobileOpen);
   const total = TOUR_STEPS.length;
   const index = clampStep(state.step);
   const done = state.completed.includes(currentStep.id);
   const isLast = index === total - 1;
 
+  const closePanel = () => {
+    if (isDesktop) setPanelOpen(false);
+    else setMobileOpen(false);
+  };
+
+  // El bottom sheet no debe quedar sobre un modal: se cierra al abrirse uno.
+  useEffect(() => {
+    if (dialogOpen && !isDesktop) setMobileOpen(false);
+  }, [dialogOpen, isDesktop]);
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPanelOpen(false);
+      if (e.key === "Escape") closePanel();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, setPanelOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   useEffect(() => {
     if (open) panelRef.current?.focus();
@@ -58,15 +75,25 @@ export function TourWidget() {
 
   if (!mounted) return null;
 
+  const handleStart = () => {
+    start();
+    if (!isDesktop) setMobileOpen(false);
+  };
+
+  const handleSkip = () => {
+    finish();
+    setMobileOpen(false);
+  };
+
   return (
     <>
       {!dialogOpen && (
         <button
           type="button"
-          onClick={() => setPanelOpen(!state.panelOpen)}
-          aria-expanded={state.panelOpen}
+          onClick={() => (isDesktop ? setPanelOpen(!state.panelOpen) : setMobileOpen((v) => !v))}
+          aria-expanded={open}
           aria-controls={PANEL_ID}
-          aria-label={state.panelOpen ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
+          aria-label={open ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
           className={cn(
             "fixed bottom-6 left-6 md:left-auto md:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
             active && !done && "animate-pulse-coral",
@@ -89,31 +116,13 @@ export function TourWidget() {
             exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: 0.25 }}
             className={cn(
-              "fixed z-[70] border border-coral/30 bg-card shadow-2xl focus-visible:outline-none",
-              dialogOpen
-                ? "top-2 left-3 right-3 flex items-center gap-2 rounded-full px-3 py-1.5"
-                : "top-16 bottom-auto left-4 right-4 max-h-[45dvh] overflow-y-auto rounded-2xl p-5 md:top-auto md:bottom-24 md:left-auto md:right-6 md:w-96 md:max-h-[calc(100dvh-8rem)]",
+              "fixed z-[70] border-coral/30 bg-card shadow-2xl focus-visible:outline-none",
+              // Móvil: bottom sheet
+              "bottom-0 left-0 right-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t p-5",
+              // Desktop: panel lateral
+              "md:bottom-24 md:left-auto md:right-6 md:max-h-[calc(100dvh-8rem)] md:w-96 md:rounded-2xl md:border",
             )}
           >
-            {dialogOpen && active ? (
-              <>
-                <Compass className="size-4 shrink-0 text-coral" aria-hidden="true" />
-                <span className="shrink-0 text-xs font-semibold text-muted-foreground">
-                  {index + 1}/{total}
-                </span>
-                <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-                  {currentStep.title}
-                </span>
-                <Button
-                  size="sm"
-                  onClick={isLast ? finish : next}
-                  className="h-8 shrink-0 bg-coral hover:bg-coral/90"
-                >
-                  {isLast ? "Fin" : "Siguiente"}
-                </Button>
-              </>
-            ) : (
-              <>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Compass className="size-4 text-coral" aria-hidden="true" />
@@ -123,7 +132,7 @@ export function TourWidget() {
               </div>
               <button
                 type="button"
-                onClick={() => setPanelOpen(false)}
+                onClick={closePanel}
                 aria-label="Cerrar la guía"
                 className="rounded-full p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral"
               >
@@ -137,7 +146,7 @@ export function TourWidget() {
                   Te guío por los módulos clave de la demo ({total} pasos) y marco solo lo que ya
                   hiciste. Puedes cerrar y abrir la guía cuando quieras.
                 </p>
-                <Button onClick={start} className="w-full bg-coral hover:bg-coral/90">
+                <Button onClick={handleStart} className="w-full bg-coral hover:bg-coral/90">
                   <Compass className="size-4 mr-2" aria-hidden="true" />
                   Iniciar recorrido
                 </Button>
@@ -171,33 +180,42 @@ export function TourWidget() {
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{currentStep.body}</p>
 
-                <div className="mt-4 flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={prev}
-                    disabled={index === 0}
-                    aria-label="Paso anterior"
-                  >
-                    <ChevronLeft className="size-4" aria-hidden="true" />
-                  </Button>
-                  <Button
-                    onClick={isLast ? finish : next}
-                    className="flex-1 bg-coral hover:bg-coral/90"
-                  >
-                    {isLast ? "Finalizar" : "Siguiente"}
-                    {!isLast && <ChevronRight className="size-4 ml-2" aria-hidden="true" />}
-                  </Button>
-                </div>
-
                 {currentStep.id === "login" && !currentUser && (
                   <Button
                     variant="outline"
-                    className="mt-2 w-full"
-                    onClick={() => setIsAuthModalOpen(true)}
+                    className="mt-3 w-full"
+                    onClick={() => {
+                      setIsAuthModalOpen(true);
+                      if (!isDesktop) setMobileOpen(false);
+                    }}
                   >
                     <KeyRound className="size-4 mr-2" aria-hidden="true" />
                     Abrir acceso con PIN
+                  </Button>
+                )}
+
+                {isDesktop ? (
+                  <div className="mt-4 flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={prev}
+                      disabled={index === 0}
+                      aria-label="Paso anterior"
+                    >
+                      <ChevronLeft className="size-4" aria-hidden="true" />
+                    </Button>
+                    <Button
+                      onClick={isLast ? finish : next}
+                      className="flex-1 bg-coral hover:bg-coral/90"
+                    >
+                      {isLast ? "Finalizar" : "Siguiente"}
+                      {!isLast && <ChevronRight className="size-4 ml-2" aria-hidden="true" />}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button variant="ghost" onClick={handleSkip} className="mt-4 w-full text-muted-foreground">
+                    Saltar recorrido
                   </Button>
                 )}
 
@@ -211,8 +229,6 @@ export function TourWidget() {
                     Reiniciar recorrido
                   </button>
                 </div>
-              </>
-            )}
               </>
             )}
           </motion.section>

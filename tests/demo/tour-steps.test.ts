@@ -57,6 +57,13 @@ describe("tour-steps", () => {
       expect(isValidTarget(step.target)).toBe(true);
       expect(isValidTarget(step.completeWhen)).toBe(true);
       expect(isValidTarget(step.completeWhenGone)).toBe(true);
+      expect(isValidTarget(step.mobileTarget)).toBe(true);
+    }
+  });
+
+  it("los pasos completeOnRoute tienen mobileTarget (sidebar oculto en móvil)", () => {
+    for (const step of TOUR_STEPS) {
+      if (step.completeOnRoute) expect(step.mobileTarget).toBeDefined();
     }
   });
 
