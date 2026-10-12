@@ -4,7 +4,7 @@
 // objetivo (el hueco se posiciona con su getBoundingClientRect, así que no puede
 // desalinearse) + estela accent alrededor. Nunca bloquea la interacción.
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
@@ -20,6 +20,9 @@ interface Rect {
 
 const PAD = 6;
 const POLL_MS = 300;
+
+// useLayoutEffect en cliente (mide antes del paint), useEffect en servidor (evita warning SSR).
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 function rectOf(el: Element): Rect {
   const r = el.getBoundingClientRect();
@@ -90,10 +93,55 @@ export function TourSpotlight() {
     };
   }, [target, reduceMotion]);
 
+  // Mide el label real (2 líneas en móvil) para decidir arriba/abajo y clampear.
+  const labelRef = useRef<HTMLDivElement>(null);
+  const [labelSize, setLabelSize] = useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  useIsomorphicLayoutEffect(() => {
+    const el = labelRef.current;
+    if (!el) return;
+    const update = () => {
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      setLabelSize((prev) =>
+        prev.width === width && prev.height === height ? prev : { width, height },
+      );
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [currentStep.id, isDesktop, rect]);
+
   if (!mounted || !rect) return null;
 
-  const labelAbove = rect.top > 96;
-  const labelLeft = rect.left < 96;
+  const viewportW = window.innerWidth;
+  const viewportH = window.innerHeight;
+  const containerLeft = rect.left - PAD;
+  const containerWidth = rect.width + PAD * 2;
+  const containerHeight = rect.height + PAD * 2;
+
+  const labelW = labelSize.width || Math.min(viewportW * 0.8, 280);
+  const labelH = labelSize.height || (isDesktop ? 30 : 46);
+  const gap = isDesktop ? 12 : 32;
+
+  // Elige el lado con hueco suficiente; si ninguno lo tiene, el más amplio.
+  const spaceBelow = viewportH - (rect.top + rect.height + PAD) - gap;
+  const spaceAbove = rect.top - PAD - gap;
+  let placeAbove: boolean;
+  if (spaceBelow >= labelH) placeAbove = false;
+  else if (spaceAbove >= labelH) placeAbove = true;
+  else placeAbove = spaceAbove > spaceBelow;
+
+  // Centrado sobre el objetivo, clampeado dentro del viewport.
+  let labelLeft = (containerWidth - labelW) / 2;
+  const absLeft = containerLeft + labelLeft;
+  const maxLeft = viewportW - 8 - labelW;
+  if (absLeft < 8) labelLeft = 8 - containerLeft;
+  else if (absLeft > maxLeft) labelLeft = maxLeft - containerLeft;
 
   return (
     <div
@@ -126,18 +174,18 @@ export function TourSpotlight() {
         transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
       />
       <div
+        ref={labelRef}
         className={cn(
-          "absolute max-w-[80vw] bg-navy px-3 py-1.5 text-center text-primary-foreground shadow-lg",
+          "absolute bg-navy px-3 py-1.5 text-center text-primary-foreground shadow-lg",
           isDesktop ? "rounded-full text-xs font-medium" : "rounded-xl",
-          labelAbove
-            ? isDesktop
-              ? "-top-10"
-              : "-top-16"
-            : isDesktop
-              ? "-bottom-10"
-              : "-bottom-16",
-          labelLeft ? "left-0" : "left-1/2 -translate-x-1/2",
         )}
+        style={{
+          maxWidth: Math.min(viewportW - 16, 280),
+          left: labelLeft,
+          ...(placeAbove
+            ? { bottom: containerHeight + gap }
+            : { top: containerHeight + gap }),
+        }}
       >
         {isDesktop ? (
           currentStep.label ?? "Haz clic aquí"

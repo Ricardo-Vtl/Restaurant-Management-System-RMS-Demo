@@ -41,10 +41,10 @@ export function WelcomeDialog() {
         if (!open) skipWelcome();
       }}
     >
-      <DialogContent className="max-w-md max-h-[90dvh] overflow-y-auto p-0">
-        <div className="bg-navy p-7 text-center">
-          <div className="size-16 bg-coral rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-coral/20">
-            <Compass className="size-8 text-accent-foreground" aria-hidden="true" />
+      <DialogContent className="max-w-md max-h-[92dvh] gap-0 overflow-y-auto p-0">
+        <div className="bg-navy p-5 text-center sm:p-7">
+          <div className="size-14 bg-coral rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-coral/20 sm:mb-4 sm:size-16">
+            <Compass className="size-7 text-accent-foreground sm:size-8" aria-hidden="true" />
           </div>
           <DialogTitle className="font-serif text-2xl font-bold text-primary-foreground">
             Restaurant Manager
@@ -54,7 +54,7 @@ export function WelcomeDialog() {
           </DialogDescription>
         </div>
 
-        <div className="p-6 flex flex-col gap-5">
+        <div className="p-5 flex flex-col gap-4 sm:gap-5 sm:p-6">
           <p className="text-sm text-muted-foreground">
             Punto de venta, mesas, cocina en vivo, caja, inventario por recetas y
             configuración white-label, en una sola aplicación. Te guío en {TOUR_STEPS.length} pasos o
