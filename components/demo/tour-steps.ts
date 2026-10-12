@@ -45,6 +45,8 @@ export interface TourStep {
   mobileTarget?: TourTarget;
   /** El target vive en el sidebar: en móvil el tour abre el drawer y lo resalta. */
   needsSidebar?: boolean;
+  /** El target vive en el carrito: en móvil el tour abre el drawer del carrito. */
+  needsCart?: boolean;
   /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
   radius?: number;
   /** Fuerza la posición del label. "inside" para objetivos de alto completo (sidebar). */
@@ -57,6 +59,8 @@ export interface TourStep {
   completeWhen?: TourTarget;
   /** Completa cuando este elemento desaparece (tras haber aparecido). */
   completeWhenGone?: TourTarget;
+  /** Como completeWhen pero solo en móvil (target en el carrito oculto). */
+  mobileCompleteWhen?: TourTarget;
   /** Completa cuando la ruta actual es el href (click del usuario en el link). */
   completeOnRoute?: boolean;
   auto?: TourAutoCondition;
@@ -119,7 +123,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/mesas",
     target: { text: "Mesa 1" },
     label: "Toca la Mesa 1",
-    completeWhen: { text: "Confirmar y Abrir" },
+    completeWhen: { selector: '[role="dialog"]' },
   },
   {
     id: "mesa-confirm",
@@ -128,7 +132,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/mesas",
     target: { text: "Confirmar y Abrir" },
     label: "Confirma la mesa",
-    completeWhen: { text: "Enviar a Cocina" },
+    completeWhen: { text: "Menú" },
   },
   {
     id: "product",
@@ -147,6 +151,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { text: "Añadir a la Mesa" },
     label: "Añádelo a la mesa",
     completeWhen: { text: "Eliminar artículo del carrito" },
+    mobileCompleteWhen: { selector: 'button[aria-label="Abrir carrito móvil"] span' },
   },
   {
     id: "send",
@@ -155,6 +160,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/mesas",
     target: { text: "Enviar a Cocina" },
     label: "Envía la comanda",
+    needsCart: true,
     auto: "order",
   },
   {

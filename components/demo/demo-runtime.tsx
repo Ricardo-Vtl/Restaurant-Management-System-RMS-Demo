@@ -6,6 +6,7 @@
 import {
   DemoAuthAutoMark,
   DemoAutoAdvance,
+  DemoCartSync,
   DemoRouteAutoMark,
   DemoSidebarSync,
 } from "./demo-auto-mark";
@@ -19,6 +20,7 @@ export function DemoTourRuntime() {
       <DemoRouteAutoMark />
       <DemoAutoAdvance />
       <DemoSidebarSync />
+      <DemoCartSync />
       <TourSpotlight />
       <TourWidget />
     </>

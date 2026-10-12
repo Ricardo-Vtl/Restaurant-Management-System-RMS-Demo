@@ -57,6 +57,7 @@ describe("tour-steps", () => {
       expect(isValidTarget(step.target)).toBe(true);
       expect(isValidTarget(step.completeWhen)).toBe(true);
       expect(isValidTarget(step.completeWhenGone)).toBe(true);
+      expect(isValidTarget(step.mobileCompleteWhen)).toBe(true);
       expect(isValidTarget(step.mobileTarget)).toBe(true);
     }
   });

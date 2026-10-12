@@ -9,6 +9,7 @@
 //   • DemoDomAutoMark   — completa cuando un elemento aparece/desaparece del DOM
 //   • DemoAutoAdvance   — avanza solo tras detectar la acción del paso
 //   • DemoSidebarSync   — en móvil abre/cierra el drawer para los pasos del sidebar
+//   • DemoCartSync      — en móvil abre/cierra el carrito para los pasos de la comanda
 
 import { useEffect, useMemo, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -113,13 +114,19 @@ export function DemoRouteAutoMark() {
 export function DemoDomAutoMark() {
   const { active, currentStep, complete } = useDemoTour();
   const seenRef = useRef(false);
+  const isDesktop = useIsDesktop();
 
   useEffect(() => {
     if (!active) return;
     seenRef.current = false;
 
+    // En móvil algunos targets viven en drawers ocultos (carrito): usan su señal propia.
+    const completeWhen = isDesktop
+      ? currentStep.completeWhen
+      : currentStep.mobileCompleteWhen ?? currentStep.completeWhen;
+
     const check = () => {
-      if (currentStep.completeWhen && findTargetElement(currentStep.completeWhen)) {
+      if (completeWhen && findTargetElement(completeWhen)) {
         complete(currentStep.id);
       }
       if (currentStep.completeWhenGone) {
@@ -132,7 +139,7 @@ export function DemoDomAutoMark() {
     check();
     const id = window.setInterval(check, 500);
     return () => window.clearInterval(id);
-  }, [active, currentStep, complete]);
+  }, [active, currentStep, complete, isDesktop]);
 
   return null;
 }
@@ -153,7 +160,9 @@ export function DemoAutoAdvance() {
   useEffect(() => {
     if (!active) return;
     const entry = entryRef.current;
-    if (!entry || entry.id !== currentStep.id || entry.wasComplete) return;
+    if (!entry || entry.id !== currentStep.id) return;
+    // Desktop: no re-avanzar al volver con "Anterior". Móvil: siempre se recupera.
+    if (entry.wasComplete && isDesktop) return;
     if (!state.completed.includes(currentStep.id)) return;
 
     const isLast = state.step >= TOUR_STEPS.length - 1;
@@ -162,7 +171,7 @@ export function DemoAutoAdvance() {
       else next();
     }, ADVANCE_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [active, state.completed, state.step, currentStep.id, next, finish]);
+  }, [active, state.completed, state.step, currentStep.id, next, finish, isDesktop]);
 
   // Móvil: recorrido 100% lineal, sin navegación manual. Los pasos sin acción
   // (landing, dashboard, cierre) avanzan solos tras unos segundos.
@@ -171,6 +180,7 @@ export function DemoAutoAdvance() {
     const hasAction = !!(
       currentStep.auto ||
       currentStep.completeWhen ||
+      currentStep.mobileCompleteWhen ||
       currentStep.completeWhenGone ||
       currentStep.completeOnRoute
     );
@@ -218,6 +228,52 @@ export function DemoSidebarSync() {
         }
       } else if (openedByTourRef.current) {
         if (isOpen()) overlay()?.click();
+        openedByTourRef.current = false;
+      }
+    };
+
+    tick();
+    const id = window.setInterval(tick, 300);
+    return () => window.clearInterval(id);
+  }, [isDesktop, needs]);
+
+  return null;
+}
+
+/**
+ * En móvil la comanda es un drawer oculto dentro del modal de la mesa. Para los
+ * pasos cuyo target vive en el carrito (p. ej. "Enviar a Cocina"), el tour lo
+ * abre y lo cierra al salir — solo si fue el tour quien lo abrió.
+ */
+export function DemoCartSync() {
+  const { active, state, currentStep } = useDemoTour();
+  const isDesktop = useIsDesktop();
+  const openedByTourRef = useRef(false);
+
+  const done = state.completed.includes(currentStep.id);
+  const needs = !isDesktop && active && !!currentStep.needsCart && !done;
+
+  useEffect(() => {
+    if (isDesktop) return;
+
+    const cart = () => document.querySelector<HTMLElement>('aside[aria-live="polite"]');
+    const isOpen = () => {
+      const el = cart();
+      return !!el && el.getBoundingClientRect().left > -8;
+    };
+    const openCart = () =>
+      document.querySelector<HTMLButtonElement>('button[aria-label="Abrir carrito móvil"]')?.click();
+    const closeCart = () =>
+      document.querySelector<HTMLButtonElement>('button[aria-label="Cerrar carrito móvil"]')?.click();
+
+    const tick = () => {
+      if (needs) {
+        if (!isOpen()) {
+          openCart();
+          openedByTourRef.current = true;
+        }
+      } else if (openedByTourRef.current) {
+        if (isOpen()) closeCart();
         openedByTourRef.current = false;
       }
     };
