@@ -3,7 +3,7 @@
 // Widget flotante del recorrido guiado: botón "Guía" + panel de pasos.
 // No es modal: el visitante sigue pudiendo usar la app mientras la guía está abierta.
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronLeft, ChevronRight, Compass, KeyRound, RotateCcw, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -16,12 +16,26 @@ import { TOUR_STEPS, clampStep, tourProgress } from "./tour-steps";
 
 const PANEL_ID = "demo-tour-panel";
 
+// ¿Hay un diálogo/sheet abierto? En móvil el botón flotante taparía el teclado
+// del PIN (o el CTA del carrito), así que se oculta mientras haya uno abierto.
+function useDialogOpen(): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const check = () => setOpen(!!document.querySelector('[role="dialog"]'));
+    check();
+    const id = window.setInterval(check, 300);
+    return () => window.clearInterval(id);
+  }, []);
+  return open;
+}
+
 export function TourWidget() {
   const { mounted, state, active, currentStep, start, finish, reset, next, prev, setPanelOpen } =
     useDemoTour();
   const { currentUser, setIsAuthModalOpen } = useAuth();
   const reduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLElement>(null);
+  const dialogOpen = useDialogOpen();
 
   const open = mounted && state.panelOpen;
   const total = TOUR_STEPS.length;
@@ -46,19 +60,21 @@ export function TourWidget() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setPanelOpen(!state.panelOpen)}
-        aria-expanded={state.panelOpen}
-        aria-controls={PANEL_ID}
-        aria-label={state.panelOpen ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
-        className={cn(
-          "fixed bottom-6 left-6 md:left-auto md:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
-          active && !done && "animate-pulse-coral",
-        )}
-      >
-        <Compass className="size-6" aria-hidden="true" />
-      </button>
+      {!dialogOpen && (
+        <button
+          type="button"
+          onClick={() => setPanelOpen(!state.panelOpen)}
+          aria-expanded={state.panelOpen}
+          aria-controls={PANEL_ID}
+          aria-label={state.panelOpen ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
+          className={cn(
+            "fixed bottom-6 left-6 md:left-auto md:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
+            active && !done && "animate-pulse-coral",
+          )}
+        >
+          <Compass className="size-6" aria-hidden="true" />
+        </button>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -72,8 +88,32 @@ export function TourWidget() {
             animate={{ opacity: 1, y: 0 }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: 0.25 }}
-            className="fixed bottom-24 left-4 right-4 md:left-auto md:right-6 md:w-96 z-[70] rounded-2xl border border-coral/30 bg-card p-5 shadow-2xl focus-visible:outline-none"
+            className={cn(
+              "fixed z-[70] border border-coral/30 bg-card shadow-2xl focus-visible:outline-none",
+              dialogOpen
+                ? "top-2 left-3 right-3 flex items-center gap-2 rounded-full px-3 py-1.5"
+                : "top-16 bottom-auto left-4 right-4 max-h-[45dvh] overflow-y-auto rounded-2xl p-5 md:top-auto md:bottom-24 md:left-auto md:right-6 md:w-96 md:max-h-[calc(100dvh-8rem)]",
+            )}
           >
+            {dialogOpen && active ? (
+              <>
+                <Compass className="size-4 shrink-0 text-coral" aria-hidden="true" />
+                <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                  {index + 1}/{total}
+                </span>
+                <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                  {currentStep.title}
+                </span>
+                <Button
+                  size="sm"
+                  onClick={isLast ? finish : next}
+                  className="h-8 shrink-0 bg-coral hover:bg-coral/90"
+                >
+                  {isLast ? "Fin" : "Siguiente"}
+                </Button>
+              </>
+            ) : (
+              <>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <Compass className="size-4 text-coral" aria-hidden="true" />
@@ -171,6 +211,8 @@ export function TourWidget() {
                     Reiniciar recorrido
                   </button>
                 </div>
+              </>
+            )}
               </>
             )}
           </motion.section>

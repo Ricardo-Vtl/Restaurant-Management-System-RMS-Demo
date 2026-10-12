@@ -41,7 +41,7 @@ export function WelcomeDialog() {
         if (!open) skipWelcome();
       }}
     >
-      <DialogContent className="max-w-md p-0 overflow-hidden">
+      <DialogContent className="max-w-md max-h-[90dvh] overflow-y-auto p-0">
         <div className="bg-navy p-7 text-center">
           <div className="size-16 bg-coral rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-coral/20">
             <Compass className="size-8 text-accent-foreground" aria-hidden="true" />

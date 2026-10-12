@@ -120,7 +120,7 @@ export function TourSpotlight() {
       />
       <div
         className={cn(
-          "absolute whitespace-nowrap rounded-full bg-navy px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-lg",
+          "absolute max-w-[80vw] rounded-full bg-navy px-3 py-1.5 text-center text-xs font-medium text-primary-foreground shadow-lg",
           labelAbove ? "-top-10" : "-bottom-10",
           labelLeft ? "left-0" : "left-1/2 -translate-x-1/2",
         )}
