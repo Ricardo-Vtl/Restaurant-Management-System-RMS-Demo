@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "demo:bootstrap": "node --env-file=.env.local scripts/demo-bootstrap.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
