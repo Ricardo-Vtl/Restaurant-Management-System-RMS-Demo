@@ -190,7 +190,7 @@ export function CartDrawer() {
                             <button
                               onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
                               aria-label={item.quantity === 1 ? "Eliminar artículo" : "Reducir cantidad"}
-                              className="size-7 rounded-full border border-border flex items-center justify-center hover:border-coral transition-colors"
+                              className="size-9 rounded-full border border-border flex items-center justify-center hover:border-coral transition-colors"
                             >
                               {item.quantity === 1 ? (
                                 <Trash2 className="size-3 text-destructive" aria-hidden="true" />
@@ -202,7 +202,7 @@ export function CartDrawer() {
                             <button
                               onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
                               aria-label="Aumentar cantidad"
-                              className="size-7 rounded-full border border-border flex items-center justify-center hover:border-coral transition-colors"
+                              className="size-9 rounded-full border border-border flex items-center justify-center hover:border-coral transition-colors"
                             >
                               <Plus className="size-3" aria-hidden="true" />
                             </button>

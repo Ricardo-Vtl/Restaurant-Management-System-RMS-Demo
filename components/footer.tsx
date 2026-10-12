@@ -68,7 +68,7 @@ export function Footer() {
                   {...(href ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                   aria-label={href ? label : `${label} (pendiente de configurar)`}
                   title={href ? undefined : "Configura este enlace en el panel"}
-                  className="size-10 bg-primary-foreground/10 hover:bg-coral rounded-full flex items-center justify-center transition-colors"
+                  className="size-11 bg-primary-foreground/10 hover:bg-coral rounded-full flex items-center justify-center transition-colors"
                 >
                   <Icon className="size-5 text-primary-foreground" aria-hidden />
                 </a>

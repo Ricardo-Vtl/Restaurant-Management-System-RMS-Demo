@@ -99,7 +99,7 @@ export const ProductCard = function ProductCard({ product, index, onClick, showP
                 onClick();
               }}
               aria-label="Agregar al carrito"
-              className="absolute bottom-3 right-3 size-10 bg-coral text-accent-foreground rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              className="absolute bottom-3 right-3 size-11 bg-coral text-accent-foreground rounded-full flex items-center justify-center shadow-lg opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
             >
               <Plus className="size-5" aria-hidden="true" />
             </motion.button>

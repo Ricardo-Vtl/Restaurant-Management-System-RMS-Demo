@@ -90,7 +90,7 @@ export function HeroSection() {
             <Badge
               variant="outline"
               className={cn(
-                "mb-6 px-4 py-2 border-2 backdrop-blur-sm",
+                "mb-6 max-w-[90vw] whitespace-normal text-center px-4 py-2 border-2 backdrop-blur-sm",
                 open
                   ? "border-success bg-success/10 text-success"
                   : "border-primary-foreground/40 bg-primary-foreground/10 text-primary-foreground/80",

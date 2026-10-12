@@ -20,7 +20,10 @@ const AuthModal = dynamic(() => import("@/components/auth-modal").then((m) => m.
 
 export default function GestionLayout({ children }: { children: React.ReactNode }) {
   const { currentUser, isHydrating, setIsAuthModalOpen } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // En móvil/tablet el sidebar es un drawer: arranca cerrado. En escritorio (lg+) expandido.
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window === "undefined" || window.matchMedia("(min-width: 1024px)").matches,
+  );
 
   // Mientras AuthProvider restaura la sesión, pintar skeleton en vez del gate
   // "Ingresar PIN" (evita el flash ~1s en cada carga dura).
@@ -78,9 +81,14 @@ function GestionContent({
         Saltar al contenido principal
       </a>
       <GestionSidebar isOpen={sidebarOpen} onToggle={toggleSidebar} />
-      <div className={cn("flex-1 transition-all duration-300", sidebarOpen ? "md:ml-64" : "md:ml-20")}>
+      <div
+        className={cn(
+          "flex-1 min-w-0 flex flex-col h-dvh transition-all duration-300",
+          sidebarOpen ? "lg:ml-64" : "lg:ml-20",
+        )}
+      >
         <GestionHeader onMenuToggle={toggleSidebar} />
-        <main id="gestion-content" tabIndex={-1} className="p-4 md:p-6 w-full min-h-[calc(100dvh-4rem)]">
+        <main id="gestion-content" tabIndex={-1} className="flex-1 min-h-0 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
       </div>

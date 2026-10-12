@@ -52,7 +52,7 @@ export default function PedidosPage() {
   const canCreate = can(role, "orders:create");
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-4rem)] gap-4 overflow-hidden">
+    <div className="flex flex-col h-full gap-4 overflow-hidden">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-0.5">

@@ -75,7 +75,7 @@ function DayRow({
   const closed = useWatch({ control, name: `schedule.${dayKey}.closed` });
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border px-3 py-2">
-      <Label className="w-24 shrink-0 font-medium" htmlFor={`day-${dayKey}`}>
+      <Label className="w-full shrink-0 font-medium sm:w-24" htmlFor={`day-${dayKey}`}>
         {DAY_LABELS[dayKey]}
       </Label>
       <div className="flex items-center gap-2">

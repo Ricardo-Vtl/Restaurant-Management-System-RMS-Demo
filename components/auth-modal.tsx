@@ -71,7 +71,7 @@ export function AuthModal() {
 
   return (
     <Dialog open={isAuthModalOpen} onOpenChange={setIsAuthModalOpen}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden">
+      <DialogContent className="max-w-sm max-h-[90dvh] overflow-y-auto p-0">
         {currentUser ? (
           <>
             <div className="bg-navy p-8 text-center relative">
@@ -132,12 +132,12 @@ export function AuthModal() {
             </div>
 
             <div className="p-6">
-              <div className="flex justify-center gap-3 mb-6">
+              <div className="flex justify-center gap-2 sm:gap-3 mb-6">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
                   <div
                     key={i}
                     className={cn(
-                      "size-12 rounded-xl border-2 flex items-center justify-center transition-all",
+                      "size-10 sm:size-12 rounded-xl border-2 flex items-center justify-center transition-all",
                       pin.length > i ? "border-coral bg-coral/10" : "border-border",
                       error && "border-destructive bg-destructive/10",
                     )}

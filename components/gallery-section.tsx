@@ -73,7 +73,7 @@ export function GallerySection() {
           initial={{ opacity: 0 }}
           animate={isInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[200px]"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 auto-rows-[150px] sm:auto-rows-[200px]"
         >
           {galleryImages.map((image, index) => (
             <motion.div

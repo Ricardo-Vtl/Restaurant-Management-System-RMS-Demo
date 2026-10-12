@@ -114,7 +114,7 @@ export function RecipeDialog({ isOpen, onClose, product }: RecipeDialogProps) {
               const qty = Number(line.quantity.replace(",", "."));
               const qtyInvalid = line.quantity.trim() !== "" && (!Number.isFinite(qty) || qty <= 0);
               return (
-                <div key={line.key} className="grid grid-cols-[7rem_1fr_7rem_auto] items-end gap-2">
+                <div key={line.key} className="flex flex-col gap-2 sm:grid sm:grid-cols-[7rem_1fr_7rem_auto] sm:items-end">
                   {hasSizes ? (
                     <div className="flex flex-col gap-1">
                       <Label htmlFor={`size-${line.key}`} className="text-xs">

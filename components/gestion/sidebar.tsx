@@ -77,7 +77,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onToggle}
-            className="fixed inset-0 bg-navy/50 z-40 md:hidden"
+            className="fixed inset-0 bg-navy/50 z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -91,8 +91,8 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
         }}
         className={cn(
           "fixed top-0 left-0 bottom-0 bg-navy z-50 flex flex-col",
-          "transform transition-transform md:translate-x-0",
-          !isOpen && "-translate-x-full md:translate-x-0",
+          "transform transition-transform lg:translate-x-0",
+          !isOpen && "-translate-x-full lg:translate-x-0",
         )}
       >
         {/* Logo */}
@@ -149,7 +149,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
             aria-label={isOpen ? "Colapsar menú lateral" : "Expandir menú lateral"}
             className={cn(
               "size-8 rounded-lg bg-navy-light/20 hover:bg-navy-light/30",
-              isOpen ? "hidden md:flex" : "hidden", // Oculto al cerrarse
+              isOpen ? "hidden lg:flex" : "hidden", // Oculto al cerrarse
             )}
           >
             <ChevronLeft

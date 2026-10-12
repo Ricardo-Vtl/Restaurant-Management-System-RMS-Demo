@@ -99,7 +99,7 @@ export function ContactSection() {
             {/* Social Links — siempre visibles; sin URL apuntan a la landing */}
             <div className="flex gap-4">
               {socialLinks.map(({ label, icon: Icon, href }) => (
-                <Button key={label} asChild variant="outline" size="icon" className="rounded-full">
+                <Button key={label} asChild variant="outline" size="icon" className="rounded-full size-11">
                   <a
                     href={href ?? "#inicio"}
                     {...(href ? { target: "_blank", rel: "noopener noreferrer" } : {})}

@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function GestionLoading() {
   return (
     <div className="min-h-screen bg-background flex">
-      <aside className="w-64 bg-navy h-screen flex flex-col p-4 gap-4">
+      <aside className="hidden lg:flex w-64 bg-navy h-screen flex-col p-4 gap-4">
         <Skeleton className="size-10 rounded-full bg-navy-light/20" />
         <div className="flex flex-col gap-2 flex-1">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -11,7 +11,7 @@ export default function GestionLoading() {
           ))}
         </div>
       </aside>
-      <div className="flex-1">
+      <div className="flex-1 lg:ml-64">
         <header className="h-16 bg-card border-b border-border flex items-center px-4">
           <Skeleton className="h-8 w-48" />
           <div className="ml-auto flex items-center gap-3">

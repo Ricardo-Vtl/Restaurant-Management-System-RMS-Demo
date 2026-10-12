@@ -143,7 +143,7 @@ export const Navbar = function Navbar() {
               onClick={() => setIsCartOpen(true)}
               aria-label="Abrir carrito"
               className={cn(
-                "relative p-2.5 rounded-full transition-all shadow-md",
+                "relative p-3 rounded-full transition-all shadow-md",
                 isScrolled
                   ? "bg-navy text-primary-foreground hover:bg-navy/90"
                   : "bg-coral text-accent-foreground hover:bg-coral/90",
@@ -171,7 +171,7 @@ export const Navbar = function Navbar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
               className={cn(
-                "md:hidden p-2 rounded-lg transition-colors",
+                "md:hidden p-2.5 rounded-lg transition-colors",
                 isScrolled ? "text-navy hover:bg-muted" : "text-primary-foreground hover:bg-white/10",
               )}
             >
