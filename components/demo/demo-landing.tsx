@@ -4,7 +4,6 @@
 
 import { DemoTourProvider } from "./demo-tour-context";
 import { DemoTourRuntime } from "./demo-runtime";
-import { LoginHint } from "./login-hint";
 import { WelcomeDialog } from "./welcome-dialog";
 
 export function DemoLanding() {
@@ -12,7 +11,6 @@ export function DemoLanding() {
     <DemoTourProvider>
       <DemoTourRuntime />
       <WelcomeDialog />
-      <LoginHint />
     </DemoTourProvider>
   );
 }

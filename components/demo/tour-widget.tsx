@@ -34,8 +34,19 @@ function useDialogOpen(): boolean {
 }
 
 export function TourWidget() {
-  const { mounted, state, active, currentStep, start, finish, reset, next, prev, setPanelOpen } =
-    useDemoTour();
+  const {
+    mounted,
+    state,
+    active,
+    currentStep,
+    start,
+    finish,
+    reset,
+    next,
+    prev,
+    setPanelOpen,
+    acknowledgeIntro,
+  } = useDemoTour();
   const { currentUser, setIsAuthModalOpen } = useAuth();
   const reduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLElement>(null);
@@ -43,11 +54,23 @@ export function TourWidget() {
   const isDesktop = useIsDesktop();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const open = mounted && (isDesktop ? state.panelOpen : mobileOpen);
   const total = TOUR_STEPS.length;
   const index = clampStep(state.step);
   const done = state.completed.includes(currentStep.id);
   const isLast = index === total - 1;
+
+  // En móvil, los pasos de sección abren el sheet solos con "Entendido".
+  const introPending =
+    mounted && !isDesktop && active && !!currentStep.intro && state.introAckFor !== currentStep.id;
+  const open = mounted && (isDesktop ? state.panelOpen : mobileOpen || introPending);
+
+  const hasAction = !!(
+    currentStep.auto ||
+    currentStep.completeWhen ||
+    currentStep.mobileCompleteWhen ||
+    currentStep.completeWhenGone ||
+    currentStep.completeOnRoute
+  );
 
   const closePanel = () => {
     if (isDesktop) setPanelOpen(false);
@@ -85,9 +108,19 @@ export function TourWidget() {
     setMobileOpen(false);
   };
 
+  const handleUnderstood = () => {
+    acknowledgeIntro();
+    setMobileOpen(false);
+    // Si el paso no se completa por acción, "Entendido" avanza (o finaliza).
+    if (!hasAction) {
+      if (isLast) finish();
+      else next();
+    }
+  };
+
   return (
     <>
-      {!dialogOpen && (
+      {!dialogOpen && !introPending && (
         <button
           type="button"
           onClick={() => (isDesktop ? setPanelOpen(!state.panelOpen) : setMobileOpen((v) => !v))}
@@ -214,9 +247,14 @@ export function TourWidget() {
                     </Button>
                   </div>
                 ) : (
-                  <Button variant="ghost" onClick={handleSkip} className="mt-4 w-full text-muted-foreground">
-                    Saltar recorrido
-                  </Button>
+                  <div className="mt-4 flex flex-col gap-2">
+                    <Button onClick={handleUnderstood} className="w-full h-12 text-base bg-coral hover:bg-coral/90">
+                      {isLast && !hasAction ? "Finalizar" : "Entendido"}
+                    </Button>
+                    <Button variant="ghost" onClick={handleSkip} className="w-full text-muted-foreground">
+                      Saltar recorrido
+                    </Button>
+                  </div>
                 )}
 
                 <div className="mt-3 flex justify-center">

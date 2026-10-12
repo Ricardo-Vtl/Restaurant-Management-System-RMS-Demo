@@ -23,8 +23,7 @@ import { useIsDesktop } from "./use-media-query";
 
 // Ritmo del recorrido: más margen entre acciones automáticas para que dé tiempo
 // a leer (híbrido acción-trigger + tiempos holgados).
-const ADVANCE_DELAY_MS = 1200;
-const IDLE_ADVANCE_MS = 7000;
+const ADVANCE_DELAY_MS = 800;
 
 export function DemoAuthAutoMark() {
   const { currentUser, isAuthModalOpen } = useAuth();
@@ -174,26 +173,6 @@ export function DemoAutoAdvance() {
     return () => window.clearTimeout(timer);
   }, [active, state.completed, state.step, currentStep.id, next, finish, isDesktop]);
 
-  // Móvil: recorrido 100% lineal, sin navegación manual. Los pasos sin acción
-  // (landing, dashboard, cierre) avanzan solos tras unos segundos.
-  useEffect(() => {
-    if (!active || isDesktop) return;
-    const hasAction = !!(
-      currentStep.auto ||
-      currentStep.completeWhen ||
-      currentStep.mobileCompleteWhen ||
-      currentStep.completeWhenGone ||
-      currentStep.completeOnRoute
-    );
-    if (hasAction) return;
-    const isLast = state.step >= TOUR_STEPS.length - 1;
-    const timer = window.setTimeout(() => {
-      if (isLast) finish();
-      else next();
-    }, IDLE_ADVANCE_MS);
-    return () => window.clearTimeout(timer);
-  }, [active, isDesktop, currentStep, state.step, next, finish]);
-
   return null;
 }
 
@@ -205,11 +184,13 @@ export function DemoAutoAdvance() {
  * cerrado y no se encima con la siguiente indicación.
  */
 export function DemoSidebarSync() {
-  const { active, currentStep } = useDemoTour();
+  const { active, state, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
   const openedRef = useRef(false);
 
-  const needs = !isDesktop && active && !!currentStep.needsSidebar;
+  // Abrir el drawer solo después de que el bottom-sheet de intro se confirmó.
+  const introReady = !currentStep.intro || state.introAckFor === currentStep.id;
+  const needs = !isDesktop && active && !!currentStep.needsSidebar && introReady;
 
   useEffect(() => {
     if (isDesktop) return;
@@ -261,11 +242,12 @@ export function DemoSidebarSync() {
  * abre UNA vez al activarse el paso y lo cierra al cambiar de paso.
  */
 export function DemoCartSync() {
-  const { active, currentStep } = useDemoTour();
+  const { active, state, currentStep } = useDemoTour();
   const isDesktop = useIsDesktop();
   const openedRef = useRef(false);
 
-  const needs = !isDesktop && active && !!currentStep.needsCart;
+  const introReady = !currentStep.intro || state.introAckFor === currentStep.id;
+  const needs = !isDesktop && active && !!currentStep.needsCart && introReady;
 
   useEffect(() => {
     if (isDesktop) return;

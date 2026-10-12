@@ -42,7 +42,8 @@ interface DemoTourContextValue {
   prev: () => void;
   setPanelOpen: (open: boolean) => void;
   complete: (id: TourStepId) => void;
-  markHintShown: () => void;
+  /** Marca el bottom-sheet de intro del paso actual como confirmado (móvil). */
+  acknowledgeIntro: () => void;
 }
 
 const DemoTourContext = createContext<DemoTourContextValue | null>(null);
@@ -68,6 +69,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       startedAt: new Date().toISOString(),
       step: 0,
       completed: [],
+      introAckFor: null,
       panelOpen: true,
     }));
   }, []);
@@ -87,6 +89,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       startedAt: new Date().toISOString(),
       step: 0,
       completed: [],
+      introAckFor: null,
       panelOpen: true,
     }));
   }, []);
@@ -109,8 +112,11 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const markHintShown = useCallback(() => {
-    setState((prev) => (prev.hintShown ? prev : { ...prev, hintShown: true }));
+  const acknowledgeIntro = useCallback(() => {
+    setState((prev) => {
+      const id = TOUR_STEPS[clampStep(prev.step)].id;
+      return prev.introAckFor === id ? prev : { ...prev, introAckFor: id };
+    });
   }, []);
 
   const value = useMemo<DemoTourContextValue>(() => {
@@ -128,9 +134,9 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       prev,
       setPanelOpen,
       complete,
-      markHintShown,
+      acknowledgeIntro,
     };
-  }, [mounted, state, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, markHintShown]);
+  }, [mounted, state, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, acknowledgeIntro]);
 
   return <DemoTourContext.Provider value={value}>{children}</DemoTourContext.Provider>;
 }

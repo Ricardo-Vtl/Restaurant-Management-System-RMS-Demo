@@ -48,6 +48,8 @@ export interface TourStep {
   needsSidebar?: boolean;
   /** El target vive en el carrito: en móvil el tour abre el drawer del carrito. */
   needsCart?: boolean;
+  /** En móvil muestra el bottom-sheet con "Entendido" al activarse el paso. */
+  intro?: boolean;
   /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
   radius?: number;
   /** Fuerza la posición del label. "inside" para objetivos de alto completo (sidebar). */
@@ -72,6 +74,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "landing",
     title: "La landing pública",
     body: "Así ve tu cliente el menú: catálogo en vivo desde la base de datos, categorías, carrito y pedidos en línea.",
+    intro: true,
   },
   {
     id: "acceso",
@@ -81,6 +84,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: "[data-demo-logo]" },
     radius: 9999,
     label: "Triple clic aquí",
+    intro: true,
     auto: "authModal",
   },
   {
@@ -100,10 +104,9 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion",
     target: { selector: "aside" },
     mobileTarget: { selector: "main h1" },
-    needsSidebar: true,
     radius: 24,
-    labelPlacement: "inside",
     label: "Tu menú de módulos",
+    intro: true,
   },
   {
     id: "mesas-link",
@@ -113,6 +116,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/mesas"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Mesas",
     mobileLabel: "Estás en Mesas",
     completeOnRoute: true,
@@ -172,6 +176,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/cocina"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Cocina",
     mobileLabel: "Estás en Cocina (KDS)",
     completeOnRoute: true,
@@ -193,6 +198,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/pedidos"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Pedidos",
     mobileLabel: "Estás en Pedidos",
     completeOnRoute: true,
@@ -223,6 +229,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/caja"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Caja",
     mobileLabel: "Estás en Caja",
     completeOnRoute: true,
@@ -253,6 +260,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/logistica"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Inventario",
     mobileLabel: "Estás en Inventario",
     completeOnRoute: true,
@@ -265,6 +273,7 @@ export const TOUR_STEPS: TourStep[] = [
     target: { selector: 'a[href="/gestion/config"]' },
     mobileTarget: { selector: "main h1" },
     needsSidebar: true,
+    intro: true,
     label: "Haz clic en Config",
     mobileLabel: "Estás en Configuración",
     completeOnRoute: true,
@@ -273,6 +282,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: "cierre",
     title: "¡Recorrido completado!",
     body: "Explora libremente. El código completo está en github.com/Ricardo-Vtl/restaurant-manager — gracias por probar la demo.",
+    intro: true,
   },
 ];
 
@@ -330,7 +340,8 @@ export interface StoredTourState {
   step: number;
   startedAt: string | null;
   completed: TourStepId[];
-  hintShown: boolean;
+  /** Paso cuyo bottom-sheet de intro ya se confirmó con "Entendido" (móvil). */
+  introAckFor: TourStepId | null;
   panelOpen: boolean;
 }
 
@@ -339,6 +350,6 @@ export const DEFAULT_TOUR_STATE: StoredTourState = {
   step: 0,
   startedAt: null,
   completed: [],
-  hintShown: false,
+  introAckFor: null,
   panelOpen: false,
 };
