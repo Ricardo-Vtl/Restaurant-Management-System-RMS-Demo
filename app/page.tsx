@@ -21,7 +21,7 @@ const AuthModal = dynamic(() => import("@/components/auth-modal").then((m) => m.
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-clip">
       <Navbar />
       <HeroSection />
       <MenuSection />
