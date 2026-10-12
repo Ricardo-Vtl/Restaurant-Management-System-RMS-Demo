@@ -8,6 +8,7 @@ import { ContactSection } from "@/components/contact-section";
 import dynamic from "next/dynamic";
 import { FloatingCart } from "@/components/floating-cart";
 import { Footer } from "@/components/footer";
+import { DemoLanding } from "@/components/demo/demo-landing";
 
 const CartDrawer = dynamic(() => import("@/components/cart-drawer").then((m) => m.CartDrawer), {
   ssr: false,
@@ -31,6 +32,7 @@ export default function Home() {
       <CartDrawer />
       <FloatingCart />
       <AuthModal />
+      <DemoLanding />
     </div>
   );
 }

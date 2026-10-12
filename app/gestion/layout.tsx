@@ -10,6 +10,7 @@ import { NowProvider } from "@/lib/now-context";
 import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DemoGestion } from "@/components/demo/demo-gestion";
 import GestionLoading from "./loading";
 
 const AuthModal = dynamic(() => import("@/components/auth-modal").then((m) => m.AuthModal), {
@@ -84,6 +85,7 @@ function GestionContent({
         </main>
       </div>
       <AuthModal />
+      <DemoGestion />
     </div>
   );
 }

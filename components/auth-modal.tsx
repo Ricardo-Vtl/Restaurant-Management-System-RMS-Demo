@@ -6,6 +6,7 @@ import { Lock, AlertCircle, LogOut, Loader2, X, LayoutGrid, ShieldCheck } from "
 import { useAuth } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { DemoPinHint } from "@/components/demo/pin-hint";
 import { cn } from "@/lib/utils";
 
 export function AuthModal() {
@@ -187,6 +188,8 @@ export function AuthModal() {
                   <X className="size-5 mx-auto" aria-hidden="true" />
                 </button>
               </div>
+
+              <DemoPinHint />
 
               <p className="text-center text-muted-foreground text-xs mt-6">
                 Consulta a administración si olvidaste tu PIN.
