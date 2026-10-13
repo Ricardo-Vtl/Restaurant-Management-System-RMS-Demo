@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Phone } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -102,6 +103,7 @@ export function ContactTab({ config }: { config: FullConfig }) {
         onSave={onSubmit}
         isPending={update.isPending}
         isDirty={form.formState.isDirty}
+        icon={Phone}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField

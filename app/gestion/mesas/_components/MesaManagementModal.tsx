@@ -79,7 +79,7 @@ export const MesaManagementModal = ({
         className={cn(
           "border-none shadow-2xl p-0 flex flex-col transition-all duration-300 ease-in-out gap-0 outline-none fixed left-[50%] -translate-x-[50%]",
           shouldShowOccupiedView
-            ? "w-full h-full max-h-[90dvh] md:w-[95vw] md:h-[92vh] lg:max-w-7xl top-[50%] -translate-y-[50%] md:rounded-3xl overflow-hidden"
+            ? "w-full h-full max-w-none max-h-[90dvh] md:w-[95vw] md:h-[92vh] lg:max-w-7xl top-[50%] -translate-y-[50%] md:rounded-3xl overflow-hidden"
             : "w-[95vw] max-w-md h-auto top-[50%] -translate-y-[50%] rounded-3xl overflow-hidden",
         )}
       >
@@ -89,14 +89,14 @@ export const MesaManagementModal = ({
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/10 rounded-full size-8"
+            className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/10 rounded-full size-11 sm:size-9"
           >
             <X className="size-4" />
             <span className="sr-only">Cerrar</span>
           </Button>
           <DialogHeader className="flex flex-col gap-0">
             <DialogDescription className="sr-only">Panel de gestión para la Mesa {mesa.number}.</DialogDescription>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pr-8">
               <div className="bg-white/20 p-3 rounded-xl">
                 <UtensilsCrossed size={24} />
               </div>
@@ -104,7 +104,7 @@ export const MesaManagementModal = ({
                 <DialogTitle className="font-black italic tracking-tighter uppercase text-2xl text-white m-0 p-0 leading-none">
                   Mesa {mesa.number}
                 </DialogTitle>
-                <p className="text-white/70 text-[10px] font-black uppercase tracking-widest pt-1">
+                <p className="text-white/70 text-xs sm:text-[10px] font-black uppercase tracking-widest pt-1">
                   {mesa.section} •{" "}
                   {shouldShowOccupiedView
                     ? `${mesa.currentGuests || guests} pax`
@@ -151,19 +151,19 @@ export const MesaManagementModal = ({
                     value="menu"
                     className="h-full border-b-4 border-transparent data-[state=active]:border-coral px-1 flex items-center gap-2"
                   >
-                    <LayoutGrid size={14} /> <span className="font-black text-[10px] uppercase italic">Menú</span>
+                    <LayoutGrid size={14} /> <span className="font-black text-xs sm:text-[10px] uppercase italic">Menú</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="historial"
                     className="h-full border-b-4 border-transparent data-[state=active]:border-coral px-1 flex items-center gap-2"
                   >
-                    <Receipt size={14} /> <span className="font-black text-[10px] uppercase italic">Cuenta</span>
+                    <Receipt size={14} /> <span className="font-black text-xs sm:text-[10px] uppercase italic">Cuenta</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="gestion"
                     className="h-full border-b-4 border-transparent data-[state=active]:border-coral px-1 flex items-center gap-2"
                   >
-                    <Settings2 size={14} /> <span className="font-black text-[10px] uppercase italic">Mesa</span>
+                    <Settings2 size={14} /> <span className="font-black text-xs sm:text-[10px] uppercase italic">Mesa</span>
                   </TabsTrigger>
                 </TabsList>
               </div>

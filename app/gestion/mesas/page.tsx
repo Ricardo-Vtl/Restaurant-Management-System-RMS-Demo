@@ -10,6 +10,7 @@ import { MesaCard } from "./_components/mesa-card";
 import { useMesasManager } from "./_hooks/useMesasManager";
 import { useLocalSimulation } from "./_hooks/useLocalSimulation";
 import { MesasHeader } from "./_components/mesas-header";
+import { MesasStatsBar } from "./_components/mesas-stats-bar";
 import { NuevaMesaModal } from "./_components/NuevaMesaModal";
 import { ConfiguracionLocalModal } from "./_components/ConfiguracionLocalModal";
 
@@ -54,26 +55,28 @@ export default function MesasPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* 1. Header de Estadísticas */}
-      <MesasHeader
+    <div className="flex flex-col gap-5">
+      {/* 1. Header + Estadísticas */}
+      <MesasHeader />
+      <MesasStatsBar
         totalLibres={manager.totalLibres}
         totalOcupadas={manager.totalOcupadas}
         sillasRespaldoActual={manager.sillasRespaldoActual}
       />
 
       {/* 2. Barra de Herramientas */}
-      <div className="flex flex-wrap items-center gap-3 justify-between -mt-3">
-        <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} aria-hidden="true" />
           <Input
             placeholder="Buscar mesa..."
+            aria-label="Buscar mesa"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 bg-muted/50 border-0 h-10 rounded-xl text-sm"
+            className="pl-9 bg-muted/50 border-0 h-11 sm:h-10 rounded-xl text-sm"
           />
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <ConfiguracionLocalModal
           isOpen={manager.isConfigModalOpen}
           setIsOpen={manager.setIsConfigModalOpen}
@@ -111,7 +114,7 @@ export default function MesasPage() {
           <EmptyDescription>{search ? "No se encontraron mesas con ese numero." : "No hay mesas creadas en el mapa actual."}</EmptyDescription>
         </Empty>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 sm:gap-6">
           {filteredTables.map((table) => (
             <MesaCard
               key={table.id}

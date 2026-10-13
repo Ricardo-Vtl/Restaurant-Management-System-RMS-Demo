@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { cn } from "@/lib/utils";
 import {
   formatQty,
   MOVEMENT_TYPE_LABELS,
@@ -49,9 +50,9 @@ export function MovementsTab() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex sm:justify-end">
         <Select value={supplyId} onValueChange={setSupplyId}>
-          <SelectTrigger className="w-64" aria-label="Filtrar por insumo">
+          <SelectTrigger className="w-full sm:w-64" aria-label="Filtrar por insumo">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -82,47 +83,85 @@ export function MovementsTab() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="rounded-xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Insumo</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead className="text-right">Cantidad</TableHead>
-                <TableHead className="text-right">Queda</TableHead>
-                <TableHead>Razón</TableHead>
-                <TableHead>Registró</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {movements.map((m) => (
-                <TableRow key={m.id}>
-                  <TableCell className="whitespace-nowrap text-muted-foreground">
+        <>
+          {/* Escritorio — tabla */}
+          <div className="hidden md:block rounded-xl border bg-card">
+            <Table aria-label="Movimientos de insumos">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Insumo</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead className="text-right">Cantidad</TableHead>
+                  <TableHead className="text-right">Queda</TableHead>
+                  <TableHead>Razón</TableHead>
+                  <TableHead>Registró</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {movements.map((m) => (
+                  <TableRow key={m.id}>
+                    <TableCell className="whitespace-nowrap text-muted-foreground">
+                      {formatMovementDate(m.created_at)}
+                    </TableCell>
+                    <TableCell className="font-medium text-navy">{m.supplies?.name ?? "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant={TYPE_BADGE[m.type]}>{MOVEMENT_TYPE_LABELS[m.type]}</Badge>
+                    </TableCell>
+                    <TableCell
+                      className={`text-right font-mono tabular-nums ${m.quantity > 0 ? "text-success" : "text-destructive"}`}
+                    >
+                      {m.quantity > 0 ? "+" : "−"}
+                      {formatQty(Math.abs(m.quantity))} {m.supplies?.unit ?? ""}
+                    </TableCell>
+                    <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
+                      {formatQty(m.stock_after)}
+                    </TableCell>
+                    <TableCell className="max-w-56 truncate text-muted-foreground" title={m.reason ?? undefined}>
+                      {m.reason ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{m.staff_users?.name ?? "Automático"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Móvil — tarjetas */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {movements.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-border bg-card p-3 flex flex-col gap-2 shadow-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <Badge variant={TYPE_BADGE[m.type]}>{MOVEMENT_TYPE_LABELS[m.type]}</Badge>
+                  <span className="text-xs whitespace-nowrap text-muted-foreground">
                     {formatMovementDate(m.created_at)}
-                  </TableCell>
-                  <TableCell className="font-medium text-navy">{m.supplies?.name ?? "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant={TYPE_BADGE[m.type]}>{MOVEMENT_TYPE_LABELS[m.type]}</Badge>
-                  </TableCell>
-                  <TableCell
-                    className={`text-right font-mono tabular-nums ${m.quantity > 0 ? "text-success" : "text-destructive"}`}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-navy truncate min-w-0">{m.supplies?.name ?? "—"}</span>
+                  <span
+                    className={cn(
+                      "font-mono text-sm font-semibold tabular-nums shrink-0",
+                      m.quantity > 0 ? "text-success" : "text-destructive",
+                    )}
                   >
                     {m.quantity > 0 ? "+" : "−"}
                     {formatQty(Math.abs(m.quantity))} {m.supplies?.unit ?? ""}
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
-                    {formatQty(m.stock_after)}
-                  </TableCell>
-                  <TableCell className="max-w-56 truncate text-muted-foreground" title={m.reason ?? undefined}>
-                    {m.reason ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{m.staff_users?.name ?? "Automático"}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <span>
+                    Queda <span className="font-mono font-semibold text-navy">{formatQty(m.stock_after)}</span>
+                  </span>
+                  <span className="truncate">{m.staff_users?.name ?? "Automático"}</span>
+                </div>
+                {m.reason && (
+                  <p className="text-xs italic text-muted-foreground border-t border-border/50 pt-2">{m.reason}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

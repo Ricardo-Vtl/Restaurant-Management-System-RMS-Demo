@@ -23,9 +23,12 @@ export function getSlaColor(elapsedSeconds: number, thresholds: SlaThresholds = 
 }
 
 export function formatElapsed(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
-  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  const mm = mins.toString().padStart(2, "0");
+  const ss = secs.toString().padStart(2, "0");
+  return hrs > 0 ? `${hrs}:${mm}:${ss}` : `${mm}:${ss}`;
 }
 
 export function getOrderTimestamp(order: Order): Date {
@@ -33,4 +36,11 @@ export function getOrderTimestamp(order: Order): Date {
     (t): t is Date => !!t,
   );
   return candidates.sort((a, b) => b.getTime() - a.getTime())[0] ?? order.createdAt;
+}
+
+// Duración total de una orden cerrada (último hito − creación), en segundos.
+export function getOrderDurationSeconds(order: Order): number {
+  const end = getOrderTimestamp(order).getTime();
+  const start = new Date(order.createdAt).getTime();
+  return Math.max(0, Math.floor((end - start) / 1000));
 }

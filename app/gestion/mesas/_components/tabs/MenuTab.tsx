@@ -111,7 +111,7 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 py-16">
         <AlertTriangle className="text-destructive" size={32} />
-        <p className="text-[10px] font-black uppercase tracking-widest text-navy">
+        <p className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">
           Error al cargar el catálogo
         </p>
       </div>
@@ -119,18 +119,18 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
   }
 
   return (
-    <div className="flex h-full w-full flex-col md:flex-row overflow-hidden bg-muted/50">
+    <div className="relative flex h-full w-full flex-col overflow-hidden bg-muted/50 md:flex-row">
       {/* SECCIÓN PRODUCTOS */}
       <div className="flex-1 flex flex-col min-w-0 bg-white h-full overflow-hidden">
         {/* Categorías */}
-        <div className="border-b bg-white shrink-0 overflow-x-auto no-scrollbar touch-pan-x">
+        <div className="border-b bg-white shrink-0 overflow-x-auto scrollbar-hide touch-pan-x">
           <Tabs value={activeCategory} onValueChange={setActiveCategory}>
             <TabsList className="flex p-2 gap-2 min-w-max bg-transparent h-auto">
               {categories.map((cat) => (
                 <TabsTrigger
                   key={cat}
                   value={cat}
-                  className="whitespace-nowrap px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all data-[state=active]:bg-coral data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-coral/20 data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
+                  className="whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-[10px] font-black uppercase transition-all data-[state=active]:bg-coral data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-coral/20 data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
                 >
                   {cat}
                 </TabsTrigger>
@@ -159,7 +159,7 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
           >
             <ShoppingBasket size={18} className="text-navy" aria-hidden="true" />
             {tempCart.length > 0 && (
-              <span aria-hidden="true" className="absolute -top-1 -right-1 bg-coral text-white text-[8px] size-4 rounded-full flex items-center justify-center font-black animate-in zoom-in">
+              <span aria-hidden="true" className="absolute -top-1 -right-1 bg-coral text-white text-xs sm:text-[8px] size-4 rounded-full flex items-center justify-center font-black animate-in zoom-in">
                 {tempCart.length}
               </span>
             )}
@@ -177,12 +177,12 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="flex items-center justify-center h-full py-16 opacity-50">
-              <p className="text-[10px] font-black uppercase tracking-widest text-navy">
+              <p className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">
                 Sin resultados para esta búsqueda
               </p>
             </div>
           ) : (
-          <div className="p-3 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-32 md:pb-6">
+          <div className="p-3 md:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pb-6">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
@@ -211,14 +211,14 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
                   )}
                 </div>
                 <div className="flex flex-col justify-center py-1 min-w-0 flex-1">
-                  <h4 className="font-black text-navy text-[10px] uppercase italic truncate leading-tight pr-12">
+                  <h4 className="font-black text-navy text-xs sm:text-[10px] uppercase italic truncate leading-tight pr-12">
                     {product.name}
                   </h4>
                   <span className="text-coral font-black text-sm mt-1">{formatCurrency(product.basePrice)}</span>
                 </div>
 
                 {!product.available && (
-                  <Badge variant="secondary" className="absolute top-1/2 right-3 -translate-y-1/2 text-[8px] px-1.5 py-0.5">
+                  <Badge variant="secondary" className="absolute top-1/2 right-3 -translate-y-1/2 text-xs sm:text-[8px] px-1.5 py-0.5">
                     Agotado
                   </Badge>
                 )}
@@ -232,15 +232,15 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
       {/* SECCIÓN CARRITO (COMANDA) */}
       <aside aria-live="polite"
         className={cn(
-          "fixed inset-0 z-50 bg-white flex flex-col transition-transform duration-300 md:relative md:translate-x-0 md:z-0 md:w-80 md:border-l shadow-2xl md:shadow-none",
-          showCartMobile ? "translate-x-0" : "translate-x-full md:translate-x-0",
+          "absolute inset-0 z-50 bg-white flex flex-col transition-transform duration-300 md:relative md:translate-x-0 md:z-0 md:w-80 md:border-l shadow-2xl md:shadow-none",
+          showCartMobile ? "translate-x-0" : "translate-x-full invisible md:visible md:translate-x-0",
         )}
       >
         {/* Header Carrito */}
         <div className="p-4 bg-navy text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <ShoppingBasket size={18} className="text-coral" />
-            <span className="font-black text-[11px] uppercase tracking-wider italic">Comanda Actual</span>
+            <span className="font-black text-xs sm:text-[11px] uppercase tracking-wider italic">Comanda Actual</span>
           </div>
           <Button
             variant="ghost"
@@ -260,7 +260,7 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
               <EmptyMedia>
                 <Plus size={40} className="text-navy" />
               </EmptyMedia>
-              <EmptyTitle className="text-[10px] font-black text-navy uppercase text-center">Agrega productos</EmptyTitle>
+              <EmptyTitle className="text-xs sm:text-[10px] font-black text-navy uppercase text-center">Agrega productos</EmptyTitle>
             </Empty>
           ) : (
             <div className="flex flex-col gap-2">
@@ -271,15 +271,15 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col min-w-0 pr-2">
-                      <span className="text-[10px] font-black text-navy uppercase italic truncate">{item.name}</span>
+                      <span className="text-xs sm:text-[10px] font-black text-navy uppercase italic truncate">{item.name}</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {item.modifiers.size && (
-                          <Badge variant="secondary" className="text-[8px] px-1.5 py-0.5">
+                          <Badge variant="secondary" className="text-xs sm:text-[8px] px-1.5 py-0.5">
                             {item.modifiers.size.name}
                           </Badge>
                         )}
                         {item.modifiers.sauce && (
-                          <Badge variant="warning" className="text-[8px] px-1.5 py-0.5">
+                          <Badge variant="warning" className="text-xs sm:text-[8px] px-1.5 py-0.5">
                             {item.modifiers.sauce.name}
                           </Badge>
                         )}
@@ -287,20 +287,20 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
                           <Badge
                             key={extra.id}
                             variant="success"
-                            className="text-[8px] px-1.5 py-0.5"
+                            className="text-xs sm:text-[8px] px-1.5 py-0.5"
                           >
                             +{extra.name}
                           </Badge>
                         ))}
                       </div>
-                      <span className="text-[10px] text-coral font-bold mt-1">{formatCurrency(item.totalPrice)}</span>
+                      <span className="text-xs sm:text-[10px] text-coral font-bold mt-1">{formatCurrency(item.totalPrice)}</span>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => removeItem(item.id)}
                       aria-label="Eliminar artículo del carrito"
-                      className="text-muted-foreground hover:text-red-500 shrink-0 size-7"
+                      className="text-muted-foreground hover:text-destructive shrink-0 size-7"
                     >
                       <Trash2 size={14} aria-hidden="true" />
                     </Button>
@@ -336,7 +336,7 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
         <Separator />
         <div className="p-4 bg-white shrink-0 flex flex-col gap-4">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Subtotal</span>
+            <span className="text-xs sm:text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Subtotal</span>
             <span className="text-xl font-black text-navy italic">{formatCurrency(subtotal)}</span>
           </div>
           <Button
@@ -350,7 +350,7 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
                 setShowCartMobile(false);
               }
             }}
-            className="w-full py-7 bg-coral hover:bg-coral/90 text-white rounded-xl font-black text-[11px] uppercase italic tracking-widest shadow-lg shadow-coral/20 active:scale-95 transition-all"
+            className="w-full py-7 bg-coral hover:bg-coral/90 text-white rounded-xl font-black text-xs sm:text-[11px] uppercase italic tracking-widest shadow-lg shadow-coral/20 active:scale-95 transition-all"
           >
             {isSending ? <Loader2 className="mr-2 animate-spin" size={16} /> : null}
             {isSending ? "Enviando..." : "Enviar a Cocina"}

@@ -1,23 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Pencil, Plus, Users } from "lucide-react";
+import { Loader2, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { useStaff, useUpdateStaff, type StaffMember } from "@/hooks/use-staff";
 import { useAuth } from "@/lib/store";
-import { StaffDialog, ROLE_LABELS } from "./_components/staff-dialog";
+import { StaffDialog } from "./_components/staff-dialog";
+import { StaffStatsBar } from "./_components/staff-stats-bar";
+import { StaffCard } from "./_components/staff-card";
 
 export default function PersonalPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -54,22 +46,31 @@ export default function PersonalPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-navy font-serif">Personal</h1>
-          <p className="text-muted-foreground text-sm">Crea empleados, asigna roles y administra sus PIN de acceso</p>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="h-7 w-1.5 bg-coral rounded-full" aria-hidden="true" />
+            <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">
+              Personal
+            </h1>
+          </div>
+          <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+            Crea empleados, asigna roles y administra sus PIN de acceso
+          </p>
         </div>
         <Button
           onClick={() => {
             setEditingStaff(null);
             setIsDialogOpen(true);
           }}
-          className="bg-coral hover:bg-coral/90"
+          className="w-full sm:w-auto h-11 sm:h-9 bg-coral hover:bg-coral/90 text-white font-black uppercase italic text-xs gap-2"
         >
-          <Plus className="size-4 mr-2" /> Nuevo Personal
+          <Plus className="size-4" aria-hidden="true" /> Nuevo Personal
         </Button>
       </div>
+
+      {staff.length > 0 && <StaffStatsBar staff={staff} />}
 
       {staff.length === 0 ? (
         <Empty>
@@ -78,62 +79,26 @@ export default function PersonalPage() {
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>No hay personal registrado</EmptyTitle>
-            <EmptyDescription>Haz clic en "Nuevo Personal" para dar de alta al primer empleado.</EmptyDescription>
+            <EmptyDescription>
+              Haz clic en &quot;Nuevo Personal&quot; para dar de alta al primer empleado.
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="rounded-xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {staff.map((member) => {
-                const isSelf = member.id === currentUser?.id;
-                return (
-                  <TableRow key={member.id} className={!member.is_active ? "opacity-50" : undefined}>
-                    <TableCell className="font-medium text-navy">
-                      {member.name}
-                      {isSelf && <span className="ml-2 text-xs text-muted-foreground">(tú)</span>}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{ROLE_LABELS[member.role]}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={member.is_active}
-                          onCheckedChange={() => handleToggleActive(member)}
-                          disabled={isSelf || updateStaff.isPending}
-                          aria-label={member.is_active ? `Desactivar a ${member.name}` : `Reactivar a ${member.name}`}
-                        />
-                        <span className="text-xs text-muted-foreground">{member.is_active ? "Activo" : "Inactivo"}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Editar a ${member.name}`}
-                        className="size-8 text-blue-600 hover:bg-blue-50"
-                        onClick={() => {
-                          setEditingStaff(member);
-                          setIsDialogOpen(true);
-                        }}
-                      >
-                        <Pencil className="size-4" aria-hidden="true" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {staff.map((member) => (
+            <StaffCard
+              key={member.id}
+              member={member}
+              isSelf={member.id === currentUser?.id}
+              pending={updateStaff.isPending}
+              onEdit={(m) => {
+                setEditingStaff(m);
+                setIsDialogOpen(true);
+              }}
+              onToggle={handleToggleActive}
+            />
+          ))}
         </div>
       )}
 

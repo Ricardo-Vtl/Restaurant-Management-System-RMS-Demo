@@ -1,41 +1,20 @@
 "use client";
 
-import { LayoutGrid, Armchair } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { LayoutGrid } from "lucide-react";
 
-interface MesasHeaderProps {
-  totalLibres: number;
-  totalOcupadas: number;
-  sillasRespaldoActual: number;
-}
-
-export function MesasHeader({ totalLibres, totalOcupadas, sillasRespaldoActual }: MesasHeaderProps) {
+export function MesasHeader() {
   return (
-    <Card className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6">
-      <div>
-        <h1 className="text-3xl font-bold text-navy font-serif tracking-tight flex items-center gap-2">
-          <LayoutGrid className="text-coral" /> Mapa de Mesas
+    <div>
+      <div className="flex items-center gap-2 mb-0.5">
+        <div className="h-7 w-1.5 bg-coral rounded-full" aria-hidden="true" />
+        <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">
+          Mapa de Mesas
         </h1>
-        <p className="text-muted-foreground italic text-sm">Gestión de aforo y distribución inteligente de sillas</p>
       </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex gap-2">
-          <Badge variant="success" className="gap-2 px-3 py-1.5 text-xs font-bold">
-            <span className="size-2 rounded-full bg-green-500 animate-pulse" />
-            {totalLibres} LIBRES
-          </Badge>
-          <Badge variant="outline" className="gap-2 px-3 py-1.5 text-xs font-bold border-coral/10 bg-coral/5 text-coral">
-            <span className="size-2 rounded-full bg-coral animate-pulse" />
-            {totalOcupadas} OCUPADAS
-          </Badge>
-          <Badge variant="outline" className="gap-2 px-3 py-1.5 text-xs font-bold border-navy/10 bg-navy/5 text-navy">
-            <Armchair size={13} className="text-navy/70" />
-            {sillasRespaldoActual} EN RESPALDO
-          </Badge>
-        </div>
-      </div>
-    </Card>
+      <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+        <LayoutGrid className="mr-1 inline size-3 align-[-1px]" aria-hidden="true" />
+        Gestión de aforo y distribución inteligente de sillas
+      </p>
+    </div>
   );
 }

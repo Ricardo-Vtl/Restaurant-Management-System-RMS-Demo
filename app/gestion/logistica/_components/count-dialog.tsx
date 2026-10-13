@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardCheck } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -58,14 +58,21 @@ export function CountDialog({ isOpen, onClose, supply }: CountDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Conteo físico</DialogTitle>
-          <DialogDescription>
-            {supply
-              ? `${supply.name} — el sistema dice ${formatQty(supply.stock_current)} ${supply.unit}. Escribe lo que contaste.`
-              : "Selecciona un insumo"}
-          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
+              <ClipboardCheck className="size-5" aria-hidden="true" />
+            </div>
+            <div>
+              <DialogTitle>Conteo físico</DialogTitle>
+              <DialogDescription>
+                {supply
+                  ? `${supply.name} — el sistema dice ${formatQty(supply.stock_current)} ${supply.unit}. Escribe lo que contaste.`
+                  : "Selecciona un insumo"}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
@@ -102,10 +109,10 @@ export function CountDialog({ isOpen, onClose, supply }: CountDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={count.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={count.isPending} className="h-11 sm:h-9">
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit} className="bg-coral hover:bg-coral/90">
+          <Button onClick={handleSubmit} disabled={!canSubmit} className="bg-coral hover:bg-coral/90 h-11 sm:h-9">
             {count.isPending && <Loader2 className="size-4 mr-2 animate-spin" aria-hidden="true" />}
             Guardar conteo
           </Button>

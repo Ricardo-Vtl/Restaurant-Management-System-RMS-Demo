@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { Menu, Bell, Search, Clock } from "lucide-react";
+import Link from "next/link";
+import { Menu, Bell, Clock } from "lucide-react";
 import { useAuth } from "@/lib/store";
 import { useAllOrders } from "@/hooks/use-orders";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { OrderStatusBadge } from "@/app/gestion/pedidos/_components/order-status-badge";
+
+const PENDING_STATUSES = ["pending", "confirmed", "preparing"];
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -29,7 +32,7 @@ function HeaderClock() {
   return (
     <div className="hidden lg:flex items-center gap-4">
       <div className="flex items-center gap-2 text-muted-foreground">
-        <Clock className="size-4" />
+        <Clock className="size-4" aria-hidden="true" />
         <span className="text-sm">
           {currentTime.toLocaleTimeString("es-MX", {
             hour: "2-digit",
@@ -54,25 +57,31 @@ export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }:
   const { currentUser } = useAuth();
   const { data: orders = [] } = useAllOrders();
 
-  const { pendingOrders, preparingOrders } = useMemo(() => {
+  const { pendingOrders, preparingOrders, pendingList } = useMemo(() => {
     const pendingOrders = orders.filter((o) => o.status === "pending").length;
     const preparingOrders = orders.filter((o) => o.status === "preparing").length;
-    return { pendingOrders, preparingOrders };
+    const pendingList = orders
+      .filter((o) => PENDING_STATUSES.includes(o.status))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+      .slice(0, 12);
+    return { pendingOrders, preparingOrders, pendingList };
   }, [orders]);
+
+  const activeCount = pendingOrders + preparingOrders;
 
   return (
     <header className="h-16 bg-card border-b border-border flex items-center justify-between px-3 sm:px-4 md:px-6 sticky top-0 z-30">
       {/* Left */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onMenuToggle} className="lg:hidden" aria-label="Abrir menú de navegación">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onMenuToggle}
+          className="lg:hidden"
+          aria-label="Abrir menú de navegación"
+        >
           <Menu className="size-5" aria-hidden="true" />
         </Button>
-
-        {/* Search - Desktop */}
-        <div className="hidden lg:flex relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input aria-label="Buscar pedidos y mesas" placeholder="Buscar pedidos, mesas..." className="pl-9 bg-muted/50 border-0" />
-        </div>
       </div>
 
       {/* Center - Date/Time */}
@@ -94,15 +103,55 @@ export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }:
           )}
         </div>
 
-        {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notificaciones">
-          <Bell className="size-5" />
-          {pendingOrders + preparingOrders > 0 && (
-            <Badge className="absolute -top-2 -right-2 size-5 bg-coral text-accent-foreground rounded-full p-0 text-[10px]">
-              {pendingOrders + preparingOrders}
-            </Badge>
-          )}
-        </Button>
+        {/* Pending orders popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative" aria-label="Órdenes pendientes">
+              <Bell className="size-5" aria-hidden="true" />
+              {activeCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 size-5 bg-coral text-accent-foreground rounded-full p-0 text-[10px]">
+                  {activeCount}
+                </Badge>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 p-0">
+            <div className="flex items-center justify-between border-b px-4 py-2.5">
+              <span className="text-xs font-black uppercase tracking-widest text-navy">Órdenes pendientes</span>
+              <Badge variant="secondary" className="text-[10px] font-black">{pendingList.length}</Badge>
+            </div>
+            {pendingList.length === 0 ? (
+              <p className="px-4 py-6 text-center text-sm text-muted-foreground">Sin órdenes pendientes.</p>
+            ) : (
+              <ul className="max-h-72 overflow-y-auto divide-y divide-border/50">
+                {pendingList.map((o) => (
+                  <li key={o.id}>
+                    <Link
+                      href="/gestion/pedidos"
+                      className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coral"
+                    >
+                      <span className="min-w-0">
+                        <span className="block font-black text-sm text-navy italic">#{o.orderNumber}</span>
+                        <span className="block text-xs text-muted-foreground uppercase font-bold tracking-tight truncate">
+                          {o.tableNumber ? `Mesa ${o.tableNumber}` : o.customerInfo?.name || "Mostrador"}
+                        </span>
+                      </span>
+                      <OrderStatusBadge status={o.status} />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="border-t px-4 py-2">
+              <Link
+                href="/gestion/pedidos"
+                className="block text-center text-xs font-black uppercase tracking-widest text-coral hover:underline"
+              >
+                Ver todos los pedidos
+              </Link>
+            </div>
+          </PopoverContent>
+        </Popover>
 
         {/* User */}
         <div className="flex items-center gap-2 pl-3 border-l border-border">

@@ -137,7 +137,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent
-        className="max-w-lg p-0 overflow-hidden max-h-[90vh] flex flex-col"
+        className="max-w-lg p-0 overflow-hidden max-h-[90dvh] flex flex-col"
         showCloseButton={false}
       >
         {/* Header con imagen */}
@@ -168,8 +168,8 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
         </div>
 
         {/* Contenido Scrolleable */}
-        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-          <DialogTitle className="font-serif text-2xl font-bold text-card-foreground mb-2">{product.name}</DialogTitle>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <DialogTitle className="font-serif text-xl sm:text-2xl font-bold text-card-foreground mb-2">{product.name}</DialogTitle>
           <DialogDescription className="text-muted-foreground mb-6">{product.description}</DialogDescription>
 
           {/* Tamaños */}
@@ -246,7 +246,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                     onClick={() => setSpiceLevel(level.name)}
                     aria-pressed={spiceLevel === level.name}
                     className={cn(
-                      "flex-1 py-3 px-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center",
+                      "flex-1 min-w-0 py-3 px-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center",
                       spiceLevel === level.name
                         ? "border-coral bg-coral/10"
                         : "border-border hover:border-coral/50",
@@ -274,14 +274,6 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                   <div
                     key={extra.id}
                     onClick={() => toggleExtra(extra)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        toggleExtra(extra);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="button"
                     className={cn(
                       "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all",
                       selectedExtras.has(extra.id)
@@ -322,7 +314,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
 
         {/* Footer - Fijo */}
         <Separator />
-        <div className="p-6 bg-card shrink-0">
+        <div className="p-4 sm:p-6 bg-card shrink-0">
           <div className="flex items-center justify-between mb-6">
             <span className="font-medium text-card-foreground">Cantidad</span>
             <div className="flex items-center gap-4">

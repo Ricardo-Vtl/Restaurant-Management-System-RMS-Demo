@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ClipboardCheck,
-  Loader2,
-  Package,
-  PackageMinus,
-  PackagePlus,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Loader2, Package, PackageMinus, PackagePlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -30,6 +22,7 @@ import { SupplyFormDialog } from "./supply-form-dialog";
 import { MovementDialog, type ManualMovementType } from "./movement-dialog";
 import { CountDialog } from "./count-dialog";
 import { StockLevel } from "./stock-level";
+import { SupplyActionsMenu, type SupplyAction } from "./supply-actions-menu";
 
 type DialogState =
   | { kind: "form"; supply: Supply | null }
@@ -37,12 +30,22 @@ type DialogState =
   | { kind: "count"; supply: Supply }
   | null;
 
+function minLabel(supply: Supply): string {
+  return supply.stock_min > 0 ? `${formatQty(supply.stock_min)} ${supply.unit}` : "—";
+}
+
 export function SuppliesTab() {
   const { currentUser } = useAuth();
   const canManage = can(currentUser?.role, "inventory:manage");
   const { data: supplies = [], isLoading, error } = useSupplies();
   const updateSupply = useUpdateSupply();
   const [dialog, setDialog] = useState<DialogState>(null);
+
+  const handleAction = (supply: Supply, action: SupplyAction) => {
+    if (action === "edit") setDialog({ kind: "form", supply });
+    else if (action === "count") setDialog({ kind: "count", supply });
+    else setDialog({ kind: "movement", supply, type: action });
+  };
 
   const handleToggleActive = async (supply: Supply) => {
     try {
@@ -68,8 +71,11 @@ export function SuppliesTab() {
   return (
     <div className="flex flex-col gap-4">
       {canManage && (
-        <div className="flex justify-end">
-          <Button onClick={() => setDialog({ kind: "form", supply: null })} className="bg-coral hover:bg-coral/90">
+        <div className="flex sm:justify-end">
+          <Button
+            onClick={() => setDialog({ kind: "form", supply: null })}
+            className="w-full sm:w-auto h-11 sm:h-9 bg-coral hover:bg-coral/90"
+          >
             <PackagePlus className="size-4 mr-2" aria-hidden="true" /> Nuevo insumo
           </Button>
         </div>
@@ -90,113 +96,63 @@ export function SuppliesTab() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className="rounded-xl border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Insumo</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Mínimo</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {supplies.map((supply) => (
-                <TableRow key={supply.id} className={!supply.is_active ? "opacity-50" : undefined}>
-                  <TableCell className="font-medium text-navy">{supply.name}</TableCell>
-                  <TableCell>
-                    <StockLevel supply={supply} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {supply.stock_min > 0 ? `${formatQty(supply.stock_min)} ${supply.unit}` : "—"}
-                  </TableCell>
-                  <TableCell>
-                    {canManage ? (
-                      <div className="flex items-center gap-2">
-                        <Switch
-                          checked={supply.is_active}
-                          onCheckedChange={() => handleToggleActive(supply)}
-                          disabled={updateSupply.isPending}
-                          aria-label={supply.is_active ? `Archivar ${supply.name}` : `Reactivar ${supply.name}`}
-                        />
-                        <span className="text-xs text-muted-foreground">
-                          {supply.is_active ? "Activo" : "Inactivo"}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        {supply.is_active ? "Activo" : "Inactivo"}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-emerald-600 hover:bg-emerald-50"
-                        onClick={() => setDialog({ kind: "movement", supply, type: "in" })}
-                        disabled={!supply.is_active}
-                        aria-label={`Registrar entrada de ${supply.name}`}
-                        title="Entrada"
-                      >
-                        <PackagePlus className="size-4" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-blue-600 hover:bg-blue-50"
-                        onClick={() => setDialog({ kind: "movement", supply, type: "out" })}
-                        disabled={!supply.is_active}
-                        aria-label={`Registrar salida de ${supply.name}`}
-                        title="Salida"
-                      >
-                        <PackageMinus className="size-4" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8 text-destructive hover:bg-destructive/10"
-                        onClick={() => setDialog({ kind: "movement", supply, type: "waste" })}
-                        disabled={!supply.is_active}
-                        aria-label={`Registrar merma de ${supply.name}`}
-                        title="Merma"
-                      >
-                        <Trash2 className="size-4" aria-hidden="true" />
-                      </Button>
-                      {canManage && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-navy hover:bg-navy/5"
-                            onClick={() => setDialog({ kind: "count", supply })}
-                            disabled={!supply.is_active}
-                            aria-label={`Conteo físico de ${supply.name}`}
-                            title="Conteo físico"
-                          >
-                            <ClipboardCheck className="size-4" aria-hidden="true" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 text-muted-foreground hover:text-navy"
-                            onClick={() => setDialog({ kind: "form", supply })}
-                            aria-label={`Editar ${supply.name}`}
-                            title="Editar"
-                          >
-                            <Pencil className="size-4" aria-hidden="true" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
+        <>
+          {/* Escritorio — tabla */}
+          <div className="hidden md:block rounded-xl border bg-card">
+            <Table aria-label="Insumos">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Insumo</TableHead>
+                  <TableHead>Nivel</TableHead>
+                  <TableHead>Mínimo</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {supplies.map((supply) => (
+                  <TableRow key={supply.id} className={!supply.is_active ? "opacity-50" : undefined}>
+                    <TableCell className="font-medium text-navy">
+                      {supply.name}
+                      <span className="ml-1.5 text-xs font-normal text-muted-foreground">{supply.unit}</span>
+                    </TableCell>
+                    <TableCell>
+                      <StockLevel supply={supply} />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{minLabel(supply)}</TableCell>
+                    <TableCell>
+                      <StatusControl
+                        supply={supply}
+                        canManage={canManage}
+                        pending={updateSupply.isPending}
+                        onToggle={handleToggleActive}
+                      />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end">
+                        <SupplyActionsMenu supply={supply} canManage={canManage} onAction={(a) => handleAction(supply, a)} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Móvil — tarjetas */}
+          <div className="flex flex-col gap-3 md:hidden">
+            {supplies.map((supply) => (
+              <SupplyCard
+                key={supply.id}
+                supply={supply}
+                canManage={canManage}
+                pending={updateSupply.isPending}
+                onToggle={handleToggleActive}
+                onAction={handleAction}
+              />
+            ))}
+          </div>
+        </>
       )}
 
       <SupplyFormDialog
@@ -217,4 +173,110 @@ export function SuppliesTab() {
       />
     </div>
   );
+}
+
+function StatusControl({
+  supply,
+  canManage,
+  pending,
+  onToggle,
+}: {
+  supply: Supply;
+  canManage: boolean;
+  pending: boolean;
+  onToggle: (supply: Supply) => void;
+}) {
+  if (!canManage) {
+    return <span className="text-xs text-muted-foreground">{supply.is_active ? "Activo" : "Inactivo"}</span>;
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <Switch
+        checked={supply.is_active}
+        onCheckedChange={() => onToggle(supply)}
+        disabled={pending}
+        aria-label={supply.is_active ? `Archivar ${supply.name}` : `Reactivar ${supply.name}`}
+      />
+      <span className="text-xs text-muted-foreground">{supply.is_active ? "Activo" : "Inactivo"}</span>
+    </div>
+  );
+}
+
+function SupplyCard({
+  supply,
+  canManage,
+  pending,
+  onToggle,
+  onAction,
+}: {
+  supply: Supply;
+  canManage: boolean;
+  pending: boolean;
+  onToggle: (supply: Supply) => void;
+  onAction: (supply: Supply, action: SupplyAction) => void;
+}) {
+  const disabled = !supply.is_active;
+  return (
+    <div className={cnCard(supply.is_active)}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="font-black text-navy truncate">{supply.name}</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{supply.unit}</p>
+        </div>
+        <StatusControl supply={supply} canManage={canManage} pending={pending} onToggle={onToggle} />
+      </div>
+
+      <StockLevel supply={supply} />
+
+      <div className="flex items-center justify-between gap-2 pt-3 border-t border-border/50">
+        <span className="text-xs text-muted-foreground">
+          Mín: <span className="font-bold text-navy">{minLabel(supply)}</span>
+        </span>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 text-emerald-600 hover:bg-emerald-50"
+            disabled={disabled}
+            onClick={() => onAction(supply, "in")}
+            aria-label={`Registrar entrada de ${supply.name}`}
+          >
+            <PackagePlus className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 text-blue-600 hover:bg-blue-50"
+            disabled={disabled}
+            onClick={() => onAction(supply, "out")}
+            aria-label={`Registrar salida de ${supply.name}`}
+          >
+            <PackageMinus className="size-4" aria-hidden="true" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11 text-destructive hover:bg-destructive/10"
+            disabled={disabled}
+            onClick={() => onAction(supply, "waste")}
+            aria-label={`Registrar merma de ${supply.name}`}
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+          </Button>
+          <SupplyActionsMenu
+            supply={supply}
+            canManage={canManage}
+            items={["count", "edit"]}
+            onAction={(a) => onAction(supply, a)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function cnCard(active: boolean): string {
+  return active
+    ? "rounded-2xl border border-border bg-card p-4 flex flex-col gap-3 shadow-sm"
+    : "rounded-2xl border border-border bg-card p-4 flex flex-col gap-3 shadow-sm opacity-60";
 }

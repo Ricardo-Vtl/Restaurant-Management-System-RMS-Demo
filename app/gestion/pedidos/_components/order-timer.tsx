@@ -19,6 +19,12 @@ const slaColors = {
   red: "text-red-500 animate-pulse",
 } as const;
 
+const slaLabels = {
+  green: "a tiempo",
+  yellow: "atención",
+  red: "demorado",
+} as const;
+
 export function OrderTimer({ order, className }: OrderTimerProps) {
   const now = useNow();
   const { data: config } = useRestaurantConfig();
@@ -35,7 +41,10 @@ export function OrderTimer({ order, className }: OrderTimerProps) {
   const color = getSlaColor(elapsed, thresholds);
 
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs font-bold", slaColors[color], className)}>
+    <span
+      aria-label={`${formatElapsed(elapsed)}, ${slaLabels[color]}`}
+      className={cn("inline-flex items-center gap-1 text-xs font-bold", slaColors[color], className)}
+    >
       <Clock size={12} aria-hidden="true" />
       {formatElapsed(elapsed)}
     </span>

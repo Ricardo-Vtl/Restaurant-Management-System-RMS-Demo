@@ -28,7 +28,7 @@ export function KitchenQueue({ orders, onAccept }: KitchenQueueProps) {
             Por Aceptar
           </h3>
         </div>
-        <span className="text-[10px] font-black rounded-full w-6 h-6 flex items-center justify-center bg-amber-50 text-amber-700">
+        <span className="text-xs sm:text-[10px] font-black rounded-full w-6 h-6 flex items-center justify-center bg-amber-50 text-amber-700">
           {orders.length}
         </span>
       </div>
@@ -47,7 +47,7 @@ export function KitchenQueue({ orders, onAccept }: KitchenQueueProps) {
           ) : (
             <div className="flex flex-col items-center justify-center py-12 opacity-30">
               <Package size={32} className="mb-2 text-navy" aria-hidden="true" />
-              <p className="text-[9px] font-black uppercase italic tracking-widest text-navy">
+              <p className="text-xs sm:text-[9px] font-black uppercase italic tracking-widest text-navy">
                 Sin ordenes pendientes
               </p>
             </div>

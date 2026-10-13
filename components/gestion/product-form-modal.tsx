@@ -138,8 +138,8 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] xl:max-w-7xl h-[90vh] max-h-[90vh] flex flex-col p-0 overflow-hidden border-none shadow-2xl rounded-3xl">
-        <DialogHeader className="p-6 bg-[#1a1f2c] text-white shrink-0">
+      <DialogContent className="max-w-[95vw] xl:max-w-7xl h-[90dvh] max-h-[90dvh] flex flex-col p-0 overflow-hidden border-none shadow-2xl rounded-3xl">
+        <DialogHeader className="p-6 bg-navy text-white shrink-0">
           <div className="flex items-center gap-4">
             <div className="p-2 bg-coral rounded-xl">
               <Settings2 className="size-6" />
@@ -148,7 +148,7 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
               <DialogTitle className="text-2xl font-serif">
                 {editingProduct ? "Editar Platillo" : "Configurador de Producto"}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground text-sm">Gestiona la disponibilidad y personalización detallada</DialogDescription>
+              <DialogDescription className="text-white/70 text-sm">Gestiona la disponibilidad y personalización detallada</DialogDescription>
             </div>
           </div>
         </DialogHeader>
@@ -327,7 +327,11 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
                               name={section.key}
                               render={({ field }) => (
                                 <FormControl>
-                                  <Switch checked={!!field.value} onCheckedChange={field.onChange} />
+                                  <Switch
+                                    checked={!!field.value}
+                                    onCheckedChange={field.onChange}
+                                    aria-label={section.label}
+                                  />
                                 </FormControl>
                               )}
                             />
@@ -336,7 +340,7 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
                           {isActive && (
                             <div className="flex flex-col gap-3">
                               {fArray.fields.map((field, index) => (
-                                <div key={field.id} className="flex gap-2">
+                                <div key={field.id} className="flex flex-col sm:flex-row gap-2">
                                   <Input
                                     placeholder="Nombre (ej: Mediano, Salsa Roja...)"
                                     aria-label={`Nombre de la opción ${index + 1}`}
@@ -346,7 +350,7 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
                                   {section.id !== "spiceLevels" && section.id !== "sauces" && (
                                     <Input
                                       type="number"
-                                      className="w-24"
+                                      className="w-full sm:w-24"
                                       placeholder="+$"
                                       aria-label={`Precio de la opción ${index + 1}`}
                                       {...form.register(`${section.id}.${index}.price` as const, { valueAsNumber: true })}
@@ -378,15 +382,15 @@ export function ProductFormModal({ isOpen, onClose, editingProduct }: ProductFor
             </div>
 
             <Separator />
-            <DialogFooter className="p-6 bg-white shrink-0 flex items-center justify-between">
+            <DialogFooter className="p-6 bg-white shrink-0 sm:items-center sm:justify-between">
               <p className="text-xs text-muted-foreground italic hidden sm:block">
                 Los cambios se verán reflejados inmediatamente en el menú
               </p>
-              <div className="flex gap-3">
-                <Button variant="ghost" type="button" onClick={onClose} disabled={isSubmitting}>
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+                <Button variant="ghost" type="button" onClick={onClose} disabled={isSubmitting} className="w-full sm:w-auto">
                   Cancelar
                 </Button>
-                <Button type="submit" className="bg-coral hover:bg-coral/90 min-w-35 text-white" disabled={isSubmitting}>
+                <Button type="submit" className="bg-coral hover:bg-coral/90 w-full sm:w-auto min-w-35 text-white" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <>
                       <Loader2 className="size-4 mr-2 animate-spin" />

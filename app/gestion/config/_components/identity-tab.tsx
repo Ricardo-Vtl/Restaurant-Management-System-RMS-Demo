@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowDown, ArrowUp, ImageIcon, Loader2, Plus, Trash2, Upload } from "lucide-react";
+import { ArrowDown, ArrowUp, ImageIcon, Loader2, Plus, Store, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -134,6 +134,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
           onSave={onSubmit}
           isPending={update.isPending}
           isDirty={form.formState.isDirty}
+          icon={Store}
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
@@ -228,7 +229,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
                           type="color"
                           value={field.value ?? "#000000"}
                           onChange={(e) => field.onChange(e.target.value)}
-                          className="size-9 rounded-md border cursor-pointer"
+                          className="size-11 sm:size-9 rounded-md border cursor-pointer"
                           aria-label={key === "primary" ? "Selector de color principal" : "Selector de color de acento"}
                         />
                         <Input {...field} value={field.value ?? ""} placeholder="#011c37" className="font-mono" />
@@ -295,7 +296,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8"
+                        className="size-11 sm:size-8"
                         aria-label={`Subir slide ${index + 1}`}
                         disabled={index === 0}
                         onClick={() => slides.move(index, index - 1)}
@@ -306,7 +307,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8"
+                        className="size-11 sm:size-8"
                         aria-label={`Bajar slide ${index + 1}`}
                         disabled={index === slides.fields.length - 1}
                         onClick={() => slides.move(index, index + 1)}
@@ -317,7 +318,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 text-destructive"
+                        className="size-11 sm:size-8 text-destructive"
                         aria-label={`Eliminar slide ${index + 1}`}
                         onClick={() => slides.remove(index)}
                       >
@@ -423,7 +424,7 @@ export function IdentityTab({ config }: { config: FullConfig }) {
             />
             <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1.5 px-5 text-center">
               <div
-                className="rounded-full px-2.5 py-0.5 text-[10px] font-medium text-white"
+                className="rounded-full px-2.5 py-0.5 text-xs font-medium text-white"
                 style={{ backgroundColor: watchColors?.accent ?? "#d43a3a" }}
               >
                 Abierto Ahora

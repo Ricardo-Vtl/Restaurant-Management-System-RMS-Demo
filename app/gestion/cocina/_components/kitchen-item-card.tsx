@@ -47,11 +47,6 @@ export function KitchenItemCard({ item, onMarkReady, isReady }: KitchenItemCardP
             >
               {item.name}
             </p>
-            {!isReady && (
-              <p className="text-[10px] text-muted-foreground font-bold">
-                x{item.quantity}
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -59,19 +54,19 @@ export function KitchenItemCard({ item, onMarkReady, isReady }: KitchenItemCardP
       {hasModifiers && (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {item.modifiers.size && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-[10px] font-bold uppercase">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 text-blue-700           text-xs sm:text-[10px] font-bold uppercase">
               <Info size={10} />
               {item.modifiers.size.name}
             </span>
           )}
           {item.modifiers.sauce && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-50 text-cyan-700 text-[10px] font-bold uppercase">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-cyan-50 text-cyan-700           text-xs sm:text-[10px] font-bold uppercase">
               <Droplets size={10} />
               {item.modifiers.sauce.name}
             </span>
           )}
           {item.modifiers.spiceLevel && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700 text-[10px] font-bold uppercase">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-orange-50 text-orange-700           text-xs sm:text-[10px] font-bold uppercase">
               <Flame size={10} />
               {item.modifiers.spiceLevel}
             </span>
@@ -79,13 +74,13 @@ export function KitchenItemCard({ item, onMarkReady, isReady }: KitchenItemCardP
           {item.modifiers.extras.map((extra, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700           text-xs sm:text-[10px] font-bold uppercase"
             >
               + {extra.name}
             </span>
           ))}
           {item.instructions && (
-            <div className="w-full flex items-start gap-1.5 p-2 rounded-lg bg-navy/5 text-navy text-[10px]">
+            <div className="w-full flex items-start gap-1.5 p-2 rounded-lg bg-navy/5 text-navy text-xs sm:text-[10px]">
               <NotebookPen size={11} className="shrink-0 mt-0.5" />
               <p className="italic">{item.instructions}</p>
             </div>

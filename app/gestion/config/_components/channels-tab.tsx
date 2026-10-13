@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Bike, Store } from "lucide-react";
+import { Bike, ShoppingBag, Store } from "lucide-react";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,7 @@ export function ChannelsTab({ config }: { config: FullConfig }) {
       onSave={onSubmit}
       isPending={update.isPending}
       isDirty={form.formState.isDirty}
+      icon={ShoppingBag}
     >
       <div className="flex items-center justify-between rounded-lg border px-4 py-3">
         <div>

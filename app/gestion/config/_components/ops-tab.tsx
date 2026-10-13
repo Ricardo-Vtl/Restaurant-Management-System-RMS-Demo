@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Settings2 } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,7 @@ export function OpsTab({ config }: { config: FullConfig }) {
       onSave={onSubmit}
       isPending={update.isPending}
       isDirty={form.formState.isDirty}
+      icon={Settings2}
     >
       <div className="flex flex-wrap items-center gap-2 rounded-lg border px-4 py-3">
         <span className="text-sm text-muted-foreground">Así se verán los timers de cocina:</span>

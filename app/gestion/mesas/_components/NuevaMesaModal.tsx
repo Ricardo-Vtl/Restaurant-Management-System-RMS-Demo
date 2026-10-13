@@ -52,7 +52,7 @@ export function NuevaMesaModal({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-navy hover:bg-navy/90 text-white rounded-xl gap-2 shadow-sm">
+        <Button className="w-full sm:w-auto h-11 sm:h-9 bg-navy hover:bg-navy/90 text-white rounded-xl gap-2 shadow-sm">
           <Plus size={18} /> Nueva Mesa
         </Button>
       </DialogTrigger>
@@ -88,7 +88,7 @@ export function NuevaMesaModal({
                   min={1}
                   className="pr-16"
                 />
-                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-muted-foreground pointer-events-none tabular-nums">
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs sm:text-[11px] text-muted-foreground pointer-events-none tabular-nums">
                   / {sillasDisponibles}
                 </span>
               </div>
@@ -96,7 +96,7 @@ export function NuevaMesaModal({
           </div>
 
           {hasError && (
-            <p className="text-sm text-red-500 !mt-1">
+            <p className="text-sm text-destructive !mt-1">
               Solo hay {sillasDisponibles} sillas disponibles para nuevas mesas
             </p>
           )}
@@ -106,15 +106,15 @@ export function NuevaMesaModal({
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-lg border p-2.5 text-center">
                 <p className="text-lg font-bold text-green-600 tabular-nums">{capacityReal}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Ahora</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground font-medium">Ahora</p>
               </div>
               <div className="bg-white rounded-lg border p-2.5 text-center">
                 <p className="text-lg font-bold text-amber-600 tabular-nums">{pendientes}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Después</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground font-medium">Después</p>
               </div>
               <div className="bg-white rounded-lg border p-2.5 text-center">
                 <p className="text-lg font-bold tabular-nums">{almacenPost}</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Almacén</p>
+                <p className="text-xs sm:text-[10px] text-muted-foreground font-medium">Almacén</p>
               </div>
             </div>
           </Card>
@@ -122,7 +122,7 @@ export function NuevaMesaModal({
 
         <Button
           onClick={onSave}
-          className="bg-coral hover:bg-coral/90 text-white w-full rounded-xl"
+          className="bg-coral hover:bg-coral/90 text-white w-full h-11 sm:h-9 rounded-xl"
           disabled={cantSave}
         >
           {isSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : null}

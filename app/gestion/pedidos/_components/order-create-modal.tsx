@@ -176,12 +176,12 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
   return (
     <>
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="sm:max-w-2xl max-h-[90dvh] p-0 gap-0">
+        <DialogContent className="sm:max-w-2xl max-h-[90dvh] p-0 gap-0 flex flex-col overflow-hidden">
           <DialogHeader className="px-6 pt-6 pb-4 shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {step !== "type" && (
-                  <Button variant="ghost" size="icon" className="size-8" onClick={prevStep}>
+                  <Button variant="ghost" size="icon" className="size-10 sm:size-8" aria-label="Volver" onClick={prevStep}>
                     <ArrowLeft size={16} />
                   </Button>
                 )}
@@ -196,7 +196,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                   </DialogDescription>
                 </div>
               </div>
-              <Badge variant="secondary" className="text-[10px] font-black uppercase">
+              <Badge variant="secondary" className="text-xs sm:text-[10px] font-black uppercase">
                 {step === "type" ? "1/3" : step === "products" ? "2/3" : "3/3"}
               </Badge>
             </div>
@@ -204,7 +204,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
 
           <div className="flex flex-col flex-1 min-h-0">
             {step === "type" && (
-              <div className="px-6 pb-6 flex flex-col gap-3">
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-6 flex flex-col gap-3">
                 {ORDER_TYPES.map((t) => {
                   const Icon = t.icon;
                   const isSelected = orderType === t.value;
@@ -212,6 +212,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                     <button
                       key={t.value}
                       onClick={() => setOrderType(t.value)}
+                      aria-pressed={isSelected}
                       className={cn(
                         "flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all",
                         isSelected
@@ -229,7 +230,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                       </div>
                       <div>
                         <p className="font-black text-navy text-sm uppercase italic">{t.label}</p>
-                        <p className="text-[10px] text-muted-foreground">{t.desc}</p>
+                        <p className="text-xs sm:text-[10px] text-muted-foreground">{t.desc}</p>
                       </div>
                     </button>
                   );
@@ -246,9 +247,10 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                   />
                   <Input
                     placeholder="Buscar producto..."
+                    aria-label="Buscar producto"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 h-9 text-xs"
+                    className="pl-9 h-11 text-sm sm:h-9 sm:text-xs"
                   />
                 </div>
 
@@ -258,7 +260,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
                       className={cn(
-                        "px-3 py-1 rounded-full text-[10px] font-black uppercase whitespace-nowrap transition-colors",
+                        "px-3 py-2 rounded-full text-xs font-black uppercase whitespace-nowrap transition-colors",
                         activeCategory === cat
                           ? "bg-navy text-white"
                           : "bg-muted text-foreground hover:bg-muted/80",
@@ -278,7 +280,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                         className="flex flex-col p-3 rounded-xl border border-border hover:border-navy/30 text-left transition-colors bg-white"
                       >
                         <p className="font-black text-navy text-xs italic truncate">{product.name}</p>
-                        <p className="text-[10px] text-muted-foreground mt-1 truncate">
+                        <p className="text-xs sm:text-[10px] text-muted-foreground mt-1 truncate">
                           {product.category}
                         </p>
                         <p className="font-black text-navy text-sm mt-2 italic">
@@ -307,7 +309,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                             className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
                           >
                             <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <span className="text-[10px] font-black text-navy bg-navy/10 size-5 rounded flex items-center justify-center shrink-0">
+                              <span className="text-xs sm:text-[10px] font-black text-navy bg-navy/10 size-5 rounded flex items-center justify-center shrink-0">
                                 {item.quantity}
                               </span>
                               <span className="text-xs font-bold text-foreground truncate">
@@ -315,16 +317,17 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[10px] font-black text-navy italic">
+                              <span className="text-xs sm:text-[10px] font-black text-navy italic">
                                 {formatCurrency(item.totalPrice)}
                               </span>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="size-5 p-0 text-destructive"
+                                className="size-8 p-0 text-destructive"
+                                aria-label="Quitar producto"
                                 onClick={() => removeCartItem(item.id)}
                               >
-                                <X size={12} />
+                                <X size={14} />
                               </Button>
                             </div>
                           </div>
@@ -341,7 +344,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
             )}
 
             {step === "confirm" && (
-              <div className="px-6 pb-6 flex flex-col gap-4">
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 pb-6 flex flex-col gap-4">
                 {orderType === "delivery" && (
                   <div className="flex flex-col gap-3">
                     <p className="text-xs font-black uppercase text-muted-foreground">
@@ -349,7 +352,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="customer-name" className="text-[10px] font-bold uppercase">
+                        <Label htmlFor="customer-name" className="text-xs sm:text-[10px] font-bold uppercase">
                           Nombre *
                         </Label>
                         <Input
@@ -358,12 +361,12 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                           onChange={(e) =>
                             setCustomerInfo((prev) => ({ ...prev, name: e.target.value }))
                           }
-                          className="h-9 text-xs"
+                          className="h-11 text-sm sm:h-9 sm:text-xs"
                           placeholder="Nombre del cliente"
                         />
                       </div>
                       <div className="flex flex-col gap-1.5">
-                        <Label htmlFor="customer-phone" className="text-[10px] font-bold uppercase">
+                        <Label htmlFor="customer-phone" className="text-xs sm:text-[10px] font-bold uppercase">
                           Telefono *
                         </Label>
                         <Input
@@ -372,13 +375,13 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                           onChange={(e) =>
                             setCustomerInfo((prev) => ({ ...prev, phone: e.target.value }))
                           }
-                          className="h-9 text-xs"
+                          className="h-11 text-sm sm:h-9 sm:text-xs"
                           placeholder="555-123-4567"
                         />
                       </div>
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <Label htmlFor="customer-address" className="text-[10px] font-bold uppercase">
+                      <Label htmlFor="customer-address" className="text-xs sm:text-[10px] font-bold uppercase">
                         Direccion
                       </Label>
                       <Input
@@ -387,7 +390,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                         onChange={(e) =>
                           setCustomerInfo((prev) => ({ ...prev, address: e.target.value }))
                         }
-                        className="h-9 text-xs"
+                        className="h-11 text-sm sm:h-9 sm:text-xs"
                         placeholder="Calle, numero, colonia"
                       />
                     </div>
@@ -395,14 +398,14 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                 )}
 
                 <div className="flex flex-col gap-1.5">
-                  <Label htmlFor="order-notes" className="text-[10px] font-bold uppercase">
+                  <Label htmlFor="order-notes" className="text-xs sm:text-[10px] font-bold uppercase">
                     Notas (opcional)
                   </Label>
                   <Input
                     id="order-notes"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="h-9 text-xs"
+                    className="h-11 text-sm sm:h-9 sm:text-xs"
                     placeholder="Instrucciones especiales..."
                   />
                 </div>

@@ -79,7 +79,7 @@ export function CancelItemsDialog({
               >
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <X size={14} className="text-destructive shrink-0" />
-                  <span className="text-[10px] font-black text-coral shrink-0">
+                  <span className="text-xs sm:text-[10px] font-black text-coral shrink-0">
                     {item.quantity}x
                   </span>
                   <span className="text-sm font-black text-navy italic truncate">
@@ -111,7 +111,7 @@ export function CancelItemsDialog({
             maxLength={200}
             autoFocus
           />
-          <p className="mt-1 text-right text-[10px] text-muted-foreground">
+          <p className="mt-1 text-right text-xs sm:text-[10px] text-muted-foreground">
             {reason.length}/200
           </p>
         </div>

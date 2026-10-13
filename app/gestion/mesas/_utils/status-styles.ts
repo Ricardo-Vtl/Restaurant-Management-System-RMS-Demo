@@ -3,5 +3,5 @@ export const statusStyles: Record<string, string> = {
   occupied: "bg-coral",
   billing: "bg-success",
   reserved: "bg-amber-400",
-  closed: "bg-gray-400",
+  closed: "bg-muted-foreground/40",
 };

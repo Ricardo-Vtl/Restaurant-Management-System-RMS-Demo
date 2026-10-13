@@ -61,7 +61,7 @@ export default function PedidosPage() {
               Logistica de Pedidos
             </h1>
           </div>
-          <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+          <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
             Monitoreo en tiempo real
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function PedidosPage() {
             <Button
               size="sm"
               onClick={() => setShowCreateModal(true)}
-              className="h-9 rounded-xl font-black uppercase italic text-[10px] gap-1.5"
+              className="h-9 rounded-xl font-black uppercase italic text-xs sm:text-[10px] gap-1.5"
             >
               <Plus size={14} />
               Nueva Orden

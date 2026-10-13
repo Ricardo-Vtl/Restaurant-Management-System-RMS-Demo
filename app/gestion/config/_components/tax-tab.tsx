@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Percent } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -87,6 +88,7 @@ export function TaxTab({ config }: { config: FullConfig }) {
         onSave={onSubmit}
         isPending={update.isPending}
         isDirty={form.formState.isDirty}
+        icon={Percent}
       >
         <div className="flex items-center justify-between rounded-lg border px-4 py-3">
           <div>

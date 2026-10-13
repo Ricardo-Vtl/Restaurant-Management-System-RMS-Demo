@@ -97,7 +97,7 @@ export function MesaAsignacionView({
                 className={cn(
                   "font-black italic text-5xl block transition-colors duration-200",
                   sillasARobarDeSalaSimuladas > 0
-                    ? "text-red-500"
+                    ? "text-destructive"
                     : guests > currentPhysicalCapacity
                       ? "text-amber-500"
                       : "text-coral",
@@ -105,7 +105,7 @@ export function MesaAsignacionView({
               >
                 {guests}
               </span>
-              <Label className="text-muted-foreground font-black text-[10px] uppercase tracking-[0.2em] mt-1 block">
+              <Label className="text-muted-foreground font-black text-xs sm:text-[10px] uppercase tracking-[0.2em] mt-1 block">
                 Comensales
               </Label>
             </div>
@@ -123,12 +123,12 @@ export function MesaAsignacionView({
           </div>
         </div>
 
-        <div className="w-full grid grid-cols-2 gap-2 text-[10px] font-black uppercase tracking-wider text-center">
+        <div className="w-full grid grid-cols-2 gap-2 text-xs sm:text-[10px] font-black uppercase tracking-wider text-center">
           <Badge
             variant="outline"
             className={cn(
               "p-2 rounded-lg justify-center",
-              bodegaSimulada === 0 ? "bg-red-50 text-red-400 line-through opacity-50" : "bg-amber-50 text-amber-800",
+              bodegaSimulada === 0 ? "bg-destructive/10 text-destructive/70 line-through opacity-50" : "bg-amber-50 text-amber-800",
             )}
           >
             En Bodega: {bodegaSimulada}
@@ -138,7 +138,7 @@ export function MesaAsignacionView({
             className={cn(
               "p-2 rounded-lg justify-center",
               sillasARobarDeSalaSimuladas > 0
-                ? "bg-red-100 text-red-700 border-red-200 animate-pulse"
+                ? "bg-destructive/15 text-destructive border-destructive/20 animate-pulse"
                 : "bg-blue-50 text-blue-800",
             )}
           >
@@ -158,10 +158,10 @@ export function MesaAsignacionView({
               {isSaving ? <Loader2 size={20} className="animate-spin" /> : <ArrowRight size={20} />}
             </div>
             <div>
-              <span className="block font-black text-md leading-none italic uppercase">
+              <span className="block font-black text-base leading-none italic uppercase">
                 {isSaving ? "Reorganizando..." : "Confirmar y Abrir"}
               </span>
-              <span id="confirmar-abrir-desc" className="text-[8px] text-white/40 font-bold uppercase mt-1 block">
+              <span id="confirmar-abrir-desc" className="text-xs sm:text-[8px] text-white/40 font-bold uppercase mt-1 block">
                 Ejecutar desmantelamiento de mesas
               </span>
             </div>
@@ -173,7 +173,7 @@ export function MesaAsignacionView({
             variant="ghost"
             onClick={() => setShowConfirmDelete(true)}
             disabled={isSaving}
-            className="text-red-400 hover:text-red-600 hover:bg-red-50 w-full rounded-xl py-3 font-black text-[10px] uppercase tracking-widest gap-2 italic"
+            className="text-destructive/70 hover:text-destructive hover:bg-destructive/10 w-full rounded-xl py-3 font-black text-xs sm:text-[10px] uppercase tracking-widest gap-2 italic"
           >
             <Trash2 size={14} /> Eliminar Mesa del Local
           </Button>
@@ -184,14 +184,14 @@ export function MesaAsignacionView({
             variant="outline"
             onClick={onSplitTable}
             disabled={isSplitting || isSaving}
-            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full rounded-xl py-3 font-black text-[10px] uppercase tracking-widest gap-2 italic"
+            className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200 w-full rounded-xl py-3 font-black text-xs sm:text-[10px] uppercase tracking-widest gap-2 italic"
           >
             {isSplitting ? <Loader2 size={14} className="animate-spin" /> : <Unlink size={14} />}
             Dividir Mesa
           </Button>
         ) : freeTablesForJoin.length > 0 ? (
           <div className="w-full flex flex-col gap-2">
-            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center">
+            <p className="text-xs sm:text-[9px] font-bold text-muted-foreground uppercase tracking-widest text-center">
               Unir con mesa
             </p>
             <div className="grid grid-cols-3 gap-1.5 max-h-28 overflow-y-auto">
@@ -203,7 +203,7 @@ export function MesaAsignacionView({
                   disabled={isJoining || isSaving}
                   onClick={() => onJoinTable(t.id)}
                   aria-label={`Unir con mesa ${t.number}`}
-                  className="h-8 rounded-lg text-[10px] font-black border-blue-200 text-blue-700 hover:bg-blue-50"
+                  className="h-8 rounded-lg text-xs sm:text-[10px] font-black border-blue-200 text-blue-700 hover:bg-blue-50"
                 >
                   <Link size={10} className="mr-1" /> {t.number}
                 </Button>
@@ -211,7 +211,7 @@ export function MesaAsignacionView({
             </div>
           </div>
         ) : (
-          <p className="text-[9px] text-muted-foreground/60 italic">No hay mesas libres para unir</p>
+          <p className="text-xs sm:text-[9px] text-muted-foreground/60 italic">No hay mesas libres para unir</p>
         ))}
       </>
     );
@@ -219,24 +219,24 @@ export function MesaAsignacionView({
 
   return (
     <Alert variant="destructive" className="p-5 flex flex-col gap-5 text-center animate-in fade-in zoom-in-95 duration-200">
-      <div className="size-12 rounded-2xl bg-red-500/10 text-red-500 flex items-center justify-center mx-auto">
+      <div className="size-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
         <AlertTriangle size={24} />
       </div>
-      <AlertTitle className="text-red-600 font-black text-lg italic uppercase leading-none col-start-auto text-center">
+      <AlertTitle className="text-destructive font-black text-lg italic uppercase leading-none col-start-auto text-center">
         ¿Eliminar Mesa {number}?
       </AlertTitle>
-      <AlertDescription className="text-[10px] font-bold text-red-400 uppercase tracking-wide pt-1 col-start-auto text-center">
+      <AlertDescription className="text-xs sm:text-[10px] font-bold text-destructive/70 uppercase tracking-wide pt-1 col-start-auto text-center">
         Esta acción es irreversible
       </AlertDescription>
-      <p className="text-[11px] font-bold text-foreground/60 uppercase leading-snug col-start-auto">
-        Las <span className="text-red-600 font-black">{baseSeats || currentPhysicalCapacity}</span> sillas físicas se
+      <p className="text-xs sm:text-[11px] font-bold text-foreground/60 uppercase leading-snug col-start-auto">
+        Las <span className="text-destructive font-black">{baseSeats || currentPhysicalCapacity}</span> sillas físicas se
         redistribuirán solidariamente en la sala.
       </p>
       <div className="flex flex-col gap-2 pt-2 col-start-auto">
         <Button
           onClick={onDeleteTable}
           disabled={isDeleting}
-          className="w-full py-4 bg-red-500 hover:bg-red-600 text-white rounded-xl font-black text-[10px] uppercase tracking-wider italic flex items-center justify-center gap-2"
+          className="w-full py-4 bg-destructive hover:bg-destructive/90 text-white rounded-xl font-black text-xs sm:text-[10px] uppercase tracking-wider italic flex items-center justify-center gap-2"
         >
           {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Sí, confirmar eliminación
         </Button>
@@ -244,7 +244,7 @@ export function MesaAsignacionView({
           variant="outline"
           onClick={() => setShowConfirmDelete(false)}
           disabled={isDeleting}
-          className="w-full py-4 border-2 border-border text-muted-foreground hover:bg-muted rounded-xl font-black text-[10px] uppercase tracking-wider italic flex items-center justify-center gap-2"
+          className="w-full py-4 border-2 border-border text-muted-foreground hover:bg-muted rounded-xl font-black text-xs sm:text-[10px] uppercase tracking-wider italic flex items-center justify-center gap-2"
         >
           <X size={14} /> Cancelar y regresar
         </Button>

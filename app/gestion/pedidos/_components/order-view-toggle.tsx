@@ -16,8 +16,9 @@ export function OrderViewToggle({ view, onViewChange }: OrderViewToggleProps) {
         variant="ghost"
         size="sm"
         onClick={() => onViewChange("kanban")}
+        aria-pressed={view === "kanban"}
         className={cn(
-          "rounded-xl px-3 py-2 text-[10px] font-black uppercase italic",
+          "rounded-xl px-3 py-2 text-xs sm:text-[10px] font-black uppercase italic",
           view === "kanban"
             ? "bg-navy text-white shadow-md"
             : "text-muted-foreground hover:bg-muted",
@@ -30,8 +31,9 @@ export function OrderViewToggle({ view, onViewChange }: OrderViewToggleProps) {
         variant="ghost"
         size="sm"
         onClick={() => onViewChange("table")}
+        aria-pressed={view === "table"}
         className={cn(
-          "rounded-xl px-3 py-2 text-[10px] font-black uppercase italic",
+          "rounded-xl px-3 py-2 text-xs sm:text-[10px] font-black uppercase italic",
           view === "table"
             ? "bg-navy text-white shadow-md"
             : "text-muted-foreground hover:bg-muted",

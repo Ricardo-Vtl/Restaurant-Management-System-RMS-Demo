@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function GestionError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
@@ -9,7 +10,7 @@ export default function GestionError({ error, reset }: { error: Error & { digest
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="text-center max-w-md flex flex-col gap-6">
         <div className="size-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto">
-          <span className="text-4xl">🐟</span>
+          <AlertTriangle className="size-9 text-destructive" aria-hidden="true" />
         </div>
         <h1 className="text-2xl font-bold text-foreground">Error en el panel de gestión</h1>
         <p className="text-muted-foreground">Ocurrió un error inesperado. Por favor intenta de nuevo.</p>

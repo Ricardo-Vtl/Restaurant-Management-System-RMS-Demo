@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserPlus, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -83,14 +83,25 @@ export function StaffDialog({ isOpen, onClose, editingStaff, isSelf }: StaffDial
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingStaff ? "Editar Personal" : "Nuevo Personal"}</DialogTitle>
-          <DialogDescription>
-            {editingStaff
-              ? "Actualiza nombre, rol o PIN. El PIN vacío se conserva."
-              : "El PIN de 6 dígitos es la credencial de acceso al POS."}
-          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
+              {editingStaff ? (
+                <Pencil className="size-5" aria-hidden="true" />
+              ) : (
+                <UserPlus className="size-5" aria-hidden="true" />
+              )}
+            </div>
+            <div>
+              <DialogTitle>{editingStaff ? "Editar Personal" : "Nuevo Personal"}</DialogTitle>
+              <DialogDescription>
+                {editingStaff
+                  ? "Actualiza nombre, rol o PIN. El PIN vacío se conserva."
+                  : "El PIN de 6 dígitos es la credencial de acceso al POS."}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-2">
@@ -143,10 +154,10 @@ export function StaffDialog({ isOpen, onClose, editingStaff, isSelf }: StaffDial
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={isPending} className="h-11 sm:h-9">
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit} className="bg-coral hover:bg-coral/90">
+          <Button onClick={handleSubmit} disabled={!canSubmit} className="bg-coral hover:bg-coral/90 h-11 sm:h-9">
             {isPending && <Loader2 className="size-4 mr-2 animate-spin" aria-hidden="true" />}
             {editingStaff ? "Guardar cambios" : "Crear personal"}
           </Button>

@@ -72,7 +72,7 @@ export function CancelOrderDialog({
             maxLength={200}
             autoFocus
           />
-          <p className="mt-1 text-right text-[10px] text-muted-foreground">
+          <p className="mt-1 text-right text-xs sm:text-[10px] text-muted-foreground">
             {reason.length}/200
           </p>
         </div>

@@ -55,7 +55,7 @@ export function OrderCard({ order, onSelectOrder, className }: OrderCardProps) {
 
       <div className="flex items-center justify-between gap-2">
         <OrderSourceBadge type={order.type} />
-        <span className="text-[10px] font-bold text-navy truncate min-w-0">
+        <span className="text-xs sm:text-[10px] font-bold text-navy truncate min-w-0">
           {order.tableNumber ? `Mesa ${order.tableNumber}` : order.customerInfo?.name ?? "Cliente"}
         </span>
         <OrderTimer order={order} />
@@ -64,7 +64,7 @@ export function OrderCard({ order, onSelectOrder, className }: OrderCardProps) {
       <div className="flex justify-between items-center pt-1 border-t border-border/50">
         <div className="flex items-center gap-1 text-muted-foreground">
           <Package size={11} aria-hidden="true" />
-          <span className="text-[10px] font-bold">{activeItemsCount} items</span>
+          <span className="text-xs sm:text-[10px] font-bold">{activeItemsCount} items</span>
         </div>
         <span className="font-black text-navy text-sm italic">
           {formatCurrency(order.total)}
@@ -76,7 +76,7 @@ export function OrderCard({ order, onSelectOrder, className }: OrderCardProps) {
           variant="ghost"
           size="sm"
           onClick={() => onSelectOrder(order.id)}
-          className="h-7 rounded-lg text-[9px] font-black uppercase italic text-muted-foreground hover:text-navy px-2.5"
+          className="h-11 sm:h-7 rounded-lg text-xs sm:text-[9px] font-black uppercase italic text-muted-foreground hover:text-navy px-2.5"
         >
           <Eye size={12} className="mr-1" aria-hidden="true" />
           Ver
@@ -86,15 +86,15 @@ export function OrderCard({ order, onSelectOrder, className }: OrderCardProps) {
           size="sm"
           disabled={!canAdvance || isLoading}
           onClick={() => advance(order)}
+          aria-label="Avanzar estado"
           className={cn(
-            "h-7 rounded-lg text-[9px] font-black uppercase italic px-2",
+            "h-11 sm:h-7 rounded-lg text-xs sm:text-[9px] font-black uppercase italic px-2",
             canAdvance
               ? "text-navy hover:text-coral"
               : "text-muted-foreground opacity-40 cursor-not-allowed",
           )}
         >
           <Play size={12} className="mr-1" aria-hidden="true" />
-          ▶
         </Button>
       </div>
     </div>

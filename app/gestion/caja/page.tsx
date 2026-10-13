@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { useAllOrders } from "@/hooks/use-orders";
-import type { Order, PaymentMethod } from "@/lib/types";
-import { CajaCheckoutDialog } from "./_components/caja-checkout-dialog";
+import { formatCurrency } from "@/lib/format";
+import type { Order } from "@/lib/types";
+import { CajaStatsBar } from "./_components/caja-stats-bar";
+import { CheckoutDialog } from "@/components/gestion/checkout-dialog";
 import { summarizePayments } from "./_utils/daily-summary";
 
 const TYPE_LABEL: Record<string, { label: string; icon: typeof ShoppingBag }> = {
@@ -16,8 +18,6 @@ const TYPE_LABEL: Record<string, { label: string; icon: typeof ShoppingBag }> = 
   delivery: { label: "Delivery", icon: Truck },
   pickup: { label: "Mostrador", icon: ShoppingBag },
 };
-
-const METHOD_LABEL: Record<PaymentMethod, string> = { cash: "Efectivo", card: "Tarjeta", transfer: "Transferencia" };
 
 // Inicio del día local en ISO — el resumen del día filtra por fecha de cobro
 // (completed_at) en el server, exento de la ventana de 48h de GET /api/orders.
@@ -77,42 +77,23 @@ export default function CajaPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-navy font-serif">Caja</h1>
-          <p className="text-muted-foreground text-sm">Cuentas pendientes de cobro y resumen del día</p>
+    <div className="flex flex-col gap-5">
+      <div>
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="h-7 w-1.5 bg-coral rounded-full" aria-hidden="true" />
+          <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">Caja</h1>
         </div>
+        <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+          Cuentas pendientes de cobro y resumen del día · {summary.count} cobradas hoy
+        </p>
       </div>
 
-      {/* Resumen del día */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-            <DollarSign size={14} className="text-coral" /> Resumen del Día
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-2">
-            <div>
-              <span className="text-3xl font-black text-navy italic tracking-tighter">${summary.total.toFixed(2)}</span>
-              <span className="ml-2 text-xs text-muted-foreground font-bold uppercase">{summary.count} cobradas</span>
-            </div>
-            {(Object.keys(summary.byMethod) as PaymentMethod[]).map((m) => (
-              <div key={m} className="text-sm">
-                <span className="text-muted-foreground uppercase text-[10px] font-black">{METHOD_LABEL[m]}: </span>
-                <span className="font-black text-navy">${summary.byMethod[m].toFixed(2)}</span>
-              </div>
-            ))}
-            {summary.count === 0 && <span className="text-sm text-muted-foreground">Aún no hay cobros hoy.</span>}
-          </div>
-        </CardContent>
-      </Card>
+      <CajaStatsBar summary={summary} />
 
       {pendingActive.length === 0 ? (
         <Empty className="py-16">
           <EmptyMedia variant="icon">
-            <DollarSign className="size-8" />
+            <DollarSign className="size-8" aria-hidden="true" />
           </EmptyMedia>
           <EmptyHeader>
             <EmptyTitle>No hay cuentas pendientes</EmptyTitle>
@@ -127,24 +108,26 @@ export default function CajaPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center justify-between">
                   <span className="font-black text-navy uppercase italic flex items-center gap-2">
-                    <Users size={16} className="text-coral" /> Mesa {g.number}
+                    <Users size={16} className="text-coral" aria-hidden="true" /> Mesa {g.number}
                   </span>
-                  <Badge variant="secondary">{g.orders.length} comanda{g.orders.length > 1 ? "s" : ""}</Badge>
+                  <Badge variant="secondary">
+                    {g.orders.length} comanda{g.orders.length > 1 ? "s" : ""}
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2 flex-1">
                 {g.orders.map((o) => (
                   <div key={o.id} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">#{o.orderNumber}</span>
-                    <span className="font-bold text-navy">${o.total.toFixed(2)}</span>
+                    <span className="font-bold text-navy">{formatCurrency(o.total)}</span>
                   </div>
                 ))}
                 <div className="flex justify-between border-t border-dashed pt-2 mt-auto">
-                  <span className="text-[10px] font-black uppercase text-muted-foreground">Total</span>
-                  <span className="font-black text-navy text-lg">${g.total.toFixed(2)}</span>
+                  <span className="text-xs sm:text-[10px] font-black uppercase text-muted-foreground">Total</span>
+                  <span className="font-black text-navy text-lg">{formatCurrency(g.total)}</span>
                 </div>
                 <Button
-                  className="mt-2 bg-navy hover:bg-navy/90 font-black uppercase italic text-xs"
+                  className="mt-2 bg-navy hover:bg-navy/90 font-black uppercase italic text-xs h-11 sm:h-9"
                   onClick={() => setCheckoutTarget({ orders: g.orders, label: `Mesa ${g.number}`, tableId: g.id })}
                 >
                   Cobrar Mesa
@@ -162,25 +145,29 @@ export default function CajaPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center justify-between">
                     <span className="font-black text-navy uppercase italic flex items-center gap-2">
-                      <Icon size={16} className="text-coral" /> {t.label} #{o.orderNumber}
+                      <Icon size={16} className="text-coral" aria-hidden="true" /> {t.label} #{o.orderNumber}
                     </span>
                     {o.customerInfo?.name && <Badge variant="secondary">{o.customerInfo.name}</Badge>}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-2 flex-1">
                   {o.items.slice(0, 4).map((it) => (
-                    <div key={it.id} className="flex justify-between text-sm">
-                      <span className="text-muted-foreground truncate">{it.quantity}x {it.name}</span>
-                      <span className="font-bold text-navy">${it.totalPrice.toFixed(2)}</span>
+                    <div key={it.id} className="flex justify-between gap-2 text-sm">
+                      <span className="text-muted-foreground truncate min-w-0 flex-1">
+                        {it.quantity}x {it.name}
+                      </span>
+                      <span className="font-bold text-navy shrink-0 text-right">{formatCurrency(it.totalPrice)}</span>
                     </div>
                   ))}
-                  {o.items.length > 4 && <span className="text-[10px] text-muted-foreground">+{o.items.length - 4} más…</span>}
+                  {o.items.length > 4 && (
+                    <span className="text-xs sm:text-[10px] text-muted-foreground">+{o.items.length - 4} más…</span>
+                  )}
                   <div className="flex justify-between border-t border-dashed pt-2 mt-auto">
-                    <span className="text-[10px] font-black uppercase text-muted-foreground">Total</span>
-                    <span className="font-black text-navy text-lg">${o.total.toFixed(2)}</span>
+                    <span className="text-xs sm:text-[10px] font-black uppercase text-muted-foreground">Total</span>
+                    <span className="font-black text-navy text-lg">{formatCurrency(o.total)}</span>
                   </div>
                   <Button
-                    className="mt-2 bg-navy hover:bg-navy/90 font-black uppercase italic text-xs"
+                    className="mt-2 bg-navy hover:bg-navy/90 font-black uppercase italic text-xs h-11 sm:h-9"
                     onClick={() => setCheckoutTarget({ orders: [o], label: `${t.label} #${o.orderNumber}` })}
                   >
                     Cobrar
@@ -192,12 +179,15 @@ export default function CajaPage() {
         </div>
       )}
 
-      <CajaCheckoutDialog
-        orders={checkoutTarget?.orders ?? []}
-        label={checkoutTarget?.label ?? ""}
-        tableId={checkoutTarget?.tableId}
+      <CheckoutDialog
         isOpen={checkoutTarget !== null}
         onClose={() => setCheckoutTarget(null)}
+        label={checkoutTarget?.label ?? ""}
+        total={(checkoutTarget?.orders ?? []).reduce((s, o) => s + o.total, 0)}
+        orderCount={checkoutTarget?.orders.length ?? 0}
+        deliveryFee={(checkoutTarget?.orders ?? []).reduce((s, o) => s + (o.deliveryFee ?? 0), 0)}
+        tableId={checkoutTarget?.tableId}
+        orderIds={checkoutTarget?.orders.map((o) => o.id)}
       />
     </div>
   );

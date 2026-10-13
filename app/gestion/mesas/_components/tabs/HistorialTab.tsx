@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import dynamic from "next/dynamic";
 import { Table } from "@/lib/types";
 import { useTables } from "@/hooks/use-tables";
 import { useTableOrders, useUpdateOrderStatus, useCancelOrderItems, type OrderWithItems } from "@/hooks/use-orders";
@@ -18,9 +17,8 @@ import { useRestitucionMobiliario } from "../../_hooks/useRestitucionMobiliario"
 import { useAuthStore } from "@/lib/stores/auth-store";
 import { useShallow } from "zustand/react/shallow";
 import { can } from "@/lib/abilities";
+import { CheckoutDialog } from "@/components/gestion/checkout-dialog";
 import type { UserRole } from "@/lib/types";
-
-const CheckoutModal = dynamic(() => import("@/components/gestion/CheckoutModal").then((m) => m.CheckoutModal), { ssr: false, loading: () => null });
 
 interface Props {
   mesa: Table;
@@ -118,7 +116,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 opacity-50">
         <Loader2 className="animate-spin text-coral" size={32} />
-        <p className="text-[10px] font-black uppercase tracking-widest text-navy">
+        <p className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">
           {isRestoring ? "Restituyendo mobiliario..." : "Consultando comanda..."}
         </p>
       </div>
@@ -129,7 +127,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3">
         <AlertTriangle className="text-destructive" size={32} />
-        <p className="text-[10px] font-black uppercase tracking-widest text-navy">
+        <p className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">
           Error al cargar las órdenes
         </p>
       </div>
@@ -142,21 +140,21 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
       <div className="flex-1 flex flex-col min-w-0 bg-white border-b lg:border-b-0 lg:border-r overflow-hidden">
         <div className="p-4 border-b bg-muted/30 flex justify-between items-center shrink-0">
           <div>
-            <h3 className="text-[10px] md:text-xs font-black text-navy uppercase italic">Consumo Total</h3>
-            <p className="text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase">Gestión por producto</p>
+            <h3 className="text-xs sm:text-[10px] md:text-xs font-black text-navy uppercase italic">Consumo Total</h3>
+            <p className="text-xs sm:text-[9px] md:text-[10px] text-muted-foreground font-bold uppercase">Gestión por producto</p>
           </div>
-          <Badge variant="outline" className="border-border text-navy font-black text-[9px] px-2 py-0.5">
+          <Badge variant="outline" className="border-border text-navy font-black text-xs sm:text-[9px] px-2 py-0.5">
             {activeOrders.length} Comandas
           </Badge>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 flex-col gap-6 bg-white pb-20 custom-scrollbar" aria-live="polite">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 flex-col gap-6 bg-white pb-20 scrollbar-hide" aria-live="polite">
           {activeOrders.length === 0 ? (
             <Empty className="opacity-20">
               <EmptyMedia>
                 <ChefHat size={40} className="text-navy" />
               </EmptyMedia>
-              <EmptyTitle className="text-[10px] font-black uppercase tracking-widest text-navy">Mesa vacía</EmptyTitle>
+              <EmptyTitle className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">Mesa vacía</EmptyTitle>
             </Empty>
           ) : (
             activeOrders.map((order) => (
@@ -168,10 +166,10 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
 
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-black text-navy uppercase italic">
+                    <span className="text-xs sm:text-[10px] font-black text-navy uppercase italic">
                       Comanda #{order.id.split("-")[0]}
                     </span>
-                    <span className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
+                    <span className="text-xs sm:text-[9px] font-bold text-muted-foreground flex items-center gap-1">
                       <Clock size={10} />
                       {new Date(order.created_at ?? "").toLocaleTimeString([], {
                         hour: "2-digit",
@@ -184,14 +182,14 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
                       variant="outline"
                       size="sm"
                       onClick={() => handleMarkOrderDelivered(order.id)}
-                      className="h-7 rounded-lg text-[9px] font-black uppercase italic text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                      className="h-7 rounded-lg text-xs sm:text-[9px] font-black uppercase italic text-emerald-600 border-emerald-200 hover:bg-emerald-50"
                     >
                       <CheckCircle2 size={12} className="mr-1" />
                       Marcar Entregada
                     </Button>
                   )}
                   {order.status === "delivered" && (
-                    <Badge variant="success" className="text-[9px] font-black uppercase">
+                    <Badge variant="success" className="text-xs sm:text-[9px] font-black uppercase">
                       <CheckCircle2 size={10} className="mr-1" />
                       Entregada
                     </Badge>
@@ -232,7 +230,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
                         <div className="flex gap-3 min-w-0 items-start flex-1">
                           <span
                             className={cn(
-                              "text-[10px] font-black shrink-0 mt-0.5",
+                              "text-xs sm:text-[10px] font-black shrink-0 mt-0.5",
                               isDelivered ? "text-muted-foreground" : isCancelled ? "text-destructive/60" : "text-coral",
                             )}
                           >
@@ -242,7 +240,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
                           <div className="flex flex-col min-w-0">
                             <span
                               className={cn(
-                                "text-[11px] font-black uppercase italic truncate",
+                                "text-xs sm:text-[11px] font-black uppercase italic truncate",
                                 isDelivered ? "text-muted-foreground line-through decoration-2" : isCancelled ? "text-destructive/60 line-through decoration-2" : "text-navy",
                               )}
                             >
@@ -252,7 +250,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-black text-muted-foreground">
+                          <span className="text-xs sm:text-[10px] font-black text-muted-foreground">
                             ${(item.total_price || 0).toFixed(2)}
                           </span>
                           {isDelivered && (
@@ -276,7 +274,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
       <aside className="w-full lg:w-80 flex flex-col bg-white shrink-0 shadow-[0_-10px_20px_rgba(0,0,0,0.05)] lg:shadow-none z-10">
         <div className="p-6 flex flex-col gap-6">
           <div className="flex lg:flex-col items-center justify-between lg:justify-center lg:text-center">
-            <p className="text-[9px] lg:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+            <p className="text-xs sm:text-[9px] lg:text-[10px] font-black text-muted-foreground uppercase tracking-widest">
               Cuenta Total
             </p>
             <div className="flex items-baseline lg:justify-center gap-1">
@@ -289,12 +287,12 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
 
           <Separator className="border-dashed border-border" />
           <div className="flex flex-col gap-3 pt-6">
-            <div className="flex justify-between text-[10px] font-bold uppercase text-muted-foreground italic">
+            <div className="flex justify-between text-xs sm:text-[10px] font-bold uppercase text-muted-foreground italic">
               <span>Subtotal</span>
               <span className="text-navy">${totalCuenta.toFixed(2)}</span>
             </div>
             <Separator className="border-border" />
-            <div className="flex justify-between text-[10px] font-black pt-2 text-coral uppercase tracking-widest">
+            <div className="flex justify-between text-xs sm:text-[10px] font-black pt-2 text-coral uppercase tracking-widest">
               <span>Total a cobrar</span>
               <span className="text-xs">${totalCuenta.toFixed(2)}</span>
             </div>
@@ -304,7 +302,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
             <Button
               variant="outline"
               onClick={handlePrint}
-              className="h-12 border-2 border-border text-navy font-black text-[10px] uppercase hover:bg-muted italic rounded-xl group"
+              className="h-12 border-2 border-border text-navy font-black text-xs sm:text-[10px] uppercase hover:bg-muted italic rounded-xl group"
             >
               <Printer className="mr-2 group-hover:scale-110 transition-transform" size={14} />
               Precuenta
@@ -330,12 +328,15 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
       </aside>
 
       {/* MODAL DE CHECKOUT */}
-      <CheckoutModal
-        mesa={{ ...mesa, totalCuenta }}
+      <CheckoutDialog
         isOpen={showCheckout}
         onClose={() => setShowCheckout(false)}
-        // 🟢 Pasamos la función interceptora para empaquetar el cobro y la reorganización de mobiliario
-        onServiceCompleted={ejecutarRestitucion}
+        label={`Mesa ${mesa.number}`}
+        total={totalCuenta}
+        orderCount={activeOrders.length}
+        tableId={mesa.id}
+        // Pasamos la función interceptora para empaquetar el cobro y la reorganización de mobiliario
+        onCompleted={ejecutarRestitucion}
       />
 
       {/* BOTON FLOTANTE DE CANCELACION */}
@@ -343,7 +344,7 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
         <Button
           variant="destructive"
           onClick={() => setShowCancelItemsDialog(true)}
-          className="fixed bottom-20 right-6 z-40 shadow-lg rounded-xl font-black uppercase italic text-xs px-6"
+          className="fixed bottom-24 right-4 z-40 shadow-lg rounded-xl font-black uppercase italic text-xs px-6 sm:bottom-20 sm:right-6"
         >
           <XCircle size={16} className="mr-2" />
           Cancelar {selectedItemIds.size} item(s)

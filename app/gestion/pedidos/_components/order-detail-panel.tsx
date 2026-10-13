@@ -80,7 +80,7 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
   return (
     <>
       <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <SheetContent side="right" className="sm:max-w-md p-0">
+        <SheetContent side="right" className="w-full sm:max-w-md p-0">
           {isLoading || !order ? (
             <div className="flex items-center justify-center h-full">
               <SheetTitle className="sr-only">Cargando orden</SheetTitle>
@@ -89,7 +89,7 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
             </div>
           ) : (
             <div className="flex flex-col h-full">
-              <SheetHeader className="border-b px-6 py-4">
+              <SheetHeader className="shrink-0 border-b px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex size-10 items-center justify-center rounded-xl bg-navy text-white font-black italic text-lg">
@@ -111,7 +111,7 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
                 </SheetDescription>
               </SheetHeader>
 
-              <ScrollArea className="flex-1 px-6 py-4">
+              <ScrollArea className="flex-1 min-h-0 px-6 py-4">
                 <div className="flex flex-col gap-6">
                   <OrderInfo order={order} />
                   <Separator />
@@ -127,7 +127,7 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
                 </div>
               </ScrollArea>
 
-              <div className="border-t px-6 py-4 flex flex-col gap-3">
+              <div className="shrink-0 border-t px-6 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-muted-foreground">Total</span>
                   <span className="text-2xl font-black italic text-navy">
@@ -135,12 +135,12 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
                   </span>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   {canAdvance && nextStatus && (
                     <Button
                       onClick={() => advance(order)}
                       disabled={isActionLoading}
-                      className="flex-1 h-11 rounded-xl font-black uppercase italic text-xs gap-2"
+                      className="w-full sm:flex-1 h-11 rounded-xl font-black uppercase italic text-xs gap-2"
                     >
                       <Play size={16} />
                       {isActionLoading ? "Actualizando..." : `→ ${STATUS_LABELS[nextStatus]}`}
@@ -151,7 +151,7 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
                       variant="destructive"
                       onClick={() => setShowCancelDialog(true)}
                       disabled={isActionLoading}
-                      className="h-11 rounded-xl font-black uppercase italic text-xs gap-2 px-4"
+                      className="w-full sm:w-auto h-11 rounded-xl font-black uppercase italic text-xs gap-2 px-4"
                     >
                       <XCircle size={16} />
                       Cancelar
@@ -185,11 +185,11 @@ function OrderInfo({ order }: { order: Order }) {
       <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
         <Clock size={16} className="text-muted-foreground" />
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase text-muted-foreground">Creada</p>
+          <p className="text-xs sm:text-[10px] font-bold uppercase text-muted-foreground">Creada</p>
           <p className="text-sm font-black italic text-navy truncate">
             {createdAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </p>
-          <p className="text-[10px] text-muted-foreground">{formatElapsed(elapsed)}</p>
+          <p className="text-xs sm:text-[10px] text-muted-foreground">{formatElapsed(elapsed)}</p>
         </div>
       </div>
 
@@ -197,7 +197,7 @@ function OrderInfo({ order }: { order: Order }) {
         <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
           <MapPin size={16} className="text-muted-foreground" />
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase text-muted-foreground">Mesa</p>
+            <p className="text-xs sm:text-[10px] font-bold uppercase text-muted-foreground">Mesa</p>
             <p className="text-sm font-black italic text-navy truncate">{order.tableNumber}</p>
           </div>
         </div>
@@ -208,7 +208,7 @@ function OrderInfo({ order }: { order: Order }) {
           <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
             <User size={16} className="text-muted-foreground" />
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">Cliente</p>
+              <p className="text-xs sm:text-[10px] font-bold uppercase text-muted-foreground">Cliente</p>
               <p className="text-sm font-black italic text-navy truncate">
                 {order.customerInfo.name}
               </p>
@@ -217,7 +217,7 @@ function OrderInfo({ order }: { order: Order }) {
           <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
             <Phone size={16} className="text-muted-foreground" />
             <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase text-muted-foreground">Telefono</p>
+              <p className="text-xs sm:text-[10px] font-bold uppercase text-muted-foreground">Telefono</p>
               <p className="text-sm font-black italic text-navy truncate">
                 {order.customerInfo.phone}
               </p>
@@ -247,7 +247,7 @@ function OrderTimeline({ order }: { order: Order }) {
           <XCircle size={16} className="text-destructive" />
           <div>
             <p className="text-sm font-black text-destructive">Cancelada</p>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs sm:text-[10px] text-muted-foreground">
               {order.cancelReason ?? "Sin motivo"}
             </p>
           </div>
@@ -292,7 +292,7 @@ function OrderTimeline({ order }: { order: Order }) {
                   {step.label}
                 </p>
                 {step.time && (
-                  <p className="text-[10px] text-muted-foreground">
+                  <p className="text-xs sm:text-[10px] text-muted-foreground">
                     {new Date(step.time).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -313,7 +313,7 @@ function OrderItems({ items }: { items: OrderItem[] }) {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <p className="text-xs font-black uppercase text-muted-foreground">Items</p>
-        <Badge variant="secondary" className="text-[10px] font-black">
+        <Badge variant="secondary" className="text-xs sm:text-[10px] font-black">
           {items.length}
         </Badge>
       </div>
@@ -352,7 +352,7 @@ function OrderItemRow({ item }: { item: OrderItem }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-black text-navy italic truncate">{item.name}</p>
-            <p className="text-[10px] text-muted-foreground">{formatCurrency(item.totalPrice)}</p>
+            <p className="text-xs sm:text-[10px] text-muted-foreground">{formatCurrency(item.totalPrice)}</p>
           </div>
         </div>
         {hasModifiers && (
@@ -375,19 +375,19 @@ function OrderItemRow({ item }: { item: OrderItem }) {
       {expanded && hasModifiers && (
         <div className="mt-3 pt-3 border-t border-border/50 flex flex-wrap gap-2">
           {item.modifiers.size && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-bold uppercase">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs sm:text-[9px] font-bold uppercase">
               <Info size={10} />
               Tam: {item.modifiers.size.name}
             </div>
           )}
           {item.modifiers.sauce && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cyan-50 text-cyan-700 text-[9px] font-bold uppercase">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cyan-50 text-cyan-700 text-xs sm:text-[9px] font-bold uppercase">
               <Droplets size={10} />
               {item.modifiers.sauce.name}
             </div>
           )}
           {item.modifiers.spiceLevel && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-orange-50 text-orange-700 text-[9px] font-bold uppercase">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-orange-50 text-orange-700 text-xs sm:text-[9px] font-bold uppercase">
               <Flame size={10} />
               {item.modifiers.spiceLevel}
             </div>
@@ -395,13 +395,13 @@ function OrderItemRow({ item }: { item: OrderItem }) {
           {item.modifiers.extras.map((extra, idx) => (
             <div
               key={idx}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[9px] font-bold uppercase"
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs sm:text-[9px] font-bold uppercase"
             >
               + {extra.name}
             </div>
           ))}
           {item.instructions && (
-            <div className="w-full flex items-start gap-2 p-2 rounded-lg bg-navy/5 text-navy text-[10px]">
+            <div className="w-full flex items-start gap-2 p-2 rounded-lg bg-navy/5 text-navy text-xs sm:text-[10px]">
               <NotebookPen size={12} className="shrink-0 mt-0.5" />
               <p className="italic">{item.instructions}</p>
             </div>

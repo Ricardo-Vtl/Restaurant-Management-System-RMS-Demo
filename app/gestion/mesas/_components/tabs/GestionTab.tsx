@@ -66,7 +66,7 @@ export const GestionTab = ({
     return (
       <div className="flex flex-col items-center justify-center h-48 gap-2 bg-muted/50">
         <Loader2 className="animate-spin text-navy" size={24} />
-        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">
+        <p className="text-xs sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider">
           Sincronizando Mobiliario...
         </p>
       </div>
@@ -95,7 +95,7 @@ export const GestionTab = ({
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
+              <Label className="text-xs sm:text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
                 Ajustar Comensales en Servicio
               </Label>
 
@@ -133,7 +133,7 @@ export const GestionTab = ({
             <div className="flex flex-col gap-2">
               <Label
                 htmlFor="gestion-section"
-                className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider"
+                className="text-xs sm:text-[10px] font-bold text-muted-foreground uppercase tracking-wider"
               >
                 Sección / Zona
               </Label>
@@ -153,7 +153,7 @@ export const GestionTab = ({
           <Button
             onClick={() => save(guests, section)}
             disabled={isSaving}
-            className="w-full bg-navy hover:bg-navy/90 text-white font-black text-[10px] uppercase tracking-widest py-5 rounded-xl italic flex items-center justify-center gap-2 mt-4 shadow-md transition-transform active:scale-95"
+            className="w-full bg-navy hover:bg-navy/90 text-white font-black text-xs sm:text-[10px] uppercase tracking-widest py-5 rounded-xl italic flex items-center justify-center gap-2 mt-4 shadow-md transition-transform active:scale-95"
           >
             {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
             Aplicar Cambios en Caliente
@@ -178,7 +178,7 @@ export const GestionTab = ({
                 </AlertDescription>
               </Alert>
             ) : (
-              <p className="text-[10px] font-bold text-muted-foreground uppercase leading-normal">
+              <p className="text-xs sm:text-[10px] font-bold text-muted-foreground uppercase leading-normal">
                 Para eliminar o alterar drásticamente la capacidad de fábrica de esta mesa, por favor utilice el botón
                 de eliminación directa ubicado en la vista de preparación antes de abrir el servicio.
               </p>
@@ -188,7 +188,7 @@ export const GestionTab = ({
           <Button
             variant="destructive"
             disabled
-            className="w-full bg-muted text-muted-foreground font-black text-[10px] uppercase tracking-widest py-5 rounded-xl italic flex items-center justify-center gap-2 opacity-50 cursor-not-allowed mt-4"
+            className="w-full bg-muted text-muted-foreground font-black text-xs sm:text-[10px] uppercase tracking-widest py-5 rounded-xl italic flex items-center justify-center gap-2 opacity-50 cursor-not-allowed mt-4"
           >
             <Trash2 size={14} />
             Eliminar Mesa (Bloqueado)

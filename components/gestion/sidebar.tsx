@@ -45,10 +45,10 @@ const navItems: NavItem[] = [
   { href: "/gestion/pedidos", label: "Pedidos", icon: ClipboardList, roles: ["admin", "cashier", "kitchen", "waiter"] },
   { href: "/gestion/cocina", label: "Cocina (KDS)", icon: ChefHat, roles: ABILITIES["kds:view"] },
   { href: "/gestion/caja", label: "Caja", icon: CreditCard, roles: ABILITIES["orders:checkout"] },
-  { href: "/gestion/menu", label: "Menu", icon: BookOpen, roles: ABILITIES["products:manage"] },
-  { href: "/gestion/logistica", label: "Logistica", icon: Truck, roles: ABILITIES["inventory:move"] },
+  { href: "/gestion/menu", label: "Menú", icon: BookOpen, roles: ABILITIES["products:manage"] },
+  { href: "/gestion/logistica", label: "Logística", icon: Truck, roles: ABILITIES["inventory:move"] },
   { href: "/gestion/personal", label: "Personal", icon: Users, roles: ABILITIES["staff:manage"] },
-  { href: "/gestion/config", label: "Configuracion", icon: Settings, roles: ABILITIES["config:manage"] },
+  { href: "/gestion/config", label: "Configuración", icon: Settings, roles: ABILITIES["config:manage"] },
 ];
 
 interface SidebarProps {
@@ -83,6 +83,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onToggle}
+            aria-hidden="true"
             className="fixed inset-0 bg-navy/50 z-40 lg:hidden"
           />
         )}
@@ -112,6 +113,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
               }
             }}
             aria-label={!isOpen ? "Expandir menú" : undefined}
+            title={!isOpen ? "Expandir menú" : undefined}
             className={cn(
               "flex items-center gap-3",
               !isOpen && "cursor-pointer hover:bg-navy-light/10 transition-colors", // Efecto hover sutil al estar cerrado
@@ -166,7 +168,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 overflow-y-auto">
+        <nav className="flex-1 py-4 overflow-y-auto" aria-label="Navegación principal">
           <ul className="flex flex-col gap-1 px-3">
             {filteredItems.map((item) => {
               const isActive = pathname === item.href || (item.href !== "/gestion" && pathname.startsWith(item.href));
@@ -178,6 +180,9 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
                   <Link
                     href={item.href}
                     onClick={closeOnMobileNav}
+                    aria-label={item.label}
+                    title={item.label}
+                    aria-current={isActive ? "page" : undefined}
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group",
                       isActive
@@ -185,7 +190,7 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
                         : "text-primary-foreground/70 hover:bg-navy-light/20 hover:text-primary-foreground",
                     )}
                   >
-                    <item.icon className={cn("size-5 shrink-0", isActive && "text-accent-foreground")} />
+                    <item.icon className={cn("size-5 shrink-0", isActive && "text-accent-foreground")} aria-hidden="true" />
                     <AnimatePresence>
                       {isOpen && (
                         <motion.span

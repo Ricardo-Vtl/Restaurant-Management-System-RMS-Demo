@@ -39,7 +39,7 @@ export function OrderStatsBar({ orders }: OrderStatsBarProps) {
   }, [orders]);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide md:grid md:grid-cols-4 md:overflow-visible md:pb-0">
       <StatCard
         icon={<Clock size={16} aria-hidden="true" />}
         label="Activos"
@@ -86,8 +86,8 @@ function StatCard({
     <div
       className={
         highlighted
-          ? "rounded-2xl bg-navy p-3 shadow-sm flex items-center gap-3"
-          : "rounded-2xl border border-border bg-white p-3 shadow-sm flex items-center gap-3"
+          ? "shrink-0 min-w-36 md:min-w-0 rounded-2xl bg-navy p-3 shadow-sm flex items-center gap-3"
+          : "shrink-0 min-w-36 md:min-w-0 rounded-2xl border border-border bg-white p-3 shadow-sm flex items-center gap-3"
       }
     >
       <div
@@ -103,8 +103,8 @@ function StatCard({
         <span
           className={
             highlighted
-              ? "text-[8px] font-bold uppercase tracking-widest text-white/60"
-              : "text-[8px] font-bold uppercase tracking-widest text-muted-foreground"
+              ? "text-xs sm:text-[10px] sm:text-[8px] font-bold uppercase tracking-widest text-white/60"
+              : "text-xs sm:text-[10px] sm:text-[8px] font-bold uppercase tracking-widest text-muted-foreground"
           }
         >
           {label}

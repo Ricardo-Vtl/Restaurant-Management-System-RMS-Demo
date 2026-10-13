@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -95,13 +95,20 @@ export function RecipeDialog({ isOpen, onClose, product }: RecipeDialogProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Receta — {product?.name ?? "Producto"}</DialogTitle>
-          <DialogDescription>
-            Define los insumos por platillo; el stock se descuenta solo al entrar la orden a cocina.
-            {hasSizes && " Las líneas Base aplican a toda talla; una línea con talla tiene prioridad para esa talla."}
-          </DialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-coral/10 text-coral">
+              <BookOpen className="size-5" aria-hidden="true" />
+            </div>
+            <div>
+              <DialogTitle>Receta — {product?.name ?? "Producto"}</DialogTitle>
+              <DialogDescription>
+                Define los insumos por platillo; el stock se descuenta solo al entrar la orden a cocina.
+                {hasSizes && " Las líneas Base aplican a toda talla; una línea con talla tiene prioridad para esa talla."}
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-col gap-3 py-2">
@@ -214,10 +221,10 @@ export function RecipeDialog({ isOpen, onClose, product }: RecipeDialogProps) {
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose} disabled={setRecipe.isPending}>
+          <Button variant="ghost" onClick={onClose} disabled={setRecipe.isPending} className="h-11 sm:h-9">
             Cancelar
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSave} className="bg-coral hover:bg-coral/90">
+          <Button onClick={handleSubmit} disabled={!canSave} className="bg-coral hover:bg-coral/90 h-11 sm:h-9">
             {setRecipe.isPending && <Loader2 className="size-4 mr-2 animate-spin" aria-hidden="true" />}
             Guardar receta
           </Button>

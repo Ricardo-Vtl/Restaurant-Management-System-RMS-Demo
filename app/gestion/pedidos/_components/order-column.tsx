@@ -37,7 +37,7 @@ export function OrderColumn({ label, color, orders, onSelectOrder }: OrderColumn
         </div>
         <span
           className={cn(
-            "text-[10px] font-black rounded-full w-6 h-6 flex items-center justify-center",
+            "text-xs sm:text-[10px] font-black rounded-full w-6 h-6 flex items-center justify-center",
             colors.bg,
             colors.text,
           )}
@@ -55,7 +55,7 @@ export function OrderColumn({ label, color, orders, onSelectOrder }: OrderColumn
           ) : (
             <div className="flex flex-col items-center justify-center py-12 opacity-30">
               <Package size={32} className="mb-2 text-navy" aria-hidden="true" />
-              <p className="text-[9px] font-black uppercase italic tracking-widest text-navy">
+              <p className="text-xs sm:text-[9px] font-black uppercase italic tracking-widest text-navy">
                 Sin pedidos
               </p>
             </div>

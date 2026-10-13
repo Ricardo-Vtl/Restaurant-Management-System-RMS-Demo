@@ -62,7 +62,7 @@ export function KitchenOrderCard({ order, onMarkItemsReady, onAccept, variant = 
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 text-muted-foreground">
               <Package size={12} aria-hidden="true" />
-              <Badge variant="secondary" className="text-[10px] font-black">
+              <Badge variant="secondary" className="text-xs sm:text-[10px] font-black">
                 {total} items
               </Badge>
             </div>
@@ -83,7 +83,11 @@ export function KitchenOrderCard({ order, onMarkItemsReady, onAccept, variant = 
       {variant === "active" && (
         <>
           <div className="px-4 py-2 flex items-center gap-3">
-            <Progress value={percent} className="h-2 flex-1" />
+            <Progress
+              value={percent}
+              aria-label={`Progreso de orden #${order.orderNumber}: ${readyCount} de ${total} listos`}
+              className="h-2 flex-1"
+            />
             <span
               className={cn(
                 "text-xs font-black italic tabular-nums",

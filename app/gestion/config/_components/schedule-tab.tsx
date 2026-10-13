@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Clock } from "lucide-react";
 import { scheduleSchema, timezoneSchema } from "@/lib/api-schemas";
 import { useUpdateConfig, type FullConfig } from "../_hooks/use-config";
 import { TabCard } from "./tab-card";
@@ -82,14 +83,14 @@ function DayRow({
         <Input
           id={`day-${dayKey}`}
           type="time"
-          className="w-28"
+          className="w-28 h-11 sm:h-9"
           disabled={closed}
           {...register(`schedule.${dayKey}.open`)}
         />
         <span className="text-muted-foreground text-sm">a</span>
         <Input
           type="time"
-          className="w-28"
+          className="w-28 h-11 sm:h-9"
           disabled={closed}
           aria-label={`Hora de cierre de ${DAY_LABELS[dayKey]}`}
           {...register(`schedule.${dayKey}.close`)}
@@ -151,6 +152,7 @@ export function ScheduleTab({ config }: { config: FullConfig }) {
       onSave={onSubmit}
       isPending={update.isPending}
       isDirty={form.formState.isDirty}
+      icon={Clock}
     >
       <div className="flex flex-col gap-2">
         {DAY_KEYS.map((key) => (

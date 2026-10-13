@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldAlert, Store, Clock, Phone, ShoppingBag, Percent, Settings2 } from "lucide-react";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { can } from "@/lib/abilities";
@@ -12,6 +12,10 @@ import { ContactTab } from "./_components/contact-tab";
 import { ChannelsTab } from "./_components/channels-tab";
 import { TaxTab } from "./_components/tax-tab";
 import { OpsTab } from "./_components/ops-tab";
+import { ConfigStatusBar } from "./_components/config-status-bar";
+
+const TAB_TRIGGER_CLASS =
+  "inline-flex items-center gap-2 rounded-full border border-transparent px-4 h-11 sm:h-9 text-xs font-black uppercase tracking-wide shrink-0 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral";
 
 export default function ConfigPage() {
   const { currentUser } = useAuth();
@@ -53,70 +57,59 @@ export default function ConfigPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-3xl font-bold text-navy font-serif">Configuración</h1>
-        <p className="text-muted-foreground text-sm">
-          Identidad, contacto, horarios, canales de venta, impuestos y operación del POS
+        <div className="flex items-center gap-2 mb-0.5">
+          <div className="h-7 w-1.5 bg-coral rounded-full" aria-hidden="true" />
+          <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">
+            Configuración
+          </h1>
+        </div>
+        <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+          Identidad, contacto, horarios, canales, impuestos y operación del POS
         </p>
       </div>
 
+      <ConfigStatusBar config={config} />
+
       <Tabs defaultValue="identidad" className="w-full">
-        <TabsList className="h-auto w-full max-w-3xl flex-wrap justify-start gap-1 bg-transparent p-0">
-          <TabsTrigger
-            value="identidad"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Identidad
+        <TabsList className="h-auto w-full flex-nowrap justify-start gap-1 overflow-x-auto scrollbar-hide bg-transparent p-0 md:flex-wrap md:overflow-visible">
+          <TabsTrigger value="identidad" className={TAB_TRIGGER_CLASS}>
+            <Store className="size-4" aria-hidden="true" /> Identidad
           </TabsTrigger>
-          <TabsTrigger
-            value="horarios"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Horarios
+          <TabsTrigger value="horarios" className={TAB_TRIGGER_CLASS}>
+            <Clock className="size-4" aria-hidden="true" /> Horarios
           </TabsTrigger>
-          <TabsTrigger
-            value="contacto"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Contacto
+          <TabsTrigger value="contacto" className={TAB_TRIGGER_CLASS}>
+            <Phone className="size-4" aria-hidden="true" /> Contacto
           </TabsTrigger>
-          <TabsTrigger
-            value="canales"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Canales
+          <TabsTrigger value="canales" className={TAB_TRIGGER_CLASS}>
+            <ShoppingBag className="size-4" aria-hidden="true" /> Canales
           </TabsTrigger>
-          <TabsTrigger
-            value="impuestos"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Impuestos
+          <TabsTrigger value="impuestos" className={TAB_TRIGGER_CLASS}>
+            <Percent className="size-4" aria-hidden="true" /> Impuestos
           </TabsTrigger>
-          <TabsTrigger
-            value="operacion"
-            className="rounded-full border border-transparent px-4 py-2 data-[state=active]:border-coral data-[state=active]:bg-coral/10 data-[state=active]:text-coral"
-          >
-            Operación
+          <TabsTrigger value="operacion" className={TAB_TRIGGER_CLASS}>
+            <Settings2 className="size-4" aria-hidden="true" /> Operación
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="identidad" className="mt-6">
+        <TabsContent value="identidad" className="mt-5">
           <IdentityTab config={config} />
         </TabsContent>
-        <TabsContent value="horarios" className="mt-6">
+        <TabsContent value="horarios" className="mt-5">
           <ScheduleTab config={config} />
         </TabsContent>
-        <TabsContent value="contacto" className="mt-6">
+        <TabsContent value="contacto" className="mt-5">
           <ContactTab config={config} />
         </TabsContent>
-        <TabsContent value="canales" className="mt-6">
+        <TabsContent value="canales" className="mt-5">
           <ChannelsTab config={config} />
         </TabsContent>
-        <TabsContent value="impuestos" className="mt-6">
+        <TabsContent value="impuestos" className="mt-5">
           <TaxTab config={config} />
         </TabsContent>
-        <TabsContent value="operacion" className="mt-6">
+        <TabsContent value="operacion" className="mt-5">
           <OpsTab config={config} />
         </TabsContent>
       </Tabs>

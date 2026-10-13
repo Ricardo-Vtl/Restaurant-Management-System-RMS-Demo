@@ -81,7 +81,7 @@ export function ConfiguracionLocalModal({
           <TooltipTrigger asChild>
             <Button
               variant="outline"
-              className="border-gray-200 hover:bg-gray-50 rounded-xl gap-2 text-gray-700"
+              className="w-full sm:w-auto h-11 sm:h-9 border-border hover:bg-muted rounded-xl gap-2 text-foreground"
               disabled={hasOccupiedTables}
             >
               <Sliders size={16} /> Configurar Local
@@ -92,9 +92,9 @@ export function ConfiguracionLocalModal({
           <TooltipContent side="bottom">Cierra las mesas ocupadas antes de reconfigurar</TooltipContent>
         )}
       </Tooltip>
-      <DialogContent className="sm:max-w-xl max-h-[90dvh] overflow-y-auto">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto overflow-x-hidden sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-navy font-serif text-xl">
+          <DialogTitle className="flex items-center gap-2 text-navy font-serif text-lg sm:text-xl">
             <Armchair className="text-coral" /> Asistente de Inventario y Distribución
           </DialogTitle>
           <DialogDescription>
@@ -102,7 +102,7 @@ export function ConfiguracionLocalModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-2 gap-4 py-3">
+        <div className="grid grid-cols-1 gap-4 py-3 sm:grid-cols-2">
           <div className="grid gap-1.5">
             <Label htmlFor="g-mesas">Total Mesas en Local</Label>
             <Input
@@ -137,10 +137,10 @@ export function ConfiguracionLocalModal({
               onChange={(e) => setSimSillasPorMesa(Math.max(1, Math.floor(Number(e.target.value)) || 1))}
             />
           </div>
-          <div className="flex items-center justify-between border rounded-xl p-3 bg-gray-50 mt-5">
+          <div className="flex items-center justify-between border rounded-xl p-3 bg-muted/50 mt-5">
             <div className="flex flex-col gap-0.5">
               <Label className="text-xs font-bold">Forzar reparto masivo</Label>
-              <p className="text-[10px] text-muted-foreground">Distribuye excedentes en las mesas</p>
+              <p className="text-xs sm:text-[10px] text-muted-foreground">Distribuye excedentes en las mesas</p>
             </div>
             <Switch checked={forzarRepartoTotal} onCheckedChange={setForzarRepartoTotal} />
           </div>
@@ -150,23 +150,23 @@ export function ConfiguracionLocalModal({
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 text-xs font-bold text-navy">
             <span>PREVISUALIZACIÓN DE LA SALA</span>
             {faltanSillas > 0 ? (
-              <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-[10px] uppercase font-black tracking-tight animate-pulse">
+              <span className="bg-destructive/10 text-destructive px-2 py-0.5 rounded text-xs sm:text-[10px] uppercase font-black tracking-tight animate-pulse">
                 Inventario insuficiente (Faltan {faltanSillas} sillas)
               </span>
             ) : (
-              <span className="bg-coral text-white px-2 py-0.5 rounded text-[10px]">
+              <span className="bg-coral text-white px-2 py-0.5 rounded text-xs sm:text-[10px]">
                 Sillas en Respaldo: {respaldoSimulado}
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto p-1 bg-white rounded-lg border text-[11px]">
+          <div className="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto p-1 bg-white rounded-lg border text-xs sm:text-[11px] sm:grid-cols-4">
             {previsualizacion.map((p) => (
               <div
                 key={p.mesa}
                 className={cn(
                   "p-2 border rounded-md text-center flex flex-col justify-center transition-colors",
-                  p.sillas === 0 ? "bg-red-50/50 border-red-100 text-red-400" : "bg-gray-50 text-navy",
+                  p.sillas === 0 ? "bg-destructive/5 border-destructive/20 text-destructive/70" : "bg-muted/50 text-navy",
                 )}
               >
                 <span className="font-bold opacity-60">Mesa {p.mesa}</span>
@@ -178,11 +178,11 @@ export function ConfiguracionLocalModal({
 
         <Button
           onClick={() => setShowConfirm(true)}
-          className="w-full rounded-xl mt-2 bg-navy hover:bg-navy/90 text-white"
+          className="w-full h-11 sm:h-9 rounded-xl mt-2 bg-navy hover:bg-navy/90 text-white"
           disabled={isConfigSaving || faltanSillas > 0}
         >
           {isConfigSaving ? <Loader2 className="animate-spin mr-2" size={16} /> : <Check size={16} className="mr-2" />}
-          Confirmar Distribucion e Inventario del Local
+          Confirmar distribución
         </Button>
 
         <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
