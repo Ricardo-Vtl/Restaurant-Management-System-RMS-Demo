@@ -10,6 +10,7 @@
 //   • DemoAutoAdvance   — avanza solo tras detectar la acción del paso
 //   • DemoSidebarSync   — en móvil abre/cierra el drawer para los pasos del sidebar
 //   • DemoCartSync      — en móvil abre/cierra el carrito para los pasos de la comanda
+//   • DemoKanbanSync    — en móvil trae a la vista la columna del kanban del paso
 //   • DemoAutoDismiss   — cierra el modal/panel que la app deja abierto tras una acción
 
 import { useEffect, useMemo, useRef } from "react";
@@ -295,6 +296,55 @@ export function DemoCartSync() {
     }, 150);
     return () => window.clearInterval(id);
   }, [isDesktop, needs, currentStep.id]);
+
+  return null;
+}
+
+/**
+ * En móvil el kanban de Pedidos es un carrusel horizontal (snap): la columna que
+ * contiene el target (p. ej. "Ver" en "Listo") puede quedar fuera de pantalla a
+ * la derecha. Para los pasos que lo marcan (`needsKanban`), el tour trae esa
+ * columna a la vista UNA vez al activarse el paso; después el usuario solo hace
+ * el trigger de la acción.
+ */
+export function DemoKanbanSync() {
+  const { active, currentStep } = useDemoTour();
+  const isDesktop = useIsDesktop();
+
+  const needs = !isDesktop && active && !!currentStep.needsKanban;
+  const target = currentStep.target;
+
+  useEffect(() => {
+    if (!needs || !target) return;
+
+    const scroller = document.querySelector<HTMLElement>('[aria-label="Columnas de pedidos"]');
+    if (!scroller) return;
+
+    let attempts = 0;
+    const tick = (): boolean => {
+      // Localiza el target aunque esté oculto a la derecha (columna fuera de
+      // pantalla) y desliza su columna al snap, como useSnapCarousel.goTo.
+      const el = findTargetElement(target, { includeOffscreenRight: true });
+      const column = el
+        ? Array.from(scroller.children).find((child) => child.contains(el))
+        : undefined;
+      if (!(column instanceof HTMLElement)) return false;
+
+      const left =
+        column.getBoundingClientRect().left -
+        scroller.getBoundingClientRect().left +
+        scroller.scrollLeft;
+      scroller.scrollTo({ left, behavior: "smooth" });
+      return true;
+    };
+
+    if (tick()) return;
+    const id = window.setInterval(() => {
+      attempts += 1;
+      if (tick() || attempts > 40) window.clearInterval(id);
+    }, 150);
+    return () => window.clearInterval(id);
+  }, [needs, target]);
 
   return null;
 }

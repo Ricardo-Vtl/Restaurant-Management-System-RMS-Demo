@@ -68,6 +68,12 @@ describe("tour-steps", () => {
     }
   });
 
+  it("los pasos needsKanban tienen target (columna de carrusel a traer a la vista)", () => {
+    for (const step of TOUR_STEPS) {
+      if (step.needsKanban) expect(step.target).toBeDefined();
+    }
+  });
+
   it("completeOnRoute solo aplica a rutas absolutas", () => {
     for (const step of TOUR_STEPS) {
       if (step.completeOnRoute) expect(step.href?.startsWith("/")).toBe(true);

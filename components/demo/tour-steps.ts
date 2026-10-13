@@ -48,6 +48,9 @@ export interface TourStep {
   needsSidebar?: boolean;
   /** El target vive en el carrito: en móvil el tour abre el drawer del carrito. */
   needsCart?: boolean;
+  /** El target vive en una columna de un carrusel horizontal (kanban): en móvil
+   *  el tour trae esa columna a la vista antes de pedir la acción. */
+  needsKanban?: boolean;
   /** En móvil muestra el bottom-sheet con "Entendido" al activarse el paso. */
   intro?: boolean;
   /** Radio del recorte en px (9999 = círculo perfecto, para logos). */
@@ -211,6 +214,7 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/pedidos",
     target: { text: "Ver" },
     label: "Abre el pedido",
+    needsKanban: true,
     completeWhen: { text: "→ Entregado" },
   },
   {
