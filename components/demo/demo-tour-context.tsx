@@ -21,11 +21,18 @@ import {
   type TourStep,
   type TourStepId,
 } from "./tour-steps";
+import {
+  claimDemoTable,
+  ensureDemoSession,
+  releaseDemoTable,
+  type DemoSession,
+} from "@/lib/demo/client";
 
 // ponytail: estado por documento (no por navegador). El singleton de módulo se
 // conserva al navegar dentro de la SPA (landing↔gestión) y se reinicia al
 // recargar la página → la bienvenida siempre aparece al entrar.
 let memoryState: StoredTourState | null = null;
+let memorySession: DemoSession | null = null;
 
 interface DemoTourContextValue {
   /** false hasta que el estado de módulo se hidrata (evita mismatch SSR). */
@@ -34,6 +41,8 @@ interface DemoTourContextValue {
   /** Recorrido en curso (se inició y no se finalizó). */
   active: boolean;
   currentStep: TourStep;
+  /** Mesa reservada por la sesión (o null si aún no se ha reclamado). */
+  session: DemoSession | null;
   start: () => void;
   skipWelcome: () => void;
   finish: () => void;
@@ -51,9 +60,11 @@ const DemoTourContext = createContext<DemoTourContextValue | null>(null);
 export function DemoTourProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<StoredTourState>(DEFAULT_TOUR_STATE);
   const [mounted, setMounted] = useState(false);
+  const [session, setSession] = useState<DemoSession | null>(null);
 
   useEffect(() => {
     if (memoryState) setState(memoryState);
+    if (memorySession) setSession(memorySession);
     setMounted(true);
   }, []);
 
@@ -61,6 +72,21 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     if (!mounted) return;
     memoryState = state;
   }, [state, mounted]);
+
+  // Reclama (o re-reclama) la mesa exclusiva de la sesión. El claim del servidor
+  // libera primero la reserva previa de esta misma sesión.
+  const beginSession = useCallback(async () => {
+    await ensureDemoSession();
+    const claimed = await claimDemoTable();
+    memorySession = claimed;
+    setSession(claimed);
+  }, []);
+
+  const endSession = useCallback(async () => {
+    memorySession = null;
+    setSession(null);
+    await releaseDemoTable();
+  }, []);
 
   const start = useCallback(() => {
     setState((prev) => ({
@@ -72,7 +98,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       introAckFor: null,
       panelOpen: true,
     }));
-  }, []);
+    void beginSession();
+  }, [beginSession]);
 
   const skipWelcome = useCallback(() => {
     setState((prev) => ({ ...prev, welcomeSeen: true }));
@@ -80,7 +107,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
 
   const finish = useCallback(() => {
     setState((prev) => ({ ...prev, startedAt: null, panelOpen: false, welcomeSeen: true }));
-  }, []);
+    void endSession();
+  }, [endSession]);
 
   const reset = useCallback(() => {
     setState((prev) => ({
@@ -92,7 +120,8 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       introAckFor: null,
       panelOpen: true,
     }));
-  }, []);
+    void beginSession();
+  }, [beginSession]);
 
   const next = useCallback(() => {
     setState((prev) => ({ ...prev, step: clampStep(prev.step + 1) }));
@@ -126,6 +155,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       state,
       active: mounted && state.startedAt !== null,
       currentStep,
+      session,
       start,
       skipWelcome,
       finish,
@@ -136,7 +166,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       complete,
       acknowledgeIntro,
     };
-  }, [mounted, state, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, acknowledgeIntro]);
+  }, [mounted, state, session, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, acknowledgeIntro]);
 
   return <DemoTourContext.Provider value={value}>{children}</DemoTourContext.Provider>;
 }

@@ -9,6 +9,7 @@ import {
   DemoAutoDismiss,
   DemoCartSync,
   DemoKanbanSync,
+  DemoOverlaySync,
   DemoRouteAutoMark,
   DemoSidebarSync,
 } from "./demo-auto-mark";
@@ -24,6 +25,7 @@ export function DemoTourRuntime() {
       <DemoSidebarSync />
       <DemoCartSync />
       <DemoKanbanSync />
+      <DemoOverlaySync />
       <DemoAutoDismiss />
       <TourSpotlight />
       <TourWidget />

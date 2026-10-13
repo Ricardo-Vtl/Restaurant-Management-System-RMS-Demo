@@ -20,7 +20,9 @@ const CTX: TourAutoContext = {
 
 function isValidTarget(target: TourTarget | undefined): boolean {
   if (!target) return true;
-  return !!target.selector !== !!target.text;
+  if (!!target.selector === !!target.text) return false;
+  if (target.within && !isValidTarget(target.within)) return false;
+  return true;
 }
 
 describe("tour-steps", () => {
@@ -72,6 +74,20 @@ describe("tour-steps", () => {
     for (const step of TOUR_STEPS) {
       if (step.needsKanban) expect(step.target).toBeDefined();
     }
+  });
+
+  it("los pasos con within acotan por texto/selector válido", () => {
+    for (const step of TOUR_STEPS) {
+      const within = step.target?.within;
+      if (within) {
+        expect(within.text ?? within.selector).toBeDefined();
+      }
+    }
+  });
+
+  it("el paso de apertura de mesa usa un target dinámico por sesión (§table)", () => {
+    const mesa = TOUR_STEPS.find((s) => s.id === "mesa-1");
+    expect(mesa?.target?.text).toContain("§table");
   });
 
   it("completeOnRoute solo aplica a rutas absolutas", () => {

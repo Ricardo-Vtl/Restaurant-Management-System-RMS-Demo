@@ -88,6 +88,35 @@ export type Database = {
           },
         ]
       }
+      demo_table_claims: {
+        Row: {
+          claimed_at: string
+          last_seen_at: string
+          session_id: string
+          table_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          last_seen_at?: string
+          session_id: string
+          table_id: string
+        }
+        Update: {
+          claimed_at?: string
+          last_seen_at?: string
+          session_id?: string
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_table_claims_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: true
+            referencedRelation: "tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           accepted_at: string | null
@@ -704,6 +733,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      demo_claim_table: {
+        Args: { p_session: string }
+        Returns: {
+          table_id: string
+          table_number: string
+        }[]
+      }
+      demo_gc: { Args: never; Returns: undefined }
+      demo_release_table: { Args: { p_session: string }; Returns: undefined }
     }
     Enums: {
       order_status:

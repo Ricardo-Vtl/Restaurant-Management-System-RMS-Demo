@@ -21,7 +21,11 @@ export type TourStepId =
   | "cobrar"
   | "cobrar-pago"
   | "logistica"
+  | "logistica-movimientos"
+  | "personal-link"
+  | "personal-equipo"
   | "config"
+  | "config-identidad"
   | "cierre";
 
 /** Condición que marca un paso como completado leyendo estado real de la app. */
@@ -32,6 +36,8 @@ export interface TourTarget {
   selector?: string;
   /** Texto visible o aria-label de un control (match exacto, luego parcial). */
   text?: string;
+  /** Restringe la búsqueda a un contenedor (selector o texto, admite §table). */
+  within?: TourTarget;
 }
 
 export interface TourStep {
@@ -127,11 +133,11 @@ export const TOUR_STEPS: TourStep[] = [
   },
   {
     id: "mesa-1",
-    title: "Abre la Mesa 1",
-    body: "Cada mesa libre se abre desde su tarjeta.",
+    title: "Abre tu mesa",
+    body: "Tu sesión reservó una mesa libre; ábrela desde su tarjeta.",
     href: "/gestion/mesas",
-    target: { text: "Mesa 1" },
-    label: "Toca la Mesa 1",
+    target: { text: "Mesa §table" },
+    label: "Toca tu mesa",
     completeWhen: { selector: '[role="dialog"]' },
   },
   {
@@ -190,9 +196,9 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Marca el platillo como listo",
     body: "Cuando esté listo, márcalo en el KDS.",
     href: "/gestion/cocina",
-    target: { text: "como listo" },
+    target: { text: "como listo", within: { text: "Mesa §table" } },
     label: "Marca listo",
-    completeWhenGone: { text: "como listo" },
+    completeWhenGone: { text: "como listo", within: { text: "Mesa §table" } },
   },
   {
     id: "pedidos-link",
@@ -212,7 +218,7 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Abre el detalle",
     body: "Mira el pedido y sus platillos.",
     href: "/gestion/pedidos",
-    target: { text: "Ver" },
+    target: { text: "Ver", within: { text: "Mesa §table" } },
     label: "Abre el pedido",
     needsKanban: true,
     completeWhen: { text: "→ Entregado" },
@@ -260,7 +266,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "logistica",
     title: "Inventario por recetas",
-    body: "Cada venta descontó insumos automáticamente; revisa el libro de movimientos.",
+    body: "Cada venta descontó insumos automáticamente por receta.",
     href: "/gestion/logistica",
     target: { selector: 'a[href="/gestion/logistica"]' },
     mobileTarget: { selector: "main h1" },
@@ -269,6 +275,39 @@ export const TOUR_STEPS: TourStep[] = [
     label: "Haz clic en Inventario",
     mobileLabel: "Estás en Inventario",
     completeOnRoute: true,
+  },
+  {
+    id: "logistica-movimientos",
+    title: "El libro de movimientos",
+    body: "Entradas, salidas, mermas y el descuento automático por venta quedan registrados aquí.",
+    href: "/gestion/logistica",
+    target: { text: "Movimientos" },
+    label: "Abre Movimientos",
+    mobileLabel: "Toca Movimientos",
+    intro: true,
+    completeWhen: { selector: '[aria-label="Filtrar por insumo"]' },
+  },
+  {
+    id: "personal-link",
+    title: "Tu equipo",
+    body: "Altas, roles y PIN de acceso del personal.",
+    href: "/gestion/personal",
+    target: { selector: 'a[href="/gestion/personal"]' },
+    mobileTarget: { selector: "main h1" },
+    needsSidebar: true,
+    intro: true,
+    label: "Haz clic en Personal",
+    mobileLabel: "Estás en Personal",
+    completeOnRoute: true,
+  },
+  {
+    id: "personal-equipo",
+    title: "Altas, roles y PIN",
+    body: "Da de alta empleados y asigna su rol y PIN de acceso.",
+    href: "/gestion/personal",
+    target: { text: "Nuevo Personal" },
+    label: "Da de alta a tu equipo",
+    intro: true,
   },
   {
     id: "config",
@@ -282,6 +321,15 @@ export const TOUR_STEPS: TourStep[] = [
     label: "Haz clic en Config",
     mobileLabel: "Estás en Configuración",
     completeOnRoute: true,
+  },
+  {
+    id: "config-identidad",
+    title: "White-label de verdad",
+    body: "Identidad, horarios, canales, impuestos y operación: todo editable sin tocar código.",
+    href: "/gestion/config",
+    target: { text: "Identidad" },
+    label: "Revisa la configuración",
+    intro: true,
   },
   {
     id: "cierre",

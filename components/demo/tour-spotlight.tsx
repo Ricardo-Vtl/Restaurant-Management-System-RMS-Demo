@@ -40,7 +40,7 @@ function sameRect(a: Rect | null, b: Rect | null): boolean {
 }
 
 export function TourSpotlight() {
-  const { mounted, active, currentStep } = useDemoTour();
+  const { mounted, active, currentStep, session } = useDemoTour();
   const reduceMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const [rect, setRect] = useState<Rect | null>(null);
@@ -54,6 +54,7 @@ export function TourSpotlight() {
       ? currentStep.target
       : currentStep.mobileTarget ?? currentStep.target
     : undefined;
+  const tableNumber = session?.tableNumber;
 
   useEffect(() => {
     scrolledRef.current = false;
@@ -65,10 +66,11 @@ export function TourSpotlight() {
       return;
     }
     let stop = false;
+    const vars = tableNumber ? { table: tableNumber } : {};
 
     const tick = () => {
       if (stop) return;
-      const el = findTargetElement(target);
+      const el = findTargetElement(target, { vars });
       const next = el ? rectOf(el) : null;
       setRect((prev) => (sameRect(prev, next) ? prev : next));
 
@@ -93,7 +95,7 @@ export function TourSpotlight() {
     return () => {
       stop = true;
     };
-  }, [target, reduceMotion]);
+  }, [target, reduceMotion, tableNumber]);
 
   // Mide el label real (2 líneas en móvil) para decidir arriba/abajo y clampear.
   const labelRef = useRef<HTMLDivElement>(null);

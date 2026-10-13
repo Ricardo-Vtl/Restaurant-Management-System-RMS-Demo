@@ -11,6 +11,7 @@
 //   • DemoSidebarSync   — en móvil abre/cierra el drawer para los pasos del sidebar
 //   • DemoCartSync      — en móvil abre/cierra el carrito para los pasos de la comanda
 //   • DemoKanbanSync    — en móvil trae a la vista la columna del kanban del paso
+//   • DemoOverlaySync   — cierra overlays que tapan pasos que necesitan sidebar/carrito
 //   • DemoAutoDismiss   — cierra el modal/panel que la app deja abierto tras una acción
 
 import { useEffect, useMemo, useRef } from "react";
@@ -50,7 +51,7 @@ export function DemoAuthAutoMark() {
 }
 
 export function DemoOrdersAutoMark() {
-  const { active, state, currentStep, complete } = useDemoTour();
+  const { active, state, currentStep, complete, session } = useDemoTour();
   const { data: orders } = useAllOrders();
 
   const ctx = useMemo<TourAutoContext>(() => {
@@ -61,10 +62,16 @@ export function DemoOrdersAutoMark() {
       hasDeliveredOrder: false,
       hasPaidOrder: false,
     };
-    if (!state.startedAt || !orders) return base;
+    if (!orders) return base;
 
-    const since = new Date(state.startedAt).getTime();
-    const fresh = orders.filter((o) => o.createdAt.getTime() > since);
+    // Acota al recurso de la sesión (su mesa). Si aún no hay claim, cae al
+    // criterio temporal para no contaminar con órdenes de otras sesiones.
+    const fresh = session
+      ? orders.filter((o) => o.tableId === session.tableId)
+      : state.startedAt
+        ? orders.filter((o) => o.createdAt.getTime() > new Date(state.startedAt as string).getTime())
+        : [];
+
     return {
       ...base,
       hasNewOrder: fresh.some((o) => o.status !== "cancelled"),
@@ -73,7 +80,7 @@ export function DemoOrdersAutoMark() {
       ),
       hasPaidOrder: fresh.some((o) => o.paymentStatus === "paid"),
     };
-  }, [orders, state.startedAt]);
+  }, [orders, session, state.startedAt]);
 
   useEffect(() => {
     if (!active) return;
@@ -113,7 +120,7 @@ export function DemoRouteAutoMark() {
 }
 
 export function DemoDomAutoMark() {
-  const { active, currentStep, complete } = useDemoTour();
+  const { active, currentStep, complete, session } = useDemoTour();
   const seenRef = useRef(false);
   const isDesktop = useIsDesktop();
 
@@ -126,12 +133,14 @@ export function DemoDomAutoMark() {
       ? currentStep.completeWhen
       : currentStep.mobileCompleteWhen ?? currentStep.completeWhen;
 
+    const vars = session ? { table: session.tableNumber } : {};
+
     const check = () => {
-      if (completeWhen && findTargetElement(completeWhen)) {
+      if (completeWhen && findTargetElement(completeWhen, { vars })) {
         complete(currentStep.id);
       }
       if (currentStep.completeWhenGone) {
-        const exists = findTargetElement(currentStep.completeWhenGone) !== null;
+        const exists = findTargetElement(currentStep.completeWhenGone, { vars }) !== null;
         if (exists) seenRef.current = true;
         else if (seenRef.current) complete(currentStep.id);
       }
@@ -140,7 +149,7 @@ export function DemoDomAutoMark() {
     check();
     const id = window.setInterval(check, 250);
     return () => window.clearInterval(id);
-  }, [active, currentStep, complete, isDesktop]);
+  }, [active, currentStep, complete, isDesktop, session]);
 
   return null;
 }
@@ -308,11 +317,12 @@ export function DemoCartSync() {
  * el trigger de la acción.
  */
 export function DemoKanbanSync() {
-  const { active, currentStep } = useDemoTour();
+  const { active, currentStep, session } = useDemoTour();
   const isDesktop = useIsDesktop();
 
   const needs = !isDesktop && active && !!currentStep.needsKanban;
   const target = currentStep.target;
+  const tableNumber = session?.tableNumber;
 
   useEffect(() => {
     if (!needs || !target) return;
@@ -320,11 +330,12 @@ export function DemoKanbanSync() {
     const scroller = document.querySelector<HTMLElement>('[aria-label="Columnas de pedidos"]');
     if (!scroller) return;
 
+    const vars = tableNumber ? { table: tableNumber } : {};
     let attempts = 0;
     const tick = (): boolean => {
       // Localiza el target aunque esté oculto a la derecha (columna fuera de
       // pantalla) y desliza su columna al snap, como useSnapCarousel.goTo.
-      const el = findTargetElement(target, { includeOffscreenRight: true });
+      const el = findTargetElement(target, { includeOffscreenRight: true, vars });
       const column = el
         ? Array.from(scroller.children).find((child) => child.contains(el))
         : undefined;
@@ -344,7 +355,39 @@ export function DemoKanbanSync() {
       if (tick() || attempts > 40) window.clearInterval(id);
     }, 150);
     return () => window.clearInterval(id);
-  }, [needs, target]);
+  }, [needs, target, tableNumber]);
+
+  return null;
+}
+
+/**
+ * Cierra overlays que tapan el objetivo de pasos que necesitan el sidebar o el
+ * carrito (p. ej. el modal de mesa queda abierto si la sesión llegó a una mesa
+ * ya abierta). Se ejecuta al activarse el paso y no toca pasos dentro de modal.
+ */
+export function DemoOverlaySync() {
+  const { active, currentStep } = useDemoTour();
+
+  const needs = active && (!!currentStep.needsSidebar || !!currentStep.needsCart);
+
+  useEffect(() => {
+    if (!needs) return;
+
+    const close = () => {
+      const dialog = document.querySelector('[role="dialog"]');
+      if (!dialog) return;
+      const btn = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find((b) => {
+        const text = (b.textContent ?? "").trim();
+        const aria = b.getAttribute("aria-label") ?? "";
+        return text === "Cerrar" || text === "Close" || /cerrar/i.test(aria);
+      });
+      btn?.click();
+    };
+
+    close();
+    const id = window.setInterval(close, 400);
+    return () => window.clearInterval(id);
+  }, [needs, currentStep.id]);
 
   return null;
 }

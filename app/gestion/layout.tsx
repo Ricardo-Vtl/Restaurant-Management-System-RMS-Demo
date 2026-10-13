@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 import { GestionSidebar } from "@/components/gestion/sidebar";
 import { GestionHeader } from "@/components/gestion/header";
 import { NowProvider } from "@/lib/now-context";
-import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DemoGestion } from "@/components/demo/demo-gestion";
+import { DemoRealtimeGate } from "@/components/demo/demo-realtime-gate";
 import GestionLoading from "./loading";
 
 const AuthModal = dynamic(() => import("@/components/auth-modal").then((m) => m.AuthModal), {
@@ -68,12 +68,11 @@ function GestionContent({
   setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   children: React.ReactNode;
 }) {
-  useRealtimeSubscription();
-
   const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), [setSidebarOpen]);
 
   return (
     <div className="min-h-screen bg-background flex">
+      <DemoRealtimeGate />
       <a
         href="#gestion-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:outline-none focus:shadow-lg"
