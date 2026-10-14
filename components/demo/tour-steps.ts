@@ -255,7 +255,7 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Cobra la cuenta",
     body: "Abre el cierre de cuenta de la mesa.",
     href: "/gestion/caja",
-    target: { text: "Cobrar Mesa" },
+    target: { text: "Cobrar Mesa", within: { text: "Mesa §table" } },
     label: "Cobra aquí",
     completeWhen: { text: "Confirmar Cobro" },
   },
