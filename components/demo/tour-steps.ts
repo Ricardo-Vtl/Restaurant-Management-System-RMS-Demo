@@ -286,9 +286,6 @@ export const TOUR_STEPS: TourStep[] = [
     title: "El libro de movimientos",
     body: "Entradas, salidas, mermas y el descuento automático por venta quedan registrados aquí.",
     href: "/gestion/logistica",
-    target: { text: "Movimientos" },
-    label: "Aquí revisas los movimientos",
-    mobileLabel: "El libro de movimientos",
     intro: true,
   },
   {
@@ -309,8 +306,6 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Altas, roles y PIN",
     body: "Da de alta empleados y asigna su rol y PIN de acceso.",
     href: "/gestion/personal",
-    target: { text: "Nuevo Personal" },
-    label: "Aquí das de alta a tu equipo",
     intro: true,
   },
   {
@@ -331,8 +326,6 @@ export const TOUR_STEPS: TourStep[] = [
     title: "White-label de verdad",
     body: "Identidad, horarios, canales, impuestos y operación: todo editable sin tocar código.",
     href: "/gestion/config",
-    target: { text: "Identidad" },
-    label: "Revisa la configuración",
     intro: true,
   },
   {
