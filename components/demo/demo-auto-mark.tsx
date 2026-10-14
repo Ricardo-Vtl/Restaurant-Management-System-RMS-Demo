@@ -64,13 +64,13 @@ export function DemoOrdersAutoMark() {
     };
     if (!orders) return base;
 
-    // Acota al recurso de la sesión (su mesa). Si aún no hay claim, cae al
-    // criterio temporal para no contaminar con órdenes de otras sesiones.
-    const fresh = session
-      ? orders.filter((o) => o.tableId === session.tableId)
-      : state.startedAt
-        ? orders.filter((o) => o.createdAt.getTime() > new Date(state.startedAt as string).getTime())
-        : [];
+    // Solo órdenes de ESTA sesión: posteriores al inicio del recorrido Y de la
+    // mesa reclamada (si existe). Sin el filtro temporal, órdenes previas de la
+    // misma mesa (histórico del demo) marcarían pasos de forma prematura.
+    const since = state.startedAt ? new Date(state.startedAt).getTime() : 0;
+    const fresh = orders.filter(
+      (o) => o.createdAt.getTime() > since && (!session || o.tableId === session.tableId),
+    );
 
     return {
       ...base,
