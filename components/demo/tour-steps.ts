@@ -159,7 +159,7 @@ export const TOUR_STEPS: TourStep[] = [
     title: "Agrega un platillo",
     body: "Toca un platillo del menú de la mesa para configurarlo.",
     href: "/gestion/mesas",
-    target: { text: "Aguachile Tradicional" },
+    target: { text: "Hamburguesa Clásica" },
     label: "Elige un platillo",
     completeWhen: { text: "Añadir a la Mesa" },
   },

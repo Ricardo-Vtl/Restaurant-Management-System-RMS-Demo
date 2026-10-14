@@ -13,6 +13,11 @@ EXCLUDES=(
   ':(exclude).agents'
   ':(exclude).opencode'
   ':(exclude).playwright-mcp'
+  # README, LICENSE y assets son propios de la demo (vitrina pública): excluidos
+  # para que un cambio de upstream no los sobrescriba.
+  ':(exclude)README.md'
+  ':(exclude)LICENSE'
+  ':(exclude)assets'
 )
 
 if ! git diff --quiet || ! git diff --cached --quiet; then

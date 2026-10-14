@@ -38,6 +38,13 @@ opencode.json
 # `git add -A` would otherwise sweep it in). See AGENTS.md.
 AGENTS.md
 
+# Documentación local de la demo (no se publica), salvo los docs de vitrina
+# enlazados desde el README.
+docs/*
+!docs/ARCHITECTURE.md
+!docs/DEMO-LAYER.md
+assets/*
+
 # Artefactos de sesiones Playwright MCP (snapshots/screenshots)
 .playwright-mcp/
 
