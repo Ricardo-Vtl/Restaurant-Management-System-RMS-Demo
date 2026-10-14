@@ -390,14 +390,15 @@ export function DemoKanbanSync() {
 }
 
 /**
- * Cierra overlays que tapan el objetivo de pasos que necesitan el sidebar o el
- * carrito (p. ej. el modal de mesa queda abierto si la sesión llegó a una mesa
- * ya abierta). Se ejecuta al activarse el paso y no toca pasos dentro de modal.
+ * Cierra overlays que tapan el objetivo de pasos que necesitan el sidebar
+ * (p. ej. el modal de mesa queda abierto si la sesión llegó a una mesa ya
+ * abierta). Solo pasos de navegación: los pasos de carrito (`needsCart`) viven
+ * DENTRO del modal, así que no deben cerrarlo.
  */
 export function DemoOverlaySync() {
   const { active, currentStep } = useDemoTour();
 
-  const needs = active && (!!currentStep.needsSidebar || !!currentStep.needsCart);
+  const needs = active && !!currentStep.needsSidebar;
 
   useEffect(() => {
     if (!needs) return;
