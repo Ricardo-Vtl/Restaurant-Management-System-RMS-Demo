@@ -311,8 +311,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Da de alta empleados y asigna su rol y PIN de acceso.",
     href: "/gestion/personal",
     target: { text: "Nuevo Personal" },
-    label: "Da de alta a tu equipo",
+    label: "Abre Nuevo Personal",
     intro: true,
+    completeWhen: { selector: '[role="dialog"]' },
+    requireTransition: true,
   },
   {
     id: "config",

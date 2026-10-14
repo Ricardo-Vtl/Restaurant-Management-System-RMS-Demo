@@ -8,7 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, ChevronLeft, ChevronRight, Compass, KeyRound, RotateCcw, X } from "lucide-react";
+import { Check, ChevronLeft, Compass, KeyRound, RotateCcw, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -227,35 +227,36 @@ export function TourWidget() {
                   </Button>
                 )}
 
-                {isDesktop ? (
-                  <div className="mt-4 flex items-center gap-2">
+                <div className="mt-4 flex flex-col gap-2">
+                  {(!hasAction || !isDesktop) && (
                     <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={prev}
-                      disabled={index === 0}
-                      aria-label="Paso anterior"
+                      onClick={handleUnderstood}
+                      className="w-full h-12 text-base bg-coral hover:bg-coral/90"
                     >
-                      <ChevronLeft className="size-4" aria-hidden="true" />
-                    </Button>
-                    <Button
-                      onClick={isLast ? finish : next}
-                      className="flex-1 bg-coral hover:bg-coral/90"
-                    >
-                      {isLast ? "Finalizar" : "Siguiente"}
-                      {!isLast && <ChevronRight className="size-4 ml-2" aria-hidden="true" />}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="mt-4 flex flex-col gap-2">
-                    <Button onClick={handleUnderstood} className="w-full h-12 text-base bg-coral hover:bg-coral/90">
                       {isLast && !hasAction ? "Finalizar" : "Entendido"}
                     </Button>
-                    <Button variant="ghost" onClick={handleSkip} className="w-full text-muted-foreground">
+                  )}
+                  <div className="flex items-center gap-2">
+                    {isDesktop && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={prev}
+                        disabled={index === 0}
+                        aria-label="Paso anterior"
+                      >
+                        <ChevronLeft className="size-4" aria-hidden="true" />
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      onClick={handleSkip}
+                      className="flex-1 text-muted-foreground"
+                    >
                       Saltar recorrido
                     </Button>
                   </div>
-                )}
+                </div>
 
                 <div className="mt-3 flex justify-center">
                   <button
