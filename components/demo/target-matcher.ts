@@ -29,7 +29,7 @@ export interface FindTargetOptions {
 const INTERACTIVE =
   "button, a, [role='button'], [role='tab'], [role='menuitem'], [role='radio']";
 
-const TABLE_LABEL_RE = /Mesa\s+\S+/g;
+const TABLE_LABEL_RE = /^Mesa\s+\d+(?:\+\d+)*$/;
 
 function normalize(value: string): string {
   return value.replace(/\s+/g, " ").trim();
@@ -59,18 +59,19 @@ function isVisible(el: Element, opts: FindTargetOptions = {}): boolean {
 
 /**
  * ¿El control vive en la tarjeta de la mesa buscada y no en un contenedor que
- * agrupa varias mesas? Sube por los ancestros hasta uno que mencione la mesa
- * objetivo y que no contenga etiquetas de OTRAS mesas.
+ * agrupa varias mesas? Cuenta etiquetas de mesa EXACTAS dentro de cada ancestro:
+ * los nodos pueden pegar "Mesa 1" con el cronómetro ("Mesa 100:46"), así que se
+ * exige coincidencia completa de un nodo (no de texto concatenado).
  */
 function matchWithin(el: Element, wanted: string): boolean {
   let node = el.parentElement;
   while (node !== null) {
-    const text = normalize(node.textContent ?? "");
-    if (text.includes(wanted)) {
-      const labels = new Set((text.match(TABLE_LABEL_RE) ?? []).map(normalize));
-      labels.delete(wanted);
-      if (labels.size === 0) return true;
+    const labels = new Set<string>();
+    for (const d of node.querySelectorAll<HTMLElement>("*")) {
+      const text = normalize(d.textContent ?? "");
+      if (TABLE_LABEL_RE.test(text)) labels.add(text);
     }
+    if (labels.has(wanted)) return labels.size === 1;
     node = node.parentElement;
   }
   return false;
