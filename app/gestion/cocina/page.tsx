@@ -113,7 +113,7 @@ export default function CocinaPage() {
           onScroll={handleScroll}
           role="group"
           aria-label="Paneles de cocina"
-          className="flex-1 min-h-0 flex lg:grid lg:grid-cols-2 gap-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none"
+          className="flex-1 min-h-0 flex lg:grid lg:grid-cols-2 lg:auto-rows-[minmax(0,1fr)] gap-4 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none"
         >
           <div className="w-full shrink-0 snap-start snap-always lg:w-auto">
             <KitchenQueue orders={queue} onAccept={(orderId) => acceptOrder.mutate(orderId)} />

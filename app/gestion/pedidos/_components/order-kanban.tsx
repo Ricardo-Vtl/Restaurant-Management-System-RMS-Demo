@@ -76,7 +76,7 @@ export function OrderKanban({ orders, search, onSelectOrder }: OrderKanbanProps)
         onScroll={handleScroll}
         role="group"
         aria-label="Columnas de pedidos"
-        className="flex-1 min-h-0 flex md:grid md:grid-cols-3 gap-2 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none"
+        className="flex-1 min-h-0 flex md:grid md:grid-cols-3 md:auto-rows-[minmax(0,1fr)] gap-2 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none"
       >
         {ACTIVE_COLUMNS.map((col) => (
           <div key={col.id} className="w-full shrink-0 snap-start snap-always">

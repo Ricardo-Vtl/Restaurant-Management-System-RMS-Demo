@@ -2,6 +2,7 @@
 
 import { GlassWater, UtensilsCrossed, IceCream, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ScrollStrip } from "@/components/scroll-strip";
 
 export interface CategoryItem {
   name: string;
@@ -25,11 +26,7 @@ function iconFor(name: string) {
 export function CategoryRail({ items, total, active, onSelect }: CategoryRailProps) {
   return (
     <div className="sticky top-0 z-20 -mx-4 px-4 py-3 bg-background/85 backdrop-blur-md border-b border-navy/5">
-      <div
-        role="group"
-        aria-label="Filtrar por categoría"
-        className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 md:justify-center"
-      >
+      <ScrollStrip ariaLabel="Filtrar por categoría" className="flex gap-2 pb-1">
         <Pill
           active={active === "all"}
           onClick={() => onSelect("all")}
@@ -47,7 +44,7 @@ export function CategoryRail({ items, total, active, onSelect }: CategoryRailPro
             count={it.count}
           />
         ))}
-      </div>
+      </ScrollStrip>
     </div>
   );
 }

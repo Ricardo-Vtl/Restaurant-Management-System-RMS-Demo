@@ -7,6 +7,19 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es/1.1.0/); el p
 
 ---
 
+## [2026-10-14] — Rieles de categorías y columnas del kanban/KDS en escritorio
+
+Fixes de scroll en escritorio (móvil no se toca). Documentado en `docs/DESIGN_SYSTEM.md` (repo oficial) §3.6/§3.11.
+
+### Added
+- `components/scroll-strip.tsx` (`ScrollStrip`): riel horizontal de chips con flechas `< >` que aparecen solo al desbordar, fuera del scroller (no tapan chips), `size-11 sm:size-9` y respetan `prefers-reduced-motion`.
+
+### Fixed
+- Rieles de categorías sin navegación en escritorio: `md:justify-center` dejaba el inicio inalcanzable (`scrollLeft` no admite negativos) y `scrollbar-hide` quitaba la única pista de scroll. Se cablea `ScrollStrip` en Menú (`category-rail`), landing (`menu-section`) y modal de Mesa (`MenuTab`).
+- Kanban (Pedidos) y KDS (Cocina) sin scroll interno por columna en escritorio: la rejilla con filas `auto` crecía con el contenido y las cards de abajo se recortaban por el `overflow-hidden` de la página. Se acota la fila con `md/lg:auto-rows-[minmax(0,1fr)]`.
+
+---
+
 ## [2026-10-13] — Off-branding de la documentación + doctrina
 
 Se elimina toda referencia literal a la marca/negocio del sistema. El producto se documenta como **Restaurant Management System (RMS)** y la identidad queda 100% dinámica vía `restaurant_config`. El código ya estaba des-marcado (el literal solo vivía en documentación).

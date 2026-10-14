@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassWater, UtensilsCrossed, IceCream, LayoutGrid } from "lucide-react";
 import { ProductCard } from "./product-card";
+import { ScrollStrip } from "@/components/scroll-strip";
 
 const ProductModal = dynamic(() => import("./product-modal").then((m) => m.ProductModal), { ssr: false, loading: () => null });
 import { useActiveProducts } from "@/hooks/use-products";
@@ -24,8 +25,6 @@ export function MenuSection() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: allProducts = [] } = useActiveProducts();
-
-  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -103,7 +102,7 @@ export function MenuSection() {
 
         {categories.length > 0 ? (
           <div className="sticky top-20 z-30 bg-background/80 backdrop-blur-md py-6 -mx-4 px-4 mb-12 border-b border-navy/5">
-            <div ref={tabsRef} className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 md:justify-center">
+            <ScrollStrip ariaLabel="Filtrar por categoría" className="flex gap-3 pb-2">
               {categories.map((cat) => {
                 const Icon = iconMap[cat.icon] || UtensilsCrossed;
                 // El conteo ahora refleja todos los productos vigentes expuestos
@@ -127,7 +126,7 @@ export function MenuSection() {
                   </button>
                 );
               })}
-            </div>
+            </ScrollStrip>
           </div>
         ) : (
           <div className="text-center py-20 opacity-50">

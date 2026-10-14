@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/format";
 import { computeItemPrice } from "@/lib/pricing";
 import { Empty, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { ScrollStrip } from "@/components/scroll-strip";
 import { useEnviarComanda } from "../../_hooks/useEnviarComanda";
 
 const ProductModal = dynamic(() => import("@/components/product-modal").then((m) => m.ProductModal), { ssr: false, loading: () => null });
@@ -123,19 +124,21 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
       {/* SECCIÓN PRODUCTOS */}
       <div className="flex-1 flex flex-col min-w-0 bg-white h-full overflow-hidden">
         {/* Categorías */}
-        <div className="border-b bg-white shrink-0 overflow-x-auto scrollbar-hide touch-pan-x">
+        <div className="border-b bg-white shrink-0">
           <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-            <TabsList className="flex p-2 gap-2 min-w-max bg-transparent h-auto">
-              {categories.map((cat) => (
-                <TabsTrigger
-                  key={cat}
-                  value={cat}
-                  className="whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-[10px] font-black uppercase transition-all data-[state=active]:bg-coral data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-coral/20 data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
-                >
-                  {cat}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <ScrollStrip ariaLabel="Filtrar por categoría" className="px-2 py-2">
+              <TabsList className="flex gap-2 min-w-max bg-transparent h-auto">
+                {categories.map((cat) => (
+                  <TabsTrigger
+                    key={cat}
+                    value={cat}
+                    className="whitespace-nowrap px-4 py-2 rounded-xl text-xs sm:text-[10px] font-black uppercase transition-all data-[state=active]:bg-coral data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-coral/20 data-[state=inactive]:bg-muted data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:bg-muted"
+                  >
+                    {cat}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </ScrollStrip>
           </Tabs>
         </div>
 
