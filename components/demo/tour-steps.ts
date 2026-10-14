@@ -69,6 +69,10 @@ export interface TourStep {
   mobileLabel?: string;
   /** Completa cuando este elemento aparece en el DOM. */
   completeWhen?: TourTarget;
+  /** Exige que el elemento completeWhen aparezca DURANTE el paso (transición
+   *  ausente→presente) en vez de valer si ya estaba presente al entrar. Evita
+   *  saltos por señales ambientales (p. ej. un enlace del sidebar). */
+  requireTransition?: boolean;
   /** Completa cuando este elemento desaparece (tras haber aparecido). */
   completeWhenGone?: TourTarget;
   /** Como completeWhen pero solo en móvil (target en el carrito oculto). */
@@ -147,7 +151,8 @@ export const TOUR_STEPS: TourStep[] = [
     href: "/gestion/mesas",
     target: { text: "Confirmar y Abrir" },
     label: "Confirma la mesa",
-    completeWhen: { text: "Menú" },
+    completeWhen: { text: "Menú", within: { selector: '[role="dialog"]' } },
+    requireTransition: true,
   },
   {
     id: "product",

@@ -22,6 +22,7 @@ import { useDemoTour } from "./demo-tour-context";
 import { TOUR_STEPS, shouldAutoComplete, type TourAutoContext } from "./tour-steps";
 import { findTargetElement } from "./target-matcher";
 import { useIsDesktop } from "./use-media-query";
+import { demoLog } from "@/lib/demo/config";
 
 // Ritmo del recorrido: más margen entre acciones automáticas para que dé tiempo
 // a leer (híbrido acción-trigger + tiempos holgados).
@@ -44,7 +45,10 @@ export function DemoAuthAutoMark() {
 
   useEffect(() => {
     if (!active) return;
-    if (shouldAutoComplete(currentStep, ctx)) complete(currentStep.id);
+    if (shouldAutoComplete(currentStep, ctx)) {
+      demoLog("auto:auth", currentStep.id);
+      complete(currentStep.id);
+    }
   }, [active, currentStep, ctx, complete]);
 
   return null;
@@ -62,14 +66,17 @@ export function DemoOrdersAutoMark() {
       hasDeliveredOrder: false,
       hasPaidOrder: false,
     };
-    if (!orders) return base;
+    if (!orders || !session || !state.startedAt) return base;
 
     // Solo órdenes de ESTA sesión: posteriores al inicio del recorrido Y de la
-    // mesa reclamada (si existe). Sin el filtro temporal, órdenes previas de la
-    // misma mesa (histórico del demo) marcarían pasos de forma prematura.
-    const since = state.startedAt ? new Date(state.startedAt).getTime() : 0;
+    // mesa/sesión reclamada. Sin el corte temporal, órdenes previas de la misma
+    // mesa (histórico del demo) marcarían pasos de forma prematura; sin sesión,
+    // se tomarían órdenes de otras sesiones.
+    const since = new Date(state.startedAt).getTime();
     const fresh = orders.filter(
-      (o) => o.createdAt.getTime() > since && (!session || o.tableId === session.tableId),
+      (o) =>
+        o.createdAt.getTime() > since &&
+        (o.demoSession ? o.demoSession === session.sessionId : o.tableId === session.tableId),
     );
 
     return {
@@ -84,7 +91,10 @@ export function DemoOrdersAutoMark() {
 
   useEffect(() => {
     if (!active) return;
-    if (shouldAutoComplete(currentStep, ctx)) complete(currentStep.id);
+    if (shouldAutoComplete(currentStep, ctx)) {
+      demoLog("auto:order", currentStep.id);
+      complete(currentStep.id);
+    }
   }, [active, currentStep, ctx, complete]);
 
   return null;
@@ -113,7 +123,10 @@ export function DemoRouteAutoMark() {
   // Los pasos "clic en el link" se completan cuando la ruta coincide.
   useEffect(() => {
     if (!active || !isRoute || !href) return;
-    if (currentStep.completeOnRoute && pathname === href) complete(currentStep.id);
+    if (currentStep.completeOnRoute && pathname === href) {
+      demoLog("route", currentStep.id, pathname);
+      complete(currentStep.id);
+    }
   }, [active, isRoute, href, currentStep.id, currentStep.completeOnRoute, pathname, complete]);
 
   return null;
@@ -121,12 +134,14 @@ export function DemoRouteAutoMark() {
 
 export function DemoDomAutoMark() {
   const { active, currentStep, complete, session } = useDemoTour();
-  const seenRef = useRef(false);
+  const seenAbsentRef = useRef(false); // completeWhen: ya estuvo ausente
+  const seenPresentRef = useRef(false); // completeWhenGone: ya estuvo presente
   const isDesktop = useIsDesktop();
 
   useEffect(() => {
     if (!active) return;
-    seenRef.current = false;
+    seenAbsentRef.current = false;
+    seenPresentRef.current = false;
 
     // En móvil algunos targets viven en drawers ocultos (carrito): usan su señal propia.
     const completeWhen = isDesktop
@@ -136,13 +151,26 @@ export function DemoDomAutoMark() {
     const vars = session ? { table: session.tableNumber } : {};
 
     const check = () => {
-      if (completeWhen && findTargetElement(completeWhen, { vars })) {
-        complete(currentStep.id);
+      if (completeWhen) {
+        const present = findTargetElement(completeWhen, { vars }) !== null;
+        if (present) {
+          // Si el paso exige transición, solo completa cuando el elemento
+          // apareció durante el paso (evita saltos por señales ambientales).
+          if (!currentStep.requireTransition || seenAbsentRef.current) {
+            demoLog("dom", currentStep.id);
+            complete(currentStep.id);
+          }
+        } else {
+          seenAbsentRef.current = true;
+        }
       }
       if (currentStep.completeWhenGone) {
         const exists = findTargetElement(currentStep.completeWhenGone, { vars }) !== null;
-        if (exists) seenRef.current = true;
-        else if (seenRef.current) complete(currentStep.id);
+        if (exists) seenPresentRef.current = true;
+        else if (seenPresentRef.current) {
+          demoLog("dom:gone", currentStep.id);
+          complete(currentStep.id);
+        }
       }
     };
 
@@ -176,6 +204,7 @@ export function DemoAutoAdvance() {
     if (!state.completed.includes(currentStep.id)) return;
 
     const isLast = state.step >= TOUR_STEPS.length - 1;
+    demoLog("advance", currentStep.id, "→", isLast ? "finish" : TOUR_STEPS[state.step + 1].id);
     const timer = window.setTimeout(() => {
       if (isLast) finish();
       else next();

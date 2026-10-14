@@ -125,6 +125,7 @@ export type Database = {
           completed_at: string | null
           created_at: string | null
           customer_info: Json | null
+          demo_session: string | null
           delivery_fee: number
           discount: number | null
           id: string
@@ -150,6 +151,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           customer_info?: Json | null
+          demo_session?: string | null
           delivery_fee?: number
           discount?: number | null
           id?: string
@@ -175,6 +177,7 @@ export type Database = {
           completed_at?: string | null
           created_at?: string | null
           customer_info?: Json | null
+          demo_session?: string | null
           delivery_fee?: number
           discount?: number | null
           id?: string

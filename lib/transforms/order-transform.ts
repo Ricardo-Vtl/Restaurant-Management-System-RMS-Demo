@@ -13,6 +13,7 @@ interface OrderRow {
   created_at: string | null;
   waiter_id?: string | null;
   staff_id?: string | null;
+  demo_session?: string | null;
   customer_info?: Json;
   subtotal?: number | null;
   tax?: number | null;
@@ -47,7 +48,7 @@ interface OrderItemRow {
 export const ORDER_SELECT = `
   id, order_number, table_id, type, status, payment_status, payment_method, total,
   subtotal, tax, discount, delivery_fee, notes, waiter_id, staff_id, customer_info,
-  accepted_at, ready_at, completed_at, cancelled_at, cancel_reason, created_at,
+  demo_session, accepted_at, ready_at, completed_at, cancelled_at, cancel_reason, created_at,
   tables(number),
   order_items(id, order_id, product_id, quantity, unit_price, total_price, modifiers, status, created_at, products(name))
 `;
@@ -107,6 +108,7 @@ export function dbOrderToDomain(row: OrderRow, items?: OrderItemRow[]): Order {
     tableNumber: row.tables?.number ?? undefined,
     waiterId: row.waiter_id ?? undefined,
     staffId: row.staff_id ?? undefined,
+    demoSession: row.demo_session ?? undefined,
     customerInfo: parseCustomerInfo(row.customer_info),
     subtotal: Number(row.subtotal ?? 0),
     tax: Number(row.tax ?? 0),

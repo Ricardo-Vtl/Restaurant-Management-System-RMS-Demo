@@ -90,6 +90,11 @@ describe("tour-steps", () => {
     expect(mesa?.target?.text).toContain("§table");
   });
 
+  it("mesa-confirm acota su completeWhen dentro del modal (no el sidebar)", () => {
+    const step = TOUR_STEPS.find((s) => s.id === "mesa-confirm");
+    expect(step?.completeWhen?.within?.selector).toContain("dialog");
+  });
+
   it("completeOnRoute solo aplica a rutas absolutas", () => {
     for (const step of TOUR_STEPS) {
       if (step.completeOnRoute) expect(step.href?.startsWith("/")).toBe(true);

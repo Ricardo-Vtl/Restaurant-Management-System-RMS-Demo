@@ -122,6 +122,8 @@ export interface Order {
   tableNumber?: string;
   waiterId?: string;
   staffId?: string;
+  /** Sesión de demo que creó la orden (solo repo demo). */
+  demoSession?: string;
 
   // Cliente (Crucial para Delivery/Take-away)
   customerInfo?: CustomerInfo;

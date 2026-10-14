@@ -21,6 +21,7 @@ export async function POST() {
 
     const row = Array.isArray(data) ? data[0] : data;
     return NextResponse.json({
+      sessionId: sid,
       tableId: row?.table_id ?? null,
       tableNumber: row?.table_number ?? null,
     });

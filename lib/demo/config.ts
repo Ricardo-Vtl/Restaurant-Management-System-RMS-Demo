@@ -15,3 +15,17 @@ export const DEMO_CLAIM_TTL_MINUTES = 60;
 
 /** Horas tras las que una orden activa huérfana se cancela en el GC. */
 export const DEMO_ORDER_TTL_HOURS = 24;
+
+/**
+ * Log de diagnóstico del tour (transiciones de paso). Activo en modo demo por
+ * defecto; silenciar con NEXT_PUBLIC_DEMO_DEBUG=0.
+ */
+export const DEMO_DEBUG = DEMO_MODE && process.env.NEXT_PUBLIC_DEMO_DEBUG !== "0";
+
+export function demoLog(...args: unknown[]): void {
+  if (DEMO_DEBUG) {
+    // eslint-disable-next-line no-console
+    console.info("[demo-tour]", ...args);
+  }
+}
+

@@ -6,6 +6,8 @@ import { handleApiError } from "@/lib/api-error";
 import { buildDefaultWindowOr } from "@/lib/status-transitions";
 import { ABILITIES } from "@/lib/abilities";
 import { ORDER_SELECT } from "@/lib/transforms/order-transform";
+import { DEMO_MODE } from "@/lib/demo/config";
+import { readSessionId } from "@/lib/demo/session";
 
 const DEFAULT_WINDOW_HOURS = 48;
 
@@ -105,6 +107,9 @@ export async function POST(req: Request) {
     const body = await req.json();
     const parsed = orderSchema.parse(body);
 
+    // Sella la orden con la sesión de demo (scoping exacto; null en producción).
+    const demoSession = DEMO_MODE ? await readSessionId() : null;
+
     const { data, error } = await supabaseAdmin
       .from("orders")
       .insert({
@@ -112,6 +117,7 @@ export async function POST(req: Request) {
         status: parsed.status ?? "pending",
         payment_status: "pending",
         total: 0,
+        ...(demoSession ? { demo_session: demoSession } : {}),
       })
       .select()
       .single();

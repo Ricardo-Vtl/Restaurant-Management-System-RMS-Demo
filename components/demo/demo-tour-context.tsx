@@ -27,12 +27,24 @@ import {
   releaseDemoTable,
   type DemoSession,
 } from "@/lib/demo/client";
+import { useAuthStore } from "@/lib/stores/auth-store";
+import { demoLog } from "@/lib/demo/config";
 
 // ponytail: estado por documento (no por navegador). El singleton de módulo se
 // conserva al navegar dentro de la SPA (landing↔gestión) y se reinicia al
 // recargar la página → la bienvenida siempre aparece al entrar.
 let memoryState: StoredTourState | null = null;
 let memorySession: DemoSession | null = null;
+
+// Al cerrar sesión se limpia el estado del tour: evita reanudar un paso viejo
+// al volver a entrar en la misma pestaña (sin recarga dura).
+useAuthStore.subscribe((state, prev) => {
+  if (prev.currentUser && !state.currentUser) {
+    memoryState = null;
+    memorySession = null;
+    void releaseDemoTable();
+  }
+});
 
 interface DemoTourContextValue {
   /** false hasta que el estado de módulo se hidrata (evita mismatch SSR). */
@@ -136,6 +148,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const complete = useCallback((id: TourStepId) => {
+    demoLog("complete", id);
     setState((prev) =>
       prev.completed.includes(id) ? prev : { ...prev, completed: [...prev.completed, id] },
     );
