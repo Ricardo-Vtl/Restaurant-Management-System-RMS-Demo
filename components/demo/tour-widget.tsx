@@ -33,6 +33,19 @@ function useDialogOpen(): boolean {
   return open;
 }
 
+// ¿Hay un Sheet lateral abierto? (p. ej. el detalle del pedido). En escritorio el
+// panel del tour se mueve a la izquierda para no tapar el panel lateral derecho.
+function useSheetOpen(): boolean {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const check = () => setOpen(!!document.querySelector('[data-slot="sheet-content"]'));
+    check();
+    const id = window.setInterval(check, 300);
+    return () => window.clearInterval(id);
+  }, []);
+  return open;
+}
+
 export function TourWidget() {
   const {
     mounted,
@@ -51,6 +64,7 @@ export function TourWidget() {
   const reduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLElement>(null);
   const dialogOpen = useDialogOpen();
+  const sheetOpen = useSheetOpen();
   const isDesktop = useIsDesktop();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -152,8 +166,10 @@ export function TourWidget() {
               "fixed z-[70] border-coral/30 bg-card shadow-2xl focus-visible:outline-none",
               // Móvil: bottom sheet
               "bottom-0 left-0 right-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t p-5",
-              // Desktop: panel lateral
-              "lg:bottom-24 lg:left-auto lg:right-6 lg:max-h-[calc(100dvh-8rem)] lg:w-96 lg:rounded-2xl lg:border",
+              // Desktop: panel lateral. Si hay un Sheet derecho abierto (detalle
+              // del pedido), se mueve a la izquierda para no taparlo.
+              "lg:bottom-24 lg:max-h-[calc(100dvh-8rem)] lg:w-96 lg:rounded-2xl lg:border",
+              sheetOpen ? "lg:left-64 lg:right-auto" : "lg:left-auto lg:right-6",
             )}
           >
             <div className="flex items-center justify-between gap-3">
