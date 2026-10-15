@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useEffectEvent } from "react";
 import Image from "next/image";
 import { X, Minus, Plus, Flame, Check } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useCart } from "@/lib/store";
-import type { Product, ProductSize, ProductSauce, ProductExtra, OrderItemModifiers } from "@/lib/types";
+import type { Product, ProductExtra, OrderItemModifiers } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,32 +29,37 @@ interface ProductModalProps {
   addLabel?: string;
 }
 
-export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }: ProductModalProps) {
+export function ProductModal(props: ProductModalProps) {
+  // Keyed reset: cada producto es una instancia nueva, así el estado transitorio
+  // (isAdding) y las opciones nunca se filtran de un producto al siguiente.
+  return <ProductModalContent key={props.product?.id ?? "empty"} {...props} />;
+}
+
+function ProductModalContent({ product, isOpen, onClose, onAddToCart, addLabel }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState<ProductSize | undefined>(undefined);
-  const [selectedSauce, setSelectedSauce] = useState<ProductSauce | undefined>(undefined);
-  const [spiceLevel, setSpiceLevel] = useState<string | undefined>(undefined);
-  const [selectedExtras, setSelectedExtras] = useState<Map<string, ProductExtra>>(new Map());
+  const [sizeId, setSizeId] = useState<string | undefined>(undefined);
+  const [sauceId, setSauceId] = useState<string | undefined>(undefined);
+  const [spiceName, setSpiceName] = useState<string | undefined>(undefined);
+  const [extraIds, setExtraIds] = useState<Set<string>>(new Set());
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const addTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const { addToCart, setIsCartOpen } = useCart();
 
-  // Reset state when modal opens
+  // Cierre diferido del "¡Agregado!" con la versión más reciente de los callbacks
+  // (regla 8.4: useEffectEvent evita el stale closure del setTimeout).
+  const finishAdd = useEffectEvent(() => {
+    setIsAdding(false);
+    onClose();
+    if (!onAddToCart) setIsCartOpen(true);
+  });
+
+  // Reset de estado propio al abrir. Las opciones (talla/salsa/picante/extras)
+  // se derivan del producto vigente, así que no hay nada que sincronizar aquí.
   useEffect(() => {
     if (isOpen && product) {
       setQuantity(1);
-      setSelectedSize(product.hasSizes ? product.sizes?.[0] : undefined);
-      setSelectedSauce(product.sauces?.[0]);
-
-      if (product.hasSpiceLevel && product.spiceLevels && product.spiceLevels.length > 0) {
-        setSpiceLevel(product.spiceLevels[0].name);
-      } else {
-        setSpiceLevel(undefined);
-      }
-
-      setSelectedExtras(new Map());
       setSpecialInstructions("");
     }
   }, [isOpen, product]);
@@ -74,6 +79,20 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
 
   if (!product) return null;
 
+  // Selecciones derivadas del producto vigente: un id de otro producto no
+  // resuelve y cae al default, evitando pasar un modificador inválido a pricing.
+  const selectedSize =
+    product.sizes?.find((s) => s.id === sizeId) ??
+    (product.hasSizes ? product.sizes?.[0] : undefined);
+  const selectedSauce =
+    product.sauces?.find((s) => s.id === sauceId) ?? product.sauces?.[0];
+  const selectedExtras = (product.extras ?? []).filter((e) => extraIds.has(e.id));
+  const spiceLevel = product.hasSpiceLevel
+    ? (product.spiceLevels?.some((l) => l.name === spiceName)
+        ? spiceName
+        : product.spiceLevels?.[0]?.name)
+    : undefined;
+
   const isFormValid = (): boolean => {
     if (!product) return false;
     if (product.hasSizes && !selectedSize) return false;
@@ -88,7 +107,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
       computeItemPrice(product, {
         size: selectedSize,
         sauce: selectedSauce,
-        extras: Array.from(selectedExtras.values()),
+        extras: selectedExtras,
       }) * quantity
     );
   };
@@ -101,7 +120,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
       size: selectedSize,
       sauce: selectedSauce,
       spiceLevel: spiceLevel || "",
-      extras: Array.from(selectedExtras.values()),
+      extras: selectedExtras,
       specialInstructions,
     };
 
@@ -111,20 +130,16 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
       addToCart(product, modifiers, quantity);
     }
 
-    addTimerRef.current = setTimeout(() => {
-      setIsAdding(false);
-      onClose();
-      if (!onAddToCart) setIsCartOpen(true);
-    }, 500);
+    addTimerRef.current = setTimeout(() => finishAdd(), 500);
   };
 
   const toggleExtra = (extra: ProductExtra) => {
-    setSelectedExtras((prev) => {
-      const next = new Map(prev);
+    setExtraIds((prev) => {
+      const next = new Set(prev);
       if (next.has(extra.id)) {
         next.delete(extra.id);
       } else {
-        next.set(extra.id, extra);
+        next.add(extra.id);
       }
       return next;
     });
@@ -183,7 +198,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                   <button
                     key={size.id}
                     type="button"
-                    onClick={() => setSelectedSize(size)}
+                    onClick={() => setSizeId(size.id)}
                     aria-pressed={selectedSize?.id === size.id}
                     className={cn(
                       "py-3 px-4 rounded-xl border-2 transition-all relative flex flex-col items-center",
@@ -216,7 +231,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                   <button
                     key={sauce.id}
                     type="button"
-                    onClick={() => setSelectedSauce(sauce)}
+                    onClick={() => setSauceId(sauce.id)}
                     aria-pressed={selectedSauce?.id === sauce.id}
                     className={cn(
                       "flex-1 min-w-25 py-3 px-4 rounded-xl border-2 transition-all text-center",
@@ -243,7 +258,7 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                   <button
                     key={level.id}
                     type="button"
-                    onClick={() => setSpiceLevel(level.name)}
+                    onClick={() => setSpiceName(level.name)}
                     aria-pressed={spiceLevel === level.name}
                     className={cn(
                       "flex-1 min-w-0 py-3 px-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center",
@@ -276,14 +291,14 @@ export function ProductModal({ product, isOpen, onClose, onAddToCart, addLabel }
                     onClick={() => toggleExtra(extra)}
                     className={cn(
                       "flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all",
-                      selectedExtras.has(extra.id)
+                      extraIds.has(extra.id)
                         ? "border-coral bg-coral/5"
                         : "border-border hover:border-coral/50",
                     )}
                   >
                     <div className="flex items-center gap-3">
                       <Checkbox
-                        checked={selectedExtras.has(extra.id)}
+                        checked={extraIds.has(extra.id)}
                         onCheckedChange={() => toggleExtra(extra)}
                         onClick={(e) => e.stopPropagation()}
                       />

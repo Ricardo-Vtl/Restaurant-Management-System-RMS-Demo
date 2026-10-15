@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { useActiveProducts } from "@/hooks/use-products";
@@ -271,7 +270,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                   ))}
                 </div>
 
-                <ScrollArea className="flex-1 min-h-0">
+                <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
                   <div className="grid grid-cols-2 gap-2 pb-2">
                     {displayedProducts.map((product) => (
                       <button
@@ -289,7 +288,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                       </button>
                     ))}
                   </div>
-                </ScrollArea>
+                </div>
 
                 <Separator className="my-3" />
 
@@ -301,7 +300,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                       </p>
                       <p className="font-black text-navy text-lg italic">{formatCurrency(total)}</p>
                     </div>
-                    <ScrollArea className="max-h-32">
+                    <div className="max-h-32 overflow-y-auto overscroll-contain">
                       <div className="flex flex-col gap-1.5">
                         {cartItems.map((item) => (
                           <div
@@ -333,7 +332,7 @@ export function OrderCreateModal({ isOpen, onClose }: OrderCreateModalProps) {
                           </div>
                         ))}
                       </div>
-                    </ScrollArea>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground text-center py-4 shrink-0">
