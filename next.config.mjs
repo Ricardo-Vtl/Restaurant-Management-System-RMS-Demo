@@ -14,7 +14,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://placehold.co https://*.fbcdn.net https://*.s3.amazonaws.com https://*.cloudfront.net${localSupabase}`,
   "font-src 'self'",
-  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${localSupabase} https://va.vercel-scripts.com https://vitals.vercel-analytics.com`,
+  `connect-src 'self' https://*.supabase.co wss://*.supabase.co${localSupabase} https://va.vercel-scripts.com https://vitals.vercel-analytics.com https://vitals.vercel-insights.com`,
   "frame-src https://www.google.com https://vercel.live",
   "worker-src 'self' blob:",
   "object-src 'none'",
