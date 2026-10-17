@@ -322,7 +322,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: "cierre",
     title: "¡Recorrido completado!",
-    body: "Explora libremente. El código completo está en github.com/Ricardo-Vtl/restaurant-manager — gracias por probar la demo.",
+    body: "Explora libremente. El código completo está en github.com/Ricardo-Vtl/Restaurant-Management-System-RMS-Demo — gracias por probar la demo.",
     intro: true,
   },
 ];
