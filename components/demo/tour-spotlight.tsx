@@ -179,6 +179,7 @@ export function TourSpotlight() {
   return (
     <div
       aria-hidden="true"
+      data-demo-spotlight
       className="pointer-events-none fixed z-[60]"
       style={{
         top: rect.top - PAD,

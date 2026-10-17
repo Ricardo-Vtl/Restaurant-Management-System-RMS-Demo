@@ -15,7 +15,8 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
-import { hasOpenDialog, hasOpenSheet } from "./demo-dom";
+import { hasOpenDialog, hasOpenSheet, spotlightRect } from "./demo-dom";
+import { computePanelDodgeY } from "./panel-dodge";
 import { TOUR_STEPS, clampStep, stepHasAction, tourProgress } from "./tour-steps";
 import { useIsDesktop } from "./use-media-query";
 
@@ -23,6 +24,9 @@ const PANEL_ID = "demo-tour-panel";
 
 // Ancho del Sheet de detalle (max-w-md): cuanto se corre el panel para no taparlo.
 const SHEET_SHIFT_PX = 448;
+// Anclaje del panel en desktop (lg:bottom-24 lg:right-6).
+const PANEL_BOTTOM_PX = 96;
+const PANEL_RIGHT_PX = 24;
 
 // Sondea un flag del DOM (diálogo/sheet abierto) cada 300 ms.
 function usePolledFlag(check: () => boolean): boolean {
@@ -34,6 +38,45 @@ function usePolledFlag(check: () => boolean): boolean {
     return () => window.clearInterval(id);
   }, [check]);
   return open;
+}
+
+/**
+ * Aparta el panel hacia arriba cuando el objetivo del spotlight cae bajo su
+ * franja (p. ej. "Enviar a Cocina" al pie de la comanda). Mide la caja SIN
+ * transformar (offset*) para no realimentarse con su propia animación.
+ */
+function usePanelDodge(opts: { enabled: boolean; stepId: string; shiftX: number }): number {
+  const [dodgeY, setDodgeY] = useState(0);
+
+  useEffect(() => {
+    if (!opts.enabled) {
+      setDodgeY(0);
+      return;
+    }
+    const compute = () => {
+      const panel = document.getElementById(PANEL_ID);
+      const target = spotlightRect();
+      if (!panel || !target) {
+        setDodgeY(0);
+        return;
+      }
+      const right = window.innerWidth - PANEL_RIGHT_PX + opts.shiftX;
+      const box = {
+        top: window.innerHeight - PANEL_BOTTOM_PX - panel.offsetHeight,
+        bottom: window.innerHeight - PANEL_BOTTOM_PX,
+        right,
+        left: right - panel.offsetWidth,
+      };
+      const y = computePanelDodgeY({ target, panel: box });
+      setDodgeY((prev) => (prev === y ? prev : y));
+    };
+
+    compute();
+    const id = window.setInterval(compute, 300);
+    return () => window.clearInterval(id);
+  }, [opts.enabled, opts.stepId, opts.shiftX]);
+
+  return dodgeY;
 }
 
 export function TourWidget() {
@@ -78,6 +121,7 @@ export function TourWidget() {
   // etiqueta como tal para no prometer un avance que no ocurre.
   const hidesOnly = hasAction && !introPending;
   const sheetShiftX = isDesktop && sheetOpen ? -SHEET_SHIFT_PX : 0;
+  const dodgeY = usePanelDodge({ enabled: open && isDesktop, stepId: currentStep.id, shiftX: sheetShiftX });
 
   const closePanel = () => {
     // Devuelve el foco al botón que abrió el panel (WCAG 2.4.3).
@@ -169,7 +213,7 @@ export function TourWidget() {
             role="region"
             aria-label="Recorrido guiado de la demo"
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0, x: sheetShiftX }}
+            animate={{ opacity: 1, y: dodgeY, x: sheetShiftX }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: 0.25 }}
             className={cn(
