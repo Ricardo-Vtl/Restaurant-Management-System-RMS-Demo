@@ -4,9 +4,11 @@
 // mesa concreta) y placeholders como "§table" resueltos con la sesión.
 
 export interface TourTarget {
+  /** Selector CSS (preferido: estable). */
   selector?: string;
+  /** Texto visible o aria-label de un control (match exacto, luego parcial). */
   text?: string;
-  /** Restringe la búsqueda a un contenedor (selector o texto). */
+  /** Restringe la búsqueda a un contenedor (selector o texto, admite §table). */
   within?: TourTarget;
 }
 

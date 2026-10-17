@@ -15,34 +15,24 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
-import { TOUR_STEPS, clampStep, tourProgress } from "./tour-steps";
+import { hasOpenDialog, hasOpenSheet } from "./demo-dom";
+import { TOUR_STEPS, clampStep, stepHasAction, tourProgress } from "./tour-steps";
 import { useIsDesktop } from "./use-media-query";
 
 const PANEL_ID = "demo-tour-panel";
 
-// ¿Hay un diálogo/sheet abierto? En móvil el botón flotante taparía el teclado
-// del PIN (o el CTA del carrito), así que se oculta mientras haya uno abierto.
-function useDialogOpen(): boolean {
-  const [open, setOpen] = useState(false);
-  useEffect(() => {
-    const check = () => setOpen(!!document.querySelector('[role="dialog"]'));
-    check();
-    const id = window.setInterval(check, 300);
-    return () => window.clearInterval(id);
-  }, []);
-  return open;
-}
+// Ancho del Sheet de detalle (max-w-md): cuanto se corre el panel para no taparlo.
+const SHEET_SHIFT_PX = 448;
 
-// ¿Hay un Sheet lateral abierto? (p. ej. el detalle del pedido). En escritorio el
-// panel del tour se mueve a la izquierda para no tapar el panel lateral derecho.
-function useSheetOpen(): boolean {
+// Sondea un flag del DOM (diálogo/sheet abierto) cada 300 ms.
+function usePolledFlag(check: () => boolean): boolean {
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    const check = () => setOpen(!!document.querySelector('[data-slot="sheet-content"]'));
-    check();
-    const id = window.setInterval(check, 300);
+    const run = () => setOpen(check());
+    run();
+    const id = window.setInterval(run, 300);
     return () => window.clearInterval(id);
-  }, []);
+  }, [check]);
   return open;
 }
 
@@ -59,12 +49,17 @@ export function TourWidget() {
     prev,
     setPanelOpen,
     acknowledgeIntro,
+    targetMissing,
   } = useDemoTour();
-  const { currentUser, setIsAuthModalOpen } = useAuth();
+  const { currentUser, isAuthModalOpen, setIsAuthModalOpen } = useAuth();
   const reduceMotion = useReducedMotion();
   const panelRef = useRef<HTMLElement>(null);
-  const dialogOpen = useDialogOpen();
-  const sheetOpen = useSheetOpen();
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  // En móvil el botón flotante taparía el teclado del PIN (o el CTA del carrito),
+  // así que se oculta mientras haya un diálogo abierto. En escritorio, con un
+  // Sheet lateral abierto (detalle del pedido) el panel se mueve a la izquierda.
+  const dialogOpen = usePolledFlag(hasOpenDialog);
+  const sheetOpen = usePolledFlag(hasOpenSheet);
   const isDesktop = useIsDesktop();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -78,17 +73,18 @@ export function TourWidget() {
     mounted && !isDesktop && active && !!currentStep.intro && state.introAckFor !== currentStep.id;
   const open = mounted && (isDesktop ? state.panelOpen : mobileOpen || introPending);
 
-  const hasAction = !!(
-    currentStep.auto ||
-    currentStep.completeWhen ||
-    currentStep.mobileCompleteWhen ||
-    currentStep.completeWhenGone ||
-    currentStep.completeOnRoute
-  );
+  const hasAction = stepHasAction(currentStep);
+  // En pasos de acción el botón no avanza (sólo cierra el sheet de intro): se
+  // etiqueta como tal para no prometer un avance que no ocurre.
+  const hidesOnly = hasAction && !introPending;
+  const sheetShiftX = isDesktop && sheetOpen ? -SHEET_SHIFT_PX : 0;
 
   const closePanel = () => {
+    // Devuelve el foco al botón que abrió el panel (WCAG 2.4.3).
+    const hadFocus = !!panelRef.current?.contains(document.activeElement);
     if (isDesktop) setPanelOpen(false);
     else setMobileOpen(false);
+    if (hadFocus) requestAnimationFrame(() => toggleRef.current?.focus());
   };
 
   // El bottom sheet no debe quedar sobre un modal: se cierra al abrirse uno.
@@ -136,6 +132,7 @@ export function TourWidget() {
     <>
       {!dialogOpen && !introPending && (
         <button
+          ref={toggleRef}
           type="button"
           onClick={() => (isDesktop ? setPanelOpen(!state.panelOpen) : setMobileOpen((v) => !v))}
           aria-expanded={open}
@@ -159,7 +156,7 @@ export function TourWidget() {
             role="region"
             aria-label="Recorrido guiado de la demo"
             initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0, x: sheetShiftX }}
             exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
             transition={{ duration: 0.25 }}
             className={cn(
@@ -167,9 +164,8 @@ export function TourWidget() {
               // Móvil: bottom sheet
               "bottom-0 left-0 right-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl border-t p-5",
               // Desktop: panel lateral. Si hay un Sheet derecho abierto (detalle
-              // del pedido), se mueve a la izquierda para no taparlo.
-              "lg:bottom-24 lg:max-h-[calc(100dvh-8rem)] lg:w-96 lg:rounded-2xl lg:border",
-              sheetOpen ? "lg:left-64 lg:right-auto" : "lg:left-auto lg:right-6",
+              // del pedido), se corre a la izquierda para no taparlo.
+              "lg:bottom-24 lg:max-h-[calc(100dvh-8rem)] lg:w-96 lg:rounded-2xl lg:border lg:left-auto lg:right-6",
             )}
           >
             <div className="flex items-center justify-between gap-3">
@@ -211,7 +207,7 @@ export function TourWidget() {
                       <Check className="size-3" aria-hidden="true" />
                       Completado
                     </Badge>
-                  ) : currentStep.auto || currentStep.completeWhen || currentStep.completeWhenGone || currentStep.completeOnRoute ? (
+                  ) : hasAction ? (
                     <Badge variant="outline" className="text-muted-foreground">
                       Se marca solo
                     </Badge>
@@ -229,7 +225,24 @@ export function TourWidget() {
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{currentStep.body}</p>
 
-                {currentStep.id === "login" && !currentUser && (
+                {targetMissing && hasAction && (
+                  <div role="status" className="mt-3 rounded-xl border border-coral/40 bg-coral/5 p-3">
+                    <p className="text-xs text-muted-foreground">
+                      Este paso no encuentra su elemento en pantalla: puede que se haya cerrado un
+                      panel o que estés en otro módulo. Reábrelo o continúa al siguiente paso.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full"
+                      onClick={isLast ? finish : next}
+                    >
+                      Ir al siguiente paso
+                    </Button>
+                  </div>
+                )}
+
+                {currentStep.id === "login" && !currentUser && !isAuthModalOpen && (
                   <Button
                     variant="outline"
                     className="mt-3 w-full"
@@ -247,10 +260,19 @@ export function TourWidget() {
                   {(!hasAction || !isDesktop) && (
                     <Button
                       onClick={handleUnderstood}
-                      className="w-full h-12 text-base bg-coral hover:bg-coral/90"
+                      variant={hidesOnly ? "outline" : "default"}
+                      className={cn(
+                        "w-full h-12 text-base",
+                        !hidesOnly && "bg-coral hover:bg-coral/90",
+                      )}
                     >
-                      {isLast && !hasAction ? "Finalizar" : "Entendido"}
+                      {hidesOnly ? "Ocultar guía" : isLast && !hasAction ? "Finalizar" : "Entendido"}
                     </Button>
+                  )}
+                  {hasAction && !isDesktop && (
+                    <p className="text-xs text-muted-foreground">
+                      Este paso avanza solo cuando hagas la acción señalada en pantalla.
+                    </p>
                   )}
                   <div className="flex items-center gap-2">
                     {isDesktop && (

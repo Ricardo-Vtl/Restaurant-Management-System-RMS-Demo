@@ -19,8 +19,24 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAllOrders } from "@/hooks/use-orders";
 import { useAuth } from "@/lib/store";
 import { useDemoTour } from "./demo-tour-context";
-import { TOUR_STEPS, shouldAutoComplete, type TourAutoContext } from "./tour-steps";
+import {
+  TOUR_STEPS,
+  decideAutoAdvance,
+  ownsAutoCondition,
+  shouldAutoComplete,
+  type TourAutoContext,
+  type TourStepId,
+} from "./tour-steps";
 import { findTargetElement } from "./target-matcher";
+import {
+  closeOpenDialog,
+  hasOpenDialog,
+  isMobileCartOpen,
+  isMobileSidebarOpen,
+  ordersKanbanScroller,
+  toggleMobileCart,
+  toggleMobileSidebar,
+} from "./demo-dom";
 import { useIsDesktop } from "./use-media-query";
 import { demoLog } from "@/lib/demo/config";
 
@@ -45,6 +61,8 @@ export function DemoAuthAutoMark() {
 
   useEffect(() => {
     if (!active) return;
+    // Solo los pasos de autenticación: los demás motores tienen su propio contexto.
+    if (!ownsAutoCondition(currentStep, ["authModal", "login"])) return;
     if (shouldAutoComplete(currentStep, ctx)) {
       demoLog("auto:auth", currentStep.id);
       complete(currentStep.id);
@@ -91,6 +109,9 @@ export function DemoOrdersAutoMark() {
 
   useEffect(() => {
     if (!active) return;
+    // Solo los pasos de órdenes: sin este filtro el contexto simulado de este
+    // motor (loggedIn: true) marcaba también los pasos de login.
+    if (!ownsAutoCondition(currentStep, ["order", "delivered", "paid"])) return;
     if (shouldAutoComplete(currentStep, ctx)) {
       demoLog("auto:order", currentStep.id);
       complete(currentStep.id);
@@ -105,6 +126,9 @@ export function DemoRouteAutoMark() {
   const pathname = usePathname();
   const router = useRouter();
   const isDesktop = useIsDesktop();
+  // Paso para el que ya navegamos. Evita "perseguir" al usuario: si se va a otro
+  // módulo por su cuenta, el tour no lo devuelve a la fuerza.
+  const pushedForRef = useRef<TourStepId | null>(null);
 
   const href = currentStep.href;
   const isRoute = !!href && href.startsWith("/");
@@ -113,12 +137,19 @@ export function DemoRouteAutoMark() {
   // sidebar; en móvil el tour abre el drawer y el usuario toca el enlace real.
   const userNavigates = !!currentStep.completeOnRoute && (isDesktop || !!currentStep.needsSidebar);
 
-  // Navegación automática al módulo del paso (solo cuando el usuario no navega).
+  // Navegación al módulo del paso (solo cuando el usuario no navega): una vez al
+  // activarse el paso, no en cada cambio de ruta.
   useEffect(() => {
     if (!active || !isRoute || !href) return;
     if (userNavigates) return;
-    if (pathname !== href) router.push(href);
-  }, [active, isRoute, href, pathname, router, userNavigates]);
+    if (pathname === href) {
+      pushedForRef.current = currentStep.id;
+      return;
+    }
+    if (pushedForRef.current === currentStep.id) return;
+    pushedForRef.current = currentStep.id;
+    router.push(href);
+  }, [active, isRoute, href, pathname, router, userNavigates, currentStep.id]);
 
   // Los pasos "clic en el link" se completan cuando la ruta coincide.
   useEffect(() => {
@@ -184,33 +215,41 @@ export function DemoDomAutoMark() {
 
 export function DemoAutoAdvance() {
   const { active, state, currentStep, next, finish } = useDemoTour();
-  const entryRef = useRef<{ id: string; wasComplete: boolean } | null>(null);
-  const isDesktop = useIsDesktop();
+  const entryRef = useRef<{ id: TourStepId; wasComplete: boolean; wentBack: boolean } | null>(null);
+  const lastIndexRef = useRef<number | null>(null);
 
-  // Registra si el paso ya estaba completo al entrar (evita re-avanzar al ir "Anterior").
+  // Al cambiar de paso se registra si el usuario volvió con "Paso anterior" y si
+  // el paso ya estaba completo al entrar (para no re-avanzar en ese caso).
   useEffect(() => {
+    const prevIndex = lastIndexRef.current;
     entryRef.current = {
       id: currentStep.id,
       wasComplete: state.completed.includes(currentStep.id),
+      wentBack: prevIndex !== null && state.step < prevIndex,
     };
+    lastIndexRef.current = state.step;
   }, [currentStep.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!active) return;
     const entry = entryRef.current;
     if (!entry || entry.id !== currentStep.id) return;
-    // Desktop: no re-avanzar al volver con "Anterior". Móvil: siempre se recupera.
-    if (entry.wasComplete && isDesktop) return;
-    if (!state.completed.includes(currentStep.id)) return;
 
-    const isLast = state.step >= TOUR_STEPS.length - 1;
-    demoLog("advance", currentStep.id, "→", isLast ? "finish" : TOUR_STEPS[state.step + 1].id);
+    const decision = decideAutoAdvance({
+      wentBack: entry.wentBack,
+      completedOnEntry: entry.wasComplete,
+      isComplete: state.completed.includes(currentStep.id),
+      isLast: state.step >= TOUR_STEPS.length - 1,
+    });
+    if (decision === "skip") return;
+
+    demoLog("advance", currentStep.id, "→", decision === "finish" ? "finish" : TOUR_STEPS[state.step + 1].id);
     const timer = window.setTimeout(() => {
-      if (isLast) finish();
+      if (decision === "finish") finish();
       else next();
     }, ADVANCE_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [active, state.completed, state.step, currentStep.id, next, finish, isDesktop]);
+  }, [active, state.completed, state.step, currentStep.id, next, finish]);
 
   return null;
 }
@@ -233,11 +272,9 @@ export function DemoSidebarSync() {
   useEffect(() => {
     if (isDesktop) return;
 
-    const overlay = () => document.querySelector<HTMLElement>('[class*="bg-navy/50"]');
-
     if (!needs) {
       if (openedRef.current) {
-        overlay()?.click();
+        if (isMobileSidebarOpen()) toggleMobileSidebar();
         openedRef.current = false;
       }
       return;
@@ -246,19 +283,14 @@ export function DemoSidebarSync() {
     let attempts = 0;
     let clicked = false;
     const tick = (): boolean => {
-      if (overlay()) {
+      if (isMobileSidebarOpen()) {
         openedRef.current = true;
         return true;
       }
-      if (!clicked) {
-        const btn = document.querySelector<HTMLButtonElement>(
-          'button[aria-label="Abrir menú de navegación"]',
-        );
-        if (btn) {
-          btn.click();
-          clicked = true;
-          openedRef.current = true;
-        }
+      // Un solo click: si se hiciera por tick, cada intento lo cerraría de nuevo.
+      if (!clicked && toggleMobileSidebar()) {
+        clicked = true;
+        openedRef.current = true;
       }
       return false;
     };
@@ -290,18 +322,9 @@ export function DemoCartSync() {
   useEffect(() => {
     if (isDesktop) return;
 
-    const cartEl = () => document.querySelector<HTMLElement>('aside[aria-live="polite"]');
-    // El carrito abre hacia la derecha: abierto ≈ left 0, cerrado ≈ ancho de pantalla.
-    const isOpen = () => {
-      const el = cartEl();
-      return !!el && el.getBoundingClientRect().left < 8;
-    };
-    const closeCart = () =>
-      document.querySelector<HTMLButtonElement>('button[aria-label="Cerrar carrito móvil"]')?.click();
-
     if (!needs) {
       if (openedRef.current) {
-        if (isOpen()) closeCart();
+        if (isMobileCartOpen()) toggleMobileCart();
         openedRef.current = false;
       }
       return;
@@ -310,19 +333,13 @@ export function DemoCartSync() {
     let attempts = 0;
     let clicked = false;
     const tick = (): boolean => {
-      if (isOpen()) {
+      if (isMobileCartOpen()) {
         openedRef.current = true;
         return true;
       }
-      if (!clicked) {
-        const btn = document.querySelector<HTMLButtonElement>(
-          'button[aria-label="Abrir carrito móvil"]',
-        );
-        if (btn) {
-          btn.click();
-          clicked = true;
-          openedRef.current = true;
-        }
+      if (!clicked && toggleMobileCart()) {
+        clicked = true;
+        openedRef.current = true;
       }
       return false;
     };
@@ -356,7 +373,7 @@ export function DemoKanbanSync() {
   useEffect(() => {
     if (!needs || !target) return;
 
-    const scroller = document.querySelector<HTMLElement>('[aria-label="Columnas de pedidos"]');
+    const scroller = ordersKanbanScroller();
     if (!scroller) return;
 
     const vars = tableNumber ? { table: tableNumber } : {};
@@ -394,6 +411,9 @@ export function DemoKanbanSync() {
  * (p. ej. el modal de mesa queda abierto si la sesión llegó a una mesa ya
  * abierta). Solo pasos de navegación: los pasos de carrito (`needsCart`) viven
  * DENTRO del modal, así que no deben cerrarlo.
+ *
+ * Cierra UNA vez por paso (reintenta un momento por si el modal se monta tarde):
+ * antes lo hacía cada 400 ms y le cerraba al visitante cualquier diálogo que abriera.
  */
 export function DemoOverlaySync() {
   const { active, currentStep } = useDemoTour();
@@ -403,19 +423,20 @@ export function DemoOverlaySync() {
   useEffect(() => {
     if (!needs) return;
 
-    const close = () => {
-      const dialog = document.querySelector('[role="dialog"]');
-      if (!dialog) return;
-      const btn = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button")).find((b) => {
-        const text = (b.textContent ?? "").trim();
-        const aria = b.getAttribute("aria-label") ?? "";
-        return text === "Cerrar" || text === "Close" || /cerrar/i.test(aria);
-      });
-      btn?.click();
+    let closed = false;
+    const tick = (): boolean => {
+      if (closed) return true;
+      if (!hasOpenDialog()) return false; // todavía no hay nada que cerrar
+      closed = closeOpenDialog();
+      return closed;
     };
 
-    close();
-    const id = window.setInterval(close, 400);
+    if (tick()) return;
+    let attempts = 0;
+    const id = window.setInterval(() => {
+      attempts += 1;
+      if (tick() || attempts > 12) window.clearInterval(id);
+    }, 200);
     return () => window.clearInterval(id);
   }, [needs, currentStep.id]);
 
@@ -439,23 +460,16 @@ export function DemoAutoDismiss() {
       return;
     }
 
-    // Cierra el diálogo/sheet abierto por su botón de cierre accesible. El modal
-    // de mesa usa "Cerrar" y el Sheet de detalle usa "Close" (sr-only).
-    const clickClose = (labels: string[]) => {
-      const btn = Array.from(
-        document.querySelectorAll<HTMLButtonElement>('[role="dialog"] button'),
-      ).find((b) => labels.includes((b.textContent ?? "").trim()));
-      btn?.click();
-    };
-
+    // Cierra el diálogo/sheet que quedó abierto tras la acción (el modal de mesa
+    // y el Sheet de detalle usan su propio botón de cierre accesible).
     if (state.completed.includes("send") && !handledRef.current.has("send")) {
       handledRef.current.add("send");
-      clickClose(["Cerrar"]);
+      closeOpenDialog();
     }
 
     if (state.completed.includes("deliver") && !handledRef.current.has("deliver")) {
       handledRef.current.add("deliver");
-      clickClose(["Close", "Cerrar"]);
+      closeOpenDialog();
     }
   }, [active, state.completed]);
 

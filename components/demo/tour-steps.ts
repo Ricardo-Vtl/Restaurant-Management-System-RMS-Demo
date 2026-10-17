@@ -1,6 +1,11 @@
 // Recorrido guiado de la demo — datos y reglas puras (sin React).
 // Solo existe en este repo (demo); el proyecto original no lo tiene.
 
+import type { TourTarget } from "./target-matcher";
+
+/** El matcher de targets es el dueño del tipo; acá se re-exporta para los pasos. */
+export type { TourTarget };
+
 export type TourStepId =
   | "landing"
   | "acceso"
@@ -31,25 +36,16 @@ export type TourStepId =
 /** Condición que marca un paso como completado leyendo estado real de la app. */
 export type TourAutoCondition = "authModal" | "login" | "order" | "delivered" | "paid";
 
-export interface TourTarget {
-  /** Selector CSS (preferido: estable). */
-  selector?: string;
-  /** Texto visible o aria-label de un control (match exacto, luego parcial). */
-  text?: string;
-  /** Restringe la búsqueda a un contenedor (selector o texto, admite §table). */
-  within?: TourTarget;
-}
-
 export interface TourStep {
   id: TourStepId;
   title: string;
   body: string;
   /** Ruta del módulo: el tour navega solo cuando el paso se activa. */
   href?: string;
-  /** Elemento que ilumina el spotlight (hueco exacto). */
+  /** Elemento que ilumina el spotlight (hueco exacto). El target puede vivir en
+   *  un contenedor oculto (sidebar/carrito/columna del kanban): los flags
+   *  `needs*` hacen que el tour lo abra o lo traiga a la vista antes. */
   target?: TourTarget;
-  /** Elemento alternativo en móvil (cuando el target vive en el sidebar oculto). */
-  mobileTarget?: TourTarget;
   /** El target vive en el sidebar: en móvil el tour abre el drawer y lo resalta. */
   needsSidebar?: boolean;
   /** El target vive en el carrito: en móvil el tour abre el drawer del carrito. */
@@ -65,7 +61,7 @@ export interface TourStep {
   labelPlacement?: "auto" | "inside";
   /** Etiqueta anclada al elemento (default "Haz clic aquí"). */
   label?: string;
-  /** Etiqueta alternativa en móvil (cuando la acción no es un clic). */
+  /** Etiqueta del spotlight en móvil (el panel suele estar cerrado). */
   mobileLabel?: string;
   /** Completa cuando este elemento aparece en el DOM. */
   completeWhen?: TourTarget;
@@ -85,6 +81,9 @@ export interface TourStep {
 export const TOUR_STEPS: TourStep[] = [
   {
     id: "landing",
+    // El tour se puede iniciar/reiniciar desde cualquier módulo: el paso 1 debe
+    // llevar a la landing (sin href quedaba hablando de una pantalla que no era).
+    href: "/",
     title: "La landing pública",
     body: "Así ve tu cliente el menú: catálogo en vivo desde la base de datos, categorías, carrito y pedidos en línea.",
     intro: true,
@@ -116,7 +115,6 @@ export const TOUR_STEPS: TourStep[] = [
     body: "KPIs del día, ocupación de mesas y pedidos en curso. El menú lateral se adapta a cada rol.",
     href: "/gestion",
     target: { selector: "aside" },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     radius: 24,
     label: "Tu menú de módulos",
@@ -128,11 +126,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Empecemos por el mapa de mesas.",
     href: "/gestion/mesas",
     target: { selector: 'a[href="/gestion/mesas"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Mesas",
-    mobileLabel: "Estás en Mesas",
+    mobileLabel: "Toca Mesas",
     completeOnRoute: true,
   },
   {
@@ -189,11 +186,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La comanda ya está en preparación.",
     href: "/gestion/cocina",
     target: { selector: 'a[href="/gestion/cocina"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Cocina",
-    mobileLabel: "Estás en Cocina (KDS)",
+    mobileLabel: "Toca Cocina",
     completeOnRoute: true,
   },
   {
@@ -211,11 +207,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "El pedido listo espera en Pedidos.",
     href: "/gestion/pedidos",
     target: { selector: 'a[href="/gestion/pedidos"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Pedidos",
-    mobileLabel: "Estás en Pedidos",
+    mobileLabel: "Toca Pedidos",
     completeOnRoute: true,
   },
   {
@@ -243,11 +238,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "La cuenta está lista para cobrar.",
     href: "/gestion/caja",
     target: { selector: 'a[href="/gestion/caja"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Caja",
-    mobileLabel: "Estás en Caja",
+    mobileLabel: "Toca Caja",
     completeOnRoute: true,
   },
   {
@@ -274,11 +268,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Cada venta descontó insumos automáticamente por receta.",
     href: "/gestion/logistica",
     target: { selector: 'a[href="/gestion/logistica"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Inventario",
-    mobileLabel: "Estás en Inventario",
+    mobileLabel: "Toca Inventario",
     completeOnRoute: true,
   },
   {
@@ -294,11 +287,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Altas, roles y PIN de acceso del personal.",
     href: "/gestion/personal",
     target: { selector: 'a[href="/gestion/personal"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Personal",
-    mobileLabel: "Estás en Personal",
+    mobileLabel: "Toca Personal",
     completeOnRoute: true,
   },
   {
@@ -314,11 +306,10 @@ export const TOUR_STEPS: TourStep[] = [
     body: "Nombre, colores, hero, horarios e impuestos sin tocar código.",
     href: "/gestion/config",
     target: { selector: 'a[href="/gestion/config"]' },
-    mobileTarget: { selector: "main h1" },
     needsSidebar: true,
     intro: true,
     label: "Haz clic en Config",
-    mobileLabel: "Estás en Configuración",
+    mobileLabel: "Toca Configuración",
     completeOnRoute: true,
   },
   {
@@ -359,15 +350,6 @@ export function isAutoConditionMet(condition: TourAutoCondition, ctx: TourAutoCo
   }
 }
 
-/** Paso que se completa cuando su condición se cumple (coherente con TOUR_STEPS[].auto). */
-export const AUTO_STEP: Record<TourAutoCondition, TourStepId> = {
-  authModal: "acceso",
-  login: "login",
-  order: "send",
-  delivered: "deliver",
-  paid: "cobrar-pago",
-};
-
 /**
  * ¿El paso ACTUAL debe marcarse solo? Solo si declara una condición `auto` y esa
  * condición ya se cumple. Anclar al paso actual (en vez de marcar pasos futuros)
@@ -377,12 +359,67 @@ export function shouldAutoComplete(step: TourStep, ctx: TourAutoContext): boolea
   return step.auto ? isAutoConditionMet(step.auto, ctx) : false;
 }
 
+/**
+ * ¿La condición de auto-marcado del paso pertenece a este motor? Cada motor debe
+ * mirar SOLO los pasos que declara: si no, un motor con contexto simulado (p. ej.
+ * el de órdenes, con `loggedIn: true` fijo) marcaba pasos de otro dominio.
+ */
+export function ownsAutoCondition(step: TourStep, conditions: TourAutoCondition[]): boolean {
+  return step.auto !== undefined && conditions.includes(step.auto);
+}
+
+/**
+ * ¿El paso avanza con una acción real del usuario? Los informacionales avanzan
+ * con "Entendido"; los de acción no llevan botón de avance.
+ */
+export function stepHasAction(step: TourStep): boolean {
+  return !!(
+    step.auto ||
+    step.completeWhen ||
+    step.mobileCompleteWhen ||
+    step.completeWhenGone ||
+    step.completeOnRoute
+  );
+}
+
 export function clampStep(step: number): number {
   return Math.min(Math.max(step, 0), TOUR_STEPS.length - 1);
 }
 
 export function tourProgress(step: number): number {
   return Math.round(((clampStep(step) + 1) / TOUR_STEPS.length) * 100);
+}
+
+/** Gracia antes de avisar que el objetivo del paso no está en pantalla (ms). */
+export const TARGET_MISSING_GRACE_MS = 2500;
+
+/** ¿Avisar que el objetivo del paso no aparece? (null = no se perdió) */
+export function isTargetMissing(
+  missingSince: number | null,
+  now: number,
+  graceMs: number = TARGET_MISSING_GRACE_MS,
+): boolean {
+  return missingSince !== null && now - missingSince >= graceMs;
+}
+
+export type AutoAdvanceDecision = "skip" | "advance" | "finish";
+
+/**
+ * Qué hace el auto-avance con el paso actual: avanzar cuando el paso está
+ * completado, salvo que el usuario haya vuelto atrás a un paso ya completado
+ * (si no, "Paso anterior" queda en loop). A propósito NO alcanza con "ya estaba
+ * completo al entrar": con el provider remontado (cruce landing↔gestión) eso
+ * dejaba el tour varado en un paso Completado sin botón para seguir.
+ */
+export function decideAutoAdvance(opts: {
+  wentBack: boolean;
+  completedOnEntry: boolean;
+  isComplete: boolean;
+  isLast: boolean;
+}): AutoAdvanceDecision {
+  if (!opts.isComplete) return "skip";
+  if (opts.wentBack && opts.completedOnEntry) return "skip";
+  return opts.isLast ? "finish" : "advance";
 }
 
 export interface StoredTourState {

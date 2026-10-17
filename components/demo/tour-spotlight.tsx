@@ -9,6 +9,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useDemoTour } from "./demo-tour-context";
 import { findTargetElement } from "./target-matcher";
+import { isTargetMissing } from "./tour-steps";
 import { useIsDesktop } from "./use-media-query";
 
 interface Rect {
@@ -40,24 +41,28 @@ function sameRect(a: Rect | null, b: Rect | null): boolean {
 }
 
 export function TourSpotlight() {
-  const { mounted, active, currentStep, session } = useDemoTour();
+  const { mounted, active, currentStep, session, reportTarget } = useDemoTour();
   const reduceMotion = useReducedMotion();
   const isDesktop = useIsDesktop();
   const [rect, setRect] = useState<Rect | null>(null);
   const scrolledRef = useRef(false);
+  // Desde cuándo el objetivo del paso no aparece (null = presente) y último
+  // estado reportado al contexto (para no re-renderizar en cada tick).
+  const missingSinceRef = useRef<number | null>(null);
+  const reportedRef = useRef<boolean | null>(null);
 
-  // En móvil los pasos cuyo target vive en el sidebar usan ese selector (el tour
-  // abre el drawer); el resto usa el mobileTarget (encabezado de la página).
-  const useSidebarTarget = !isDesktop && !!currentStep.needsSidebar;
-  const target = active
-    ? isDesktop || useSidebarTarget
-      ? currentStep.target
-      : currentStep.mobileTarget ?? currentStep.target
-    : undefined;
+  // El target del paso ilumina el elemento a usar: el tour abre lo que haga
+  // falta (drawer del sidebar, carrito, columna del kanban) para que esté visible.
+  const target = active ? currentStep.target : undefined;
   const tableNumber = session?.tableNumber;
 
   useEffect(() => {
     scrolledRef.current = false;
+    // El aviso de objetivo ausente se recalcula por paso (y el halo no debe
+    // heredarse del paso anterior).
+    missingSinceRef.current = null;
+    reportedRef.current = null;
+    setRect(null);
   }, [currentStep.id]);
 
   useEffect(() => {
@@ -71,8 +76,25 @@ export function TourSpotlight() {
     const tick = () => {
       if (stop) return;
       const el = findTargetElement(target, { vars });
-      const next = el ? rectOf(el) : null;
-      setRect((prev) => (sameRect(prev, next) ? prev : next));
+
+      // El panel avisa cuando el objetivo no aparece. Mientras la ausencia esté
+      // dentro de la gracia se conserva el último halo: evita el parpadeo de las
+      // mutaciones que cambian el texto del botón ("Procesando…", "Actualizando…").
+      if (el) {
+        missingSinceRef.current = null;
+        const next = rectOf(el);
+        setRect((prev) => (sameRect(prev, next) ? prev : next));
+      } else if (missingSinceRef.current === null) {
+        missingSinceRef.current = Date.now();
+      } else if (isTargetMissing(missingSinceRef.current, Date.now())) {
+        setRect(null);
+      }
+
+      const found = !isTargetMissing(missingSinceRef.current, Date.now());
+      if (reportedRef.current !== found) {
+        reportedRef.current = found;
+        reportTarget(currentStep.id, found);
+      }
 
       if (el && !scrolledRef.current) {
         scrolledRef.current = true;
@@ -95,7 +117,7 @@ export function TourSpotlight() {
     return () => {
       stop = true;
     };
-  }, [target, reduceMotion, tableNumber]);
+  }, [target, reduceMotion, tableNumber, currentStep.id, reportTarget]);
 
   // Mide el label real (2 líneas en móvil) para decidir arriba/abajo y clampear.
   const labelRef = useRef<HTMLDivElement>(null);

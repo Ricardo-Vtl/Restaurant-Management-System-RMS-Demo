@@ -65,6 +65,9 @@ interface DemoTourContextValue {
   complete: (id: TourStepId) => void;
   /** Marca el bottom-sheet de intro del paso actual como confirmado (móvil). */
   acknowledgeIntro: () => void;
+  /** El objetivo del paso actual no aparece en pantalla (lo reporta el spotlight). */
+  targetMissing: boolean;
+  reportTarget: (stepId: TourStepId, found: boolean) => void;
 }
 
 const DemoTourContext = createContext<DemoTourContextValue | null>(null);
@@ -73,6 +76,10 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<StoredTourState>(DEFAULT_TOUR_STATE);
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<DemoSession | null>(null);
+  // El spotlight reporta por paso si encontró su objetivo; el panel avisa cuando no.
+  const [targetState, setTargetState] = useState<{ stepId: TourStepId; found: boolean } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (memoryState) setState(memoryState);
@@ -110,7 +117,7 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       introAckFor: null,
       panelOpen: true,
     }));
-    void beginSession();
+    if (!memorySession) void beginSession();
   }, [beginSession]);
 
   const skipWelcome = useCallback(() => {
@@ -132,7 +139,9 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       introAckFor: null,
       panelOpen: true,
     }));
-    void beginSession();
+    // No re-reclamar si la sesión ya tiene mesa: reiniciar en medio del recorrido
+    // no debe mover la mesa (los pasos de comanda/cobro apuntarían a otra).
+    if (!memorySession) void beginSession();
   }, [beginSession]);
 
   const next = useCallback(() => {
@@ -161,6 +170,12 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const reportTarget = useCallback((stepId: TourStepId, found: boolean) => {
+    setTargetState((prev) =>
+      prev && prev.stepId === stepId && prev.found === found ? prev : { stepId, found },
+    );
+  }, []);
+
   const value = useMemo<DemoTourContextValue>(() => {
     const currentStep = TOUR_STEPS[clampStep(state.step)];
     return {
@@ -178,8 +193,11 @@ export function DemoTourProvider({ children }: { children: ReactNode }) {
       setPanelOpen,
       complete,
       acknowledgeIntro,
+      targetMissing:
+        targetState !== null && targetState.stepId === currentStep.id && !targetState.found,
+      reportTarget,
     };
-  }, [mounted, state, session, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, acknowledgeIntro]);
+  }, [mounted, state, session, start, skipWelcome, finish, reset, next, prev, setPanelOpen, complete, acknowledgeIntro, targetState, reportTarget]);
 
   return <DemoTourContext.Provider value={value}>{children}</DemoTourContext.Provider>;
 }

@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  AUTO_STEP,
+  TARGET_MISSING_GRACE_MS,
   TOUR_STEPS,
   clampStep,
+  decideAutoAdvance,
   isAutoConditionMet,
+  isTargetMissing,
+  ownsAutoCondition,
   shouldAutoComplete,
+  stepHasAction,
   tourProgress,
   type TourAutoContext,
   type TourTarget,
@@ -60,13 +64,6 @@ describe("tour-steps", () => {
       expect(isValidTarget(step.completeWhen)).toBe(true);
       expect(isValidTarget(step.completeWhenGone)).toBe(true);
       expect(isValidTarget(step.mobileCompleteWhen)).toBe(true);
-      expect(isValidTarget(step.mobileTarget)).toBe(true);
-    }
-  });
-
-  it("los pasos completeOnRoute tienen mobileTarget (sidebar oculto en móvil)", () => {
-    for (const step of TOUR_STEPS) {
-      if (step.completeOnRoute) expect(step.mobileTarget).toBeDefined();
     }
   });
 
@@ -101,10 +98,14 @@ describe("tour-steps", () => {
     }
   });
 
-  it("AUTO_STEP apunta al paso que declara cada condición", () => {
+  it("cada condición auto la declara un solo paso", () => {
+    const seen = new Map<string, string>();
     for (const step of TOUR_STEPS) {
-      if (step.auto) expect(AUTO_STEP[step.auto]).toBe(step.id);
+      if (!step.auto) continue;
+      expect(seen.get(step.auto)).toBeUndefined();
+      seen.set(step.auto, step.id);
     }
+    expect(seen.size).toBeGreaterThan(0);
   });
 
   it("shouldAutoComplete solo marca el paso que declara la condición cumplida", () => {
@@ -115,5 +116,52 @@ describe("tour-steps", () => {
     expect(shouldAutoComplete(step("login"), { ...CTX, loggedIn: true })).toBe(true);
     expect(shouldAutoComplete(step("send"), CTX)).toBe(false);
     expect(shouldAutoComplete(step("send"), { ...CTX, hasNewOrder: true })).toBe(true);
+  });
+
+  it("cada motor solo mira los pasos de su dominio", () => {
+    const step = (id: string) => TOUR_STEPS.find((s) => s.id === id)!;
+    expect(ownsAutoCondition(step("acceso"), ["authModal", "login"])).toBe(true);
+    expect(ownsAutoCondition(step("login"), ["authModal", "login"])).toBe(true);
+    expect(ownsAutoCondition(step("send"), ["order", "delivered", "paid"])).toBe(true);
+    // El motor de órdenes simula loggedIn: sin el filtro marcaba pasos de login.
+    expect(ownsAutoCondition(step("acceso"), ["order", "delivered", "paid"])).toBe(false);
+    expect(ownsAutoCondition(step("landing"), ["authModal", "login"])).toBe(false);
+  });
+
+  it("stepHasAction cubre auto y los disparadores de DOM/ruta", () => {
+    const step = (id: string) => TOUR_STEPS.find((s) => s.id === id)!;
+    expect(stepHasAction(step("landing"))).toBe(false);
+    expect(stepHasAction(step("acceso"))).toBe(true); // auto
+    expect(stepHasAction(step("mesa-1"))).toBe(true); // completeWhen
+    expect(stepHasAction(step("kds-ready"))).toBe(true); // completeWhenGone
+    expect(stepHasAction(step("mesas-link"))).toBe(true); // completeOnRoute
+    expect(stepHasAction(step("add-item"))).toBe(true); // mobileCompleteWhen
+  });
+
+  it("los pasos de acción tienen target (aplica el aviso de objetivo ausente)", () => {
+    for (const step of TOUR_STEPS) {
+      if (stepHasAction(step)) expect(step.target).toBeDefined();
+    }
+  });
+
+  it("isTargetMissing avisa solo si el objetivo lleva perdido la gracia", () => {
+    expect(isTargetMissing(null, 10_000)).toBe(false);
+    expect(isTargetMissing(9_000, 9_000 + TARGET_MISSING_GRACE_MS - 1)).toBe(false);
+    expect(isTargetMissing(9_000, 9_000 + TARGET_MISSING_GRACE_MS)).toBe(true);
+  });
+
+  it("decideAutoAdvance avanza al completar y no re-avanza al volver atrás", () => {
+    const base = { wentBack: false, completedOnEntry: false, isComplete: true, isLast: false };
+    expect(decideAutoAdvance({ ...base, isComplete: false })).toBe("skip");
+    expect(decideAutoAdvance(base)).toBe("advance");
+    expect(decideAutoAdvance({ ...base, isLast: true })).toBe("finish");
+    // "Paso anterior" sobre un paso ya completado: no re-avanza (evita el loop).
+    expect(decideAutoAdvance({ ...base, wentBack: true, completedOnEntry: true })).toBe("skip");
+    // Volver a un paso sin completar y completarlo: avanza igual.
+    expect(decideAutoAdvance({ ...base, wentBack: true, completedOnEntry: false })).toBe("advance");
+  });
+
+  it("el primer paso lleva a la landing (el tour puede iniciar en cualquier módulo)", () => {
+    expect(TOUR_STEPS[0].href).toBe("/");
   });
 });
