@@ -151,8 +151,8 @@ export function TourSpotlight() {
   const containerHeight = rect.height + PAD * 2;
 
   const labelW = labelSize.width || Math.min(viewportW * 0.8, 280);
-  const labelH = labelSize.height || (isDesktop ? 30 : 46);
-  const gap = isDesktop ? 12 : 32;
+  const labelH = labelSize.height || (isDesktop ? 34 : 46);
+  const gap = 12;
 
   // Elige el lado con hueco suficiente; si ninguno lo tiene (objetivo de alto
   // completo, p. ej. el sidebar), el label va dentro del hueco.
@@ -208,11 +208,9 @@ export function TourSpotlight() {
       />
       <div
         ref={labelRef}
-        className={cn(
-          "absolute px-3 py-1.5 text-center shadow-lg",
-          isDesktop ? "rounded-full text-xs font-medium" : "rounded-xl",
-          placeInside ? "bg-primary-foreground text-navy" : "bg-navy text-primary-foreground",
-        )}
+        // Un solo lenguaje visual para el label: tarjeta clara con borde coral,
+        // legible sobre el atenuado y sobre el sidebar (donde va dentro del hueco).
+        className="absolute rounded-xl border-2 border-coral bg-primary-foreground px-3 py-1.5 text-center text-navy shadow-lg"
         style={
           placeInside
             ? {
@@ -230,18 +228,17 @@ export function TourSpotlight() {
               }
         }
       >
-        {isDesktop ? (
-          currentStep.label ?? "Haz clic aquí"
-        ) : (
-          <>
-            <span className="block text-[11px] font-semibold uppercase tracking-wide text-coral">
-              {currentStep.title}
-            </span>
-            <span className="mt-0.5 block text-xs font-medium">
-              {currentStep.mobileLabel ?? currentStep.label ?? "Sigue la guía"}
-            </span>
-          </>
+        {/* En móvil el panel suele estar cerrado: el label lleva el título del paso. */}
+        {!isDesktop && (
+          <span className="block text-[11px] font-semibold uppercase tracking-wide text-coral">
+            {currentStep.title}
+          </span>
         )}
+        <span className={cn("block text-xs font-medium", !isDesktop && "mt-0.5")}>
+          {isDesktop
+            ? currentStep.label ?? "Haz clic aquí"
+            : currentStep.mobileLabel ?? currentStep.label ?? "Sigue la guía"}
+        </span>
       </div>
     </div>
   );

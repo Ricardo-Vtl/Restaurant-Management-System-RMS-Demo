@@ -103,7 +103,13 @@ export function TourWidget() {
   }, [open]);
 
   useEffect(() => {
-    if (open) panelRef.current?.focus();
+    if (!open) return;
+    // No robar el foco si el visitante está escribiendo (el sheet se abre solo).
+    const el = document.activeElement;
+    const typing =
+      el instanceof HTMLElement &&
+      (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+    if (!typing) panelRef.current?.focus();
   }, [open]);
 
   if (!mounted) return null;
@@ -130,6 +136,11 @@ export function TourWidget() {
 
   return (
     <>
+      {/* Cada paso se anuncia a lectores de pantalla (el foco no salta al cambiar). */}
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {mounted && active ? `Paso ${index + 1} de ${total}: ${currentStep.title}` : ""}
+      </p>
+
       {!dialogOpen && !introPending && (
         <button
           ref={toggleRef}
@@ -140,7 +151,9 @@ export function TourWidget() {
           aria-label={open ? "Cerrar la guía de la demo" : "Abrir la guía de la demo"}
           className={cn(
             "fixed bottom-6 left-6 lg:left-auto lg:right-6 z-[70] size-14 rounded-full bg-coral text-accent-foreground shadow-2xl shadow-coral/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral",
-            active && !done && "animate-pulse-coral",
+            // Pulsa solo cuando hay que mirar el panel (objetivo perdido): el
+            // halo del spotlight ya señala el elemento en el resto de pasos.
+            active && !done && targetMissing && "animate-pulse-coral",
           )}
         >
           <Compass className="size-6" aria-hidden="true" />
@@ -300,7 +313,7 @@ export function TourWidget() {
                   <button
                     type="button"
                     onClick={reset}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                    className="inline-flex items-center gap-1 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <RotateCcw className="size-3" aria-hidden="true" />
                     Reiniciar recorrido
