@@ -1,7 +1,8 @@
 "use client";
 
 // Bienvenida de la demo: presentación breve + PINs + arranque del recorrido.
-// Se muestra una sola vez por visitante (localStorage).
+// Se muestra cada vez que se entra (el estado del tour vive por documento: una
+// recarga lo reinicia y vuelve a presentar la demo).
 
 import { Boxes, Compass, Palette, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -13,15 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
+import { DEMO_PINS } from "@/lib/demo/pins";
 import { useDemoTour } from "./demo-tour-context";
 import { TOUR_STEPS } from "./tour-steps";
-
-const DEMO_PINS = [
-  { role: "Admin", pin: "123456" },
-  { role: "Mesero", pin: "111111" },
-  { role: "Cocina", pin: "222222" },
-  { role: "Caja", pin: "333333" },
-];
 
 const HIGHLIGHTS = [
   { icon: Wallet, label: "POS + KDS + Caja" },

@@ -17,10 +17,11 @@ export const DEMO_CLAIM_TTL_MINUTES = 60;
 export const DEMO_ORDER_TTL_HOURS = 24;
 
 /**
- * Log de diagnóstico del tour (transiciones de paso). Activo en modo demo por
- * defecto; silenciar con NEXT_PUBLIC_DEMO_DEBUG=0.
+ * Log de diagnóstico del tour (transiciones de paso). Apagado por defecto: se
+ * enciende con NEXT_PUBLIC_DEMO_DEBUG=1 (para no dejar ruido en la consola de
+ * los visitantes de la demo).
  */
-export const DEMO_DEBUG = DEMO_MODE && process.env.NEXT_PUBLIC_DEMO_DEBUG !== "0";
+export const DEMO_DEBUG = DEMO_MODE && process.env.NEXT_PUBLIC_DEMO_DEBUG === "1";
 
 export function demoLog(...args: unknown[]): void {
   if (DEMO_DEBUG) {

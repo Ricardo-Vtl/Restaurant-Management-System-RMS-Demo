@@ -4,13 +4,7 @@
 
 import { KeyRound } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
-
-const DEMO_PINS = [
-  { role: "Admin", pin: "123456" },
-  { role: "Mesero", pin: "111111" },
-  { role: "Cocina", pin: "222222" },
-  { role: "Caja", pin: "333333" },
-];
+import { DEMO_PINS } from "@/lib/demo/pins";
 
 export function DemoPinHint() {
   return (
