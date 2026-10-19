@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Package, PackageMinus, PackagePlus, Trash2 } from "lucide-react";
+import { Package, PackageMinus, PackagePlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import {
@@ -18,6 +19,7 @@ import { can } from "@/lib/abilities";
 import { useAuth } from "@/lib/store";
 import { formatQty, type Supply } from "@/lib/inventory";
 import { useSupplies, useUpdateSupply } from "@/hooks/use-supplies";
+import { LoadingRegion, TableSkeleton } from "@/components/gestion/skeletons";
 import { SupplyFormDialog } from "./supply-form-dialog";
 import { MovementDialog, type ManualMovementType } from "./movement-dialog";
 import { CountDialog } from "./count-dialog";
@@ -62,9 +64,16 @@ export function SuppliesTab() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-8 animate-spin text-coral" aria-label="Cargando insumos" />
-      </div>
+      <LoadingRegion label="Cargando insumos">
+        <div className="flex flex-col gap-4">
+          {canManage && (
+            <div className="flex sm:justify-end">
+              <Skeleton className="h-11 w-full rounded-xl sm:h-9 sm:w-40" />
+            </div>
+          )}
+          <TableSkeleton rows={6} columns={5} />
+        </div>
+      </LoadingRegion>
     );
   }
 

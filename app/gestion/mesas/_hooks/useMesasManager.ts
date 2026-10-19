@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export function useMesasManager() {
   const { data: tables = [], isLoading, isError } = useTables();
   const invalidateTables = useInvalidateTables();
-  const { data: configData } = useRestaurantConfig();
+  const { data: configData, isLoading: isConfigLoading } = useRestaurantConfig();
   const invalidateConfig = useInvalidateRestaurantConfig();
 
   // Estados de carga y modales
@@ -134,7 +134,7 @@ export function useMesasManager() {
   return {
     // Datos y Estados
     tables,
-    isLoaded: !isLoading,
+    isLoaded: !isLoading && !isConfigLoading,
     isError,
     isSaving,
     isCreateModalOpen,

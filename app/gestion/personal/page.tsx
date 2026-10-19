@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Plus, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { useStaff, useUpdateStaff, type StaffMember } from "@/hooks/use-staff";
 import { useAuth } from "@/lib/store";
+import { LoadingRegion, StaffCardsSkeleton, StatsSkeleton } from "@/components/gestion/skeletons";
 import { StaffDialog } from "./_components/staff-dialog";
 import { StaffStatsBar } from "./_components/staff-stats-bar";
 import { StaffCard } from "./_components/staff-card";
@@ -36,15 +37,6 @@ export default function PersonalPage() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="size-10 animate-spin text-coral" />
-        <p className="text-muted-foreground animate-pulse">Cargando personal...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -70,36 +62,45 @@ export default function PersonalPage() {
         </Button>
       </div>
 
-      {staff.length > 0 && <StaffStatsBar staff={staff} />}
-
-      {staff.length === 0 ? (
-        <Empty>
-          <EmptyMedia variant="icon">
-            <Users className="size-8" />
-          </EmptyMedia>
-          <EmptyHeader>
-            <EmptyTitle>No hay personal registrado</EmptyTitle>
-            <EmptyDescription>
-              Haz clic en &quot;Nuevo Personal&quot; para dar de alta al primer empleado.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      {isLoading ? (
+        <LoadingRegion label="Cargando personal" className="flex flex-col gap-5">
+          <StatsSkeleton count={4} minWidth="min-w-36" highlightedIndex={3} />
+          <StaffCardsSkeleton />
+        </LoadingRegion>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {staff.map((member) => (
-            <StaffCard
-              key={member.id}
-              member={member}
-              isSelf={member.id === currentUser?.id}
-              pending={updateStaff.isPending}
-              onEdit={(m) => {
-                setEditingStaff(m);
-                setIsDialogOpen(true);
-              }}
-              onToggle={handleToggleActive}
-            />
-          ))}
-        </div>
+        <>
+          {staff.length > 0 && <StaffStatsBar staff={staff} />}
+
+        {staff.length === 0 ? (
+          <Empty>
+            <EmptyMedia variant="icon">
+              <Users className="size-8" />
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>No hay personal registrado</EmptyTitle>
+              <EmptyDescription>
+                Haz clic en &quot;Nuevo Personal&quot; para dar de alta al primer empleado.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {staff.map((member) => (
+              <StaffCard
+                key={member.id}
+                member={member}
+                isSelf={member.id === currentUser?.id}
+                pending={updateStaff.isPending}
+                onEdit={(m) => {
+                  setEditingStaff(m);
+                  setIsDialogOpen(true);
+                }}
+                onToggle={handleToggleActive}
+              />
+            ))}
+          </div>
+        )}
+        </>
       )}
 
       <StaffDialog

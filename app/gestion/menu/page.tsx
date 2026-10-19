@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import {
   Plus,
   UtensilsCrossed,
-  Loader2,
   Search,
   SearchX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion, ProductGridSkeleton, StatsSkeleton } from "@/components/gestion/skeletons";
 import {
   Empty,
   EmptyHeader,
@@ -100,15 +101,6 @@ export default function MenuGestionPage() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="size-10 animate-spin text-coral" />
-        <p className="text-muted-foreground animate-pulse">Cargando el menú de {restaurantName}...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-5">
       {/* Header */}
@@ -132,68 +124,83 @@ export default function MenuGestionPage() {
         </Button>
       </div>
 
-      {/* Resumen */}
-      {products.length > 0 && <MenuStatsBar products={products} />}
-
-      {/* Búsqueda */}
-      {products.length > 0 && (
-        <div className="relative">
-          <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-            size={14}
-            aria-hidden="true"
-          />
-          <Input
-            placeholder="Buscar platillo..."
-            aria-label="Buscar platillo"
-            className="pl-10 h-11 sm:h-10 bg-white border-border rounded-2xl text-sm sm:text-xs font-medium focus-visible:ring-coral shadow-sm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      )}
-
-      {/* Categorías */}
-      {products.length > 0 && categories.length > 0 && (
-        <CategoryRail
-          items={categories}
-          total={products.length}
-          active={activeCategory}
-          onSelect={setActiveCategory}
-        />
-      )}
-
-      {products.length === 0 ? (
-        <Empty>
-          <EmptyMedia variant="icon">
-            <UtensilsCrossed className="size-8" />
-          </EmptyMedia>
-          <EmptyHeader>
-            <EmptyTitle>No hay platillos aún</EmptyTitle>
-            <EmptyDescription>Haz clic en &quot;Nuevo Platillo&quot; para empezar a armar tu menú.</EmptyDescription>
-          </EmptyHeader>
-          <Button onClick={handleCreate} className="mt-2 bg-coral hover:bg-coral/90 text-white">
-            <Plus className="size-4 mr-2" aria-hidden="true" /> Nuevo Platillo
-          </Button>
-        </Empty>
-      ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 opacity-40">
-          <SearchX className="size-10 mb-3 text-navy" aria-hidden="true" />
-          <p className="text-sm font-black uppercase italic tracking-widest text-navy">
-            Sin resultados
-          </p>
-        </div>
+      {isLoading ? (
+        <LoadingRegion label="Cargando menú" className="flex flex-col gap-5">
+          <StatsSkeleton count={4} minWidth="min-w-36" highlightedIndex={3} />
+          <Skeleton className="h-11 w-full rounded-2xl sm:h-10" />
+          <div className="flex gap-2 overflow-hidden">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-9 w-24 shrink-0 rounded-full" />
+            ))}
+          </div>
+          <ProductGridSkeleton />
+        </LoadingRegion>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {filtered.map((product) => (
-            <MenuProductCard
-              key={product.id}
-              product={product}
-              onEdit={handleEdit}
-              onDelete={setDeleteTarget}
+        <>
+          {/* Resumen */}
+          {products.length > 0 && <MenuStatsBar products={products} />}
+
+          {/* Búsqueda */}
+          {products.length > 0 && (
+            <div className="relative">
+              <Search
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                size={14}
+                aria-hidden="true"
+              />
+              <Input
+                placeholder="Buscar platillo..."
+                aria-label="Buscar platillo"
+                className="pl-10 h-11 sm:h-10 bg-white border-border rounded-2xl text-sm sm:text-xs font-medium focus-visible:ring-coral shadow-sm"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          )}
+
+          {/* Categorías */}
+          {products.length > 0 && categories.length > 0 && (
+            <CategoryRail
+              items={categories}
+              total={products.length}
+              active={activeCategory}
+              onSelect={setActiveCategory}
             />
-          ))}
-        </div>
+          )}
+
+          {products.length === 0 ? (
+            <Empty>
+              <EmptyMedia variant="icon">
+                <UtensilsCrossed className="size-8" />
+              </EmptyMedia>
+              <EmptyHeader>
+                <EmptyTitle>No hay platillos aún</EmptyTitle>
+                <EmptyDescription>Haz clic en &quot;Nuevo Platillo&quot; para empezar a armar tu menú.</EmptyDescription>
+              </EmptyHeader>
+              <Button onClick={handleCreate} className="mt-2 bg-coral hover:bg-coral/90 text-white">
+                <Plus className="size-4 mr-2" aria-hidden="true" /> Nuevo Platillo
+              </Button>
+            </Empty>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 opacity-40">
+              <SearchX className="size-10 mb-3 text-navy" aria-hidden="true" />
+              <p className="text-sm font-black uppercase italic tracking-widest text-navy">
+                Sin resultados
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {filtered.map((product) => (
+                <MenuProductCard
+                  key={product.id}
+                  product={product}
+                  onEdit={handleEdit}
+                  onDelete={setDeleteTarget}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       <ProductFormModal

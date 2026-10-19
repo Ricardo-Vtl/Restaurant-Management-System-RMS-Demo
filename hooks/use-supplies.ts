@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api-fetch";
 import { isLowStock, type Supply, type SupplyMovementType } from "@/lib/inventory";
 import type {
@@ -35,9 +35,12 @@ export function useSupplies(enabled = true) {
 }
 
 // Contador para el badge del sidebar (comparte caché con la página).
-export function useLowStockCount(enabled = true): number {
-  const { data } = useSupplies(enabled);
-  return (data ?? []).filter((s) => s.is_active && isLowStock(s)).length;
+export function useLowStockCount(enabled = true): { count: number; isLoading: boolean } {
+  const { data, isLoading } = useSupplies(enabled);
+  return {
+    count: (data ?? []).filter((s) => s.is_active && isLowStock(s)).length,
+    isLoading,
+  };
 }
 
 export function useSupplyMovements(supplyId?: string) {
@@ -49,6 +52,7 @@ export function useSupplyMovements(supplyId?: string) {
       return res.json();
     },
     staleTime: 15_000,
+    placeholderData: keepPreviousData,
   });
 }
 

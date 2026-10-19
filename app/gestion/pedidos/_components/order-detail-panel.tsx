@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/gestion/skeletons";
 import { useOrderDetail } from "@/hooks/use-orders";
 import { useOrderActions } from "../_hooks/use-order-actions";
 import { OrderStatusBadge } from "./order-status-badge";
@@ -82,11 +84,37 @@ export function OrderDetailPanel({ orderId, isOpen, onClose }: OrderDetailPanelP
       <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
         <SheetContent side="right" className="w-full sm:max-w-md p-0">
           {isLoading || !order ? (
-            <div className="flex items-center justify-center h-full">
+            <LoadingRegion label="Cargando orden" className="flex h-full flex-col">
               <SheetTitle className="sr-only">Cargando orden</SheetTitle>
               <SheetDescription className="sr-only">Cargando detalle de orden</SheetDescription>
-              <p className="text-sm text-muted-foreground">Cargando...</p>
-            </div>
+              <div className="flex items-center gap-3 border-b px-6 py-4">
+                <Skeleton className="size-10 rounded-xl" />
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-5 w-32" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                    <Skeleton className="h-5 w-24 rounded-full" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-1 flex-col gap-6 px-6 py-4">
+                <div className="flex flex-col gap-3">
+                  <Skeleton className="h-3.5 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+                <Skeleton className="h-px w-full" />
+                <div className="flex flex-col gap-3">
+                  <Skeleton className="h-4 w-28" />
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="flex items-center justify-between gap-3">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </LoadingRegion>
           ) : (
             <div className="flex flex-col h-full">
               <SheetHeader className="shrink-0 border-b px-6 py-4">

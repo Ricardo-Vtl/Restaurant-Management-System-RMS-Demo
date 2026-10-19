@@ -1,10 +1,11 @@
 "use client";
 
-import { Loader2, ShieldAlert, Store, Clock, Phone, ShoppingBag, Percent, Settings2 } from "lucide-react";
+import { ShieldAlert, Store, Clock, Phone, ShoppingBag, Percent, Settings2 } from "lucide-react";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { can } from "@/lib/abilities";
 import { useAuth } from "@/lib/store";
+import { ConfigSkeleton, LoadingRegion } from "@/components/gestion/skeletons";
 import { useFullConfig } from "./_hooks/use-config";
 import { IdentityTab } from "./_components/identity-tab";
 import { ScheduleTab } from "./_components/schedule-tab";
@@ -49,9 +50,21 @@ export default function ConfigPage() {
 
   if (isLoading || !config) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="size-10 animate-spin text-coral" />
-        <p className="text-muted-foreground animate-pulse">Cargando configuración...</p>
+      <div className="flex flex-col gap-5">
+        <div>
+          <div className="flex items-center gap-2 mb-0.5">
+            <div className="h-7 w-1.5 bg-coral rounded-full" aria-hidden="true" />
+            <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">
+              Configuración
+            </h1>
+          </div>
+          <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
+            Identidad, contacto, horarios, canales, impuestos y operación del POS
+          </p>
+        </div>
+        <LoadingRegion label="Cargando configuración">
+          <ConfigSkeleton />
+        </LoadingRegion>
       </div>
     );
   }

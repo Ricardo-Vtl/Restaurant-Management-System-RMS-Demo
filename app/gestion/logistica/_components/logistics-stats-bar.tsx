@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Package, AlertTriangle, Archive, History } from "lucide-react";
 import { isLowStock } from "@/lib/inventory";
 import { useSupplies, useSupplyMovements } from "@/hooks/use-supplies";
+import { StatsSkeleton } from "@/components/gestion/skeletons";
 
 function isToday(iso: string): boolean {
   const d = new Date(iso);
@@ -16,8 +17,8 @@ function isToday(iso: string): boolean {
 }
 
 export function LogisticsStatsBar() {
-  const { data: supplies = [] } = useSupplies();
-  const { data: movements = [] } = useSupplyMovements();
+  const { data: supplies = [], isLoading: suppliesLoading } = useSupplies();
+  const { data: movements = [], isLoading: movementsLoading } = useSupplyMovements();
 
   const stats = useMemo(
     () => ({
@@ -28,6 +29,10 @@ export function LogisticsStatsBar() {
     }),
     [supplies, movements],
   );
+
+  if (suppliesLoading || movementsLoading) {
+    return <StatsSkeleton count={4} minWidth="min-w-36" highlightedIndex={3} />;
+  }
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide md:grid md:grid-cols-4 md:overflow-visible md:pb-0">

@@ -20,6 +20,7 @@ import {
   Home,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/store";
 import { Separator } from "@/components/ui/separator";
@@ -60,8 +61,10 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
   const pathname = usePathname();
   const router = useRouter();
   const { currentUser, logout } = useAuth();
-  const lowStockCount = useLowStockCount(can(currentUser?.role, "inventory:move"));
-  const { data: siteConfig } = useSiteConfig();
+  const { count: lowStockCount, isLoading: lowStockLoading } = useLowStockCount(
+    can(currentUser?.role, "inventory:move"),
+  );
+  const { data: siteConfig, isLoading: siteConfigLoading } = useSiteConfig();
 
   if (!currentUser) return null;
 
@@ -120,7 +123,9 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
             )}
           >
             <div className="size-10 bg-coral rounded-full flex items-center justify-center shrink-0 overflow-hidden">
-              {siteConfig?.logo_url ? (
+              {siteConfigLoading ? (
+                <Skeleton className="size-10 rounded-full bg-white/20" />
+              ) : siteConfig?.logo_url ? (
                 <Image
                   src={siteConfig.logo_url}
                   alt={siteConfig.name || "Logo"}
@@ -133,16 +138,20 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
               )}
             </div>
             <AnimatePresence>
-              {isOpen && (
-                <motion.span
-                  initial={{ opacity: 0, width: 0 }}
-                  animate={{ opacity: 1, width: "auto" }}
-                  exit={{ opacity: 0, width: 0 }}
-                  className="font-serif text-primary-foreground font-bold whitespace-nowrap overflow-hidden"
-                >
-                  {siteConfig?.name || FALLBACK_NAME}
-                </motion.span>
-              )}
+              {isOpen &&
+                (siteConfigLoading ? (
+                  <Skeleton key="brand-skeleton" className="h-5 w-28 bg-white/15" />
+                ) : (
+                  <motion.span
+                    key="brand-name"
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="font-serif text-primary-foreground font-bold whitespace-nowrap overflow-hidden"
+                  >
+                    {siteConfig?.name || FALLBACK_NAME}
+                  </motion.span>
+                ))}
             </AnimatePresence>
           </Link>
 
@@ -203,11 +212,13 @@ export const GestionSidebar = React.memo(function GestionSidebar({ isOpen, onTog
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    {badge && isOpen && (
+                    {isOpen && item.href === "/gestion/logistica" && lowStockLoading ? (
+                      <Skeleton className="ml-auto size-5 rounded-full bg-coral/20" />
+                    ) : badge && isOpen ? (
                       <Badge variant="outline" className="ml-auto bg-coral/20 text-coral border-coral/20 rounded-full">
                         {badge}
                       </Badge>
-                    )}
+                    ) : null}
                   </Link>
                 </li>
               );

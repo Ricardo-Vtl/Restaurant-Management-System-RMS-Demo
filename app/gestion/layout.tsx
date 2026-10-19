@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DemoGestion } from "@/components/demo/demo-gestion";
 import { DemoRealtimeGate } from "@/components/demo/demo-realtime-gate";
-import GestionLoading from "./loading";
+import { GestionShellSkeleton } from "@/components/gestion/gestion-shell-skeleton";
 
 const AuthModal = dynamic(() => import("@/components/auth-modal").then((m) => m.AuthModal), {
   ssr: false,
@@ -28,7 +28,7 @@ export default function GestionLayout({ children }: { children: React.ReactNode 
   // Mientras AuthProvider restaura la sesión, pintar skeleton en vez del gate
   // "Ingresar PIN" (evita el flash ~1s en cada carga dura).
   if (isHydrating) {
-    return <GestionLoading />;
+    return <GestionShellSkeleton />;
   }
 
   if (!currentUser) {

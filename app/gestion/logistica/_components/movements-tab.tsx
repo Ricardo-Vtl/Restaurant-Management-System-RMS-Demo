@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { History, Loader2 } from "lucide-react";
+import { History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -26,6 +26,7 @@ import {
   type SupplyMovementType,
 } from "@/lib/inventory";
 import { useSupplies, useSupplyMovements } from "@/hooks/use-supplies";
+import { LoadingRegion, TableSkeleton } from "@/components/gestion/skeletons";
 
 const TYPE_BADGE: Record<SupplyMovementType, "success" | "info" | "warning" | "secondary"> = {
   in: "success",
@@ -42,14 +43,14 @@ function formatMovementDate(iso: string): string {
 export function MovementsTab() {
   const [supplyId, setSupplyId] = useState("all");
   const { data: supplies = [] } = useSupplies();
-  const { data: movements = [], isLoading, error } = useSupplyMovements(supplyId === "all" ? undefined : supplyId);
+  const { data: movements = [], isLoading, isFetching, error } = useSupplyMovements(supplyId === "all" ? undefined : supplyId);
 
   if (error) {
     return <p className="py-8 text-center text-destructive">Error al cargar los movimientos</p>;
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col gap-4", isFetching && !isLoading && "opacity-60")} aria-busy={isFetching && !isLoading}>
       <div className="flex sm:justify-end">
         <Select value={supplyId} onValueChange={setSupplyId}>
           <SelectTrigger className="w-full sm:w-64" aria-label="Filtrar por insumo">
@@ -67,9 +68,9 @@ export function MovementsTab() {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="size-8 animate-spin text-coral" aria-label="Cargando movimientos" />
-        </div>
+        <LoadingRegion label="Cargando movimientos">
+          <TableSkeleton rows={7} columns={7} />
+        </LoadingRegion>
       ) : movements.length === 0 ? (
         <Empty>
           <EmptyMedia variant="icon">

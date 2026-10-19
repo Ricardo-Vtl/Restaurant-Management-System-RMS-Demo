@@ -139,7 +139,7 @@ export function AuthModal() {
                   <div
                     key={i}
                     className={cn(
-                      "size-10 sm:size-12 rounded-xl border-2 flex items-center justify-center transition-all",
+                      "aspect-square min-w-0 flex-1 max-w-10 sm:max-w-12 rounded-xl border-2 flex items-center justify-center transition-all",
                       pin.length > i ? "border-coral bg-coral/10" : "border-border",
                       error && "border-destructive bg-destructive/10",
                     )}

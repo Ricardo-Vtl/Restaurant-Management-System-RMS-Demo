@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BookOpen, Loader2, Pencil } from "lucide-react";
+import { BookOpen, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/store";
 import type { Product } from "@/lib/types";
 import { useActiveProducts } from "@/hooks/use-products";
 import { useRecipes, type RecipeRow } from "@/hooks/use-recipes";
+import { LoadingRegion, TableSkeleton } from "@/components/gestion/skeletons";
 import { RecipeDialog } from "./recipe-dialog";
 
 function summarize(lines: RecipeRow[]): string {
@@ -45,9 +46,9 @@ export function RecipesTab() {
 
   if (productsLoading || recipesLoading) {
     return (
-      <div className="flex justify-center py-16">
-        <Loader2 className="size-8 animate-spin text-coral" aria-label="Cargando recetas" />
-      </div>
+      <LoadingRegion label="Cargando recetas">
+        <TableSkeleton rows={6} columns={4} />
+      </LoadingRegion>
     );
   }
 

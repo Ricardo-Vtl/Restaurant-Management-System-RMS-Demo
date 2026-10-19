@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Search, AlertTriangle } from "lucide-react";
+import { Search, AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Empty, EmptyDescription } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion, StatsSkeleton, TablesGridSkeleton } from "@/components/gestion/skeletons";
 import { MesaCard } from "./_components/mesa-card";
 
 // Importaciones de nuestra arquitectura limpia
@@ -34,11 +36,22 @@ export default function MesasPage() {
     setIsConfigModalOpen: manager.setIsConfigModalOpen,
   });
 
-  // Estado de carga inicial (Pantalla de carga)
+  // Estado de carga inicial (skeleton con el mismo layout del módulo)
   if (!manager.isLoaded) {
     return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="animate-spin text-coral" size={40} />
+      <div className="flex flex-col gap-5">
+        <MesasHeader />
+        <StatsSkeleton count={3} minWidth="min-w-36" highlightedIndex={2} />
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <Skeleton className="h-11 w-full rounded-xl sm:h-10 sm:w-64" />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <Skeleton className="h-11 w-full rounded-xl sm:h-9 sm:w-40" />
+            <Skeleton className="h-11 w-full rounded-xl sm:h-9 sm:w-36" />
+          </div>
+        </div>
+        <LoadingRegion label="Cargando mesas">
+          <TablesGridSkeleton />
+        </LoadingRegion>
       </div>
     );
   }

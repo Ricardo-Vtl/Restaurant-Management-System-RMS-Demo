@@ -3,6 +3,7 @@
 import { ShieldAlert, Package, History, BookOpen } from "lucide-react";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { can } from "@/lib/abilities";
 import { useAuth } from "@/lib/store";
 import { useSupplies } from "@/hooks/use-supplies";
@@ -23,8 +24,8 @@ function Count({ n }: { n: number }) {
 
 export default function LogisticaPage() {
   const { currentUser } = useAuth();
-  const { data: supplies = [] } = useSupplies();
-  const { data: products = [] } = useActiveProducts();
+  const { data: supplies = [], isLoading: suppliesLoading } = useSupplies();
+  const { data: products = [], isLoading: productsLoading } = useActiveProducts();
 
   if (!can(currentUser?.role, "inventory:move")) {
     return (
@@ -63,13 +64,15 @@ export default function LogisticaPage() {
       <Tabs defaultValue="insumos" className="w-full">
         <TabsList className="h-auto w-full flex-wrap justify-start gap-1 bg-transparent p-0">
           <TabsTrigger value="insumos" className={TAB_TRIGGER_CLASS}>
-            <Package className="size-4" aria-hidden="true" /> Insumos <Count n={supplies.length} />
+            <Package className="size-4" aria-hidden="true" /> Insumos{" "}
+            {suppliesLoading ? <Skeleton className="h-4 w-5 rounded-full" /> : <Count n={supplies.length} />}
           </TabsTrigger>
           <TabsTrigger value="movimientos" className={TAB_TRIGGER_CLASS}>
             <History className="size-4" aria-hidden="true" /> Movimientos
           </TabsTrigger>
           <TabsTrigger value="recetas" className={TAB_TRIGGER_CLASS}>
-            <BookOpen className="size-4" aria-hidden="true" /> Recetas <Count n={products.length} />
+            <BookOpen className="size-4" aria-hidden="true" /> Recetas{" "}
+            {productsLoading ? <Skeleton className="h-4 w-5 rounded-full" /> : <Count n={products.length} />}
           </TabsTrigger>
         </TabsList>
 

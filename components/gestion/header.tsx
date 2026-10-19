@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { OrderStatusBadge } from "@/app/gestion/pedidos/_components/order-status-badge";
 
@@ -55,7 +56,7 @@ function HeaderClock() {
 
 export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }: HeaderProps) {
   const { currentUser } = useAuth();
-  const { data: orders = [] } = useAllOrders();
+  const { data: orders = [], isLoading } = useAllOrders();
 
   const { pendingOrders, preparingOrders, pendingList } = useMemo(() => {
     const pendingOrders = orders.filter((o) => o.status === "pending").length;
@@ -91,15 +92,24 @@ export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }:
       <div className="flex items-center gap-3">
         {/* Quick Stats */}
         <div className="hidden sm:flex items-center gap-2">
-          {pendingOrders > 0 && (
-            <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
-              {pendingOrders} pendiente{pendingOrders > 1 ? "s" : ""}
-            </Badge>
-          )}
-          {preparingOrders > 0 && (
-            <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">
-              {preparingOrders} en cocina
-            </Badge>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-5 w-20 rounded-full" />
+              <Skeleton className="h-5 w-24 rounded-full" />
+            </>
+          ) : (
+            <>
+              {pendingOrders > 0 && (
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-500/30">
+                  {pendingOrders} pendiente{pendingOrders > 1 ? "s" : ""}
+                </Badge>
+              )}
+              {preparingOrders > 0 && (
+                <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/30">
+                  {preparingOrders} en cocina
+                </Badge>
+              )}
+            </>
           )}
         </div>
 
@@ -108,10 +118,14 @@ export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }:
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="relative" aria-label="Órdenes pendientes">
               <Bell className="size-5" aria-hidden="true" />
-              {activeCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 size-5 bg-coral text-accent-foreground rounded-full p-0 text-[10px]">
-                  {activeCount}
-                </Badge>
+              {isLoading ? (
+                <Skeleton className="absolute -top-2 -right-2 size-5 rounded-full" />
+              ) : (
+                activeCount > 0 && (
+                  <Badge className="absolute -top-2 -right-2 size-5 bg-coral text-accent-foreground rounded-full p-0 text-[10px]">
+                    {activeCount}
+                  </Badge>
+                )
               )}
             </Button>
           </PopoverTrigger>
@@ -120,7 +134,19 @@ export const GestionHeader = React.memo(function GestionHeader({ onMenuToggle }:
               <span className="text-xs font-black uppercase tracking-widest text-navy">Órdenes pendientes</span>
               <Badge variant="secondary" className="text-[10px] font-black">{pendingList.length}</Badge>
             </div>
-            {pendingList.length === 0 ? (
+            {isLoading ? (
+              <div className="flex flex-col gap-3 p-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center justify-between gap-3">
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-4 w-20" />
+                      <Skeleton className="h-3 w-28" />
+                    </div>
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) : pendingList.length === 0 ? (
               <p className="px-4 py-6 text-center text-sm text-muted-foreground">Sin órdenes pendientes.</p>
             ) : (
               <ul className="max-h-72 overflow-y-auto divide-y divide-border/50">

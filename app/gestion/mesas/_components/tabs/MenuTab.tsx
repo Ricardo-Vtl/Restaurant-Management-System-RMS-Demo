@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Plus, Minus, ShoppingBasket, Trash2, Utensils, X, Loader2, AlertTriangle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/gestion/skeletons";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/format";
 import { computeItemPrice } from "@/lib/pricing";
@@ -116,6 +118,42 @@ export const MenuTab = ({ mesa, onProductSelect }: Props) => {
           Error al cargar el catálogo
         </p>
       </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <LoadingRegion label="Cargando catálogo" className="flex h-full w-full flex-col overflow-hidden bg-muted/50 md:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 bg-white p-4">
+          <div className="flex gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-8 w-20 shrink-0 rounded-full" />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex gap-2 rounded-xl border border-border p-2">
+                <Skeleton className="size-16 shrink-0 rounded-lg" />
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="mt-auto h-5 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="hidden w-80 shrink-0 flex-col gap-3 border-l border-border bg-white p-4 md:flex">
+          <Skeleton className="h-5 w-32" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between gap-2">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-4 w-12" />
+            </div>
+          ))}
+          <Skeleton className="mt-auto h-10 w-full rounded-xl" />
+        </div>
+      </LoadingRegion>
     );
   }
 

@@ -8,8 +8,10 @@ import { CancelItemsDialog } from "../cancel-items-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Receipt, Clock, ChefHat, Printer, DollarSign, Loader2, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { Receipt, Clock, ChefHat, Printer, DollarSign, AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/gestion/skeletons";
 import { cn } from "@/lib/utils";
 import { Empty, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { toast } from "sonner";
@@ -114,12 +116,25 @@ export const HistorialTab = ({ mesa, onServiceCompleted, sillasRespaldoActual }:
 
   if (isLoading || isRestoring) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 opacity-50">
-        <Loader2 className="animate-spin text-coral" size={32} />
-        <p className="text-xs sm:text-[10px] font-black uppercase tracking-widest text-navy">
-          {isRestoring ? "Restituyendo mobiliario..." : "Consultando comanda..."}
-        </p>
-      </div>
+      <LoadingRegion
+        label={isRestoring ? "Restituyendo mobiliario" : "Consultando comanda"}
+        className="flex h-full flex-col gap-3 p-4"
+      >
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex flex-col gap-3 rounded-xl border border-border bg-white p-4">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-3.5 w-full" />
+            <Skeleton className="h-3.5 w-2/3" />
+            <div className="flex items-center justify-between border-t border-border/50 pt-2">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+          </div>
+        ))}
+      </LoadingRegion>
     );
   }
 

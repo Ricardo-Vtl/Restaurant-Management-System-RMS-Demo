@@ -9,6 +9,7 @@ import { KitchenActive } from "./_components/kitchen-active";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { KitchenSkeleton, LoadingRegion } from "@/components/gestion/skeletons";
 import { Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSiteConfig } from "@/hooks/use-site-config";
@@ -61,12 +62,21 @@ export default function CocinaPage() {
         </div>
         <div className="flex items-center gap-2">
           {/* Desktop: badges informativos (paneles lado a lado) */}
-          <Badge variant="warning" className="hidden lg:inline-flex text-xs sm:text-[10px] font-black">
-            {queue.length} cola
-          </Badge>
-          <Badge variant="info" className="hidden lg:inline-flex text-xs sm:text-[10px] font-black">
-            {active.length} activas
-          </Badge>
+          {isLoading ? (
+            <div className="hidden items-center gap-2 lg:flex">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+          ) : (
+            <>
+              <Badge variant="warning" className="hidden lg:inline-flex text-xs sm:text-[10px] font-black">
+                {queue.length} cola
+              </Badge>
+              <Badge variant="info" className="hidden lg:inline-flex text-xs sm:text-[10px] font-black">
+                {active.length} activas
+              </Badge>
+            </>
+          )}
 
           {/* Móvil: pills que cambian de panel */}
           <div
@@ -80,6 +90,7 @@ export default function CocinaPage() {
               label="Cola"
               count={queue.length}
               accent="amber"
+              loading={isLoading}
             />
             <PanelPill
               active={activePanel === 1}
@@ -87,6 +98,7 @@ export default function CocinaPage() {
               label="Preparación"
               count={active.length}
               accent="blue"
+              loading={isLoading}
             />
           </div>
 
@@ -103,10 +115,9 @@ export default function CocinaPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
-          <Skeleton className="rounded-2xl" />
-          <Skeleton className="rounded-2xl" />
-        </div>
+        <LoadingRegion label="Cargando cocina" className="flex flex-1 min-h-0 flex-col">
+          <KitchenSkeleton />
+        </LoadingRegion>
       ) : (
         <div
           ref={scrollerRef}
@@ -136,12 +147,14 @@ function PanelPill({
   label,
   count,
   accent,
+  loading = false,
 }: {
   active: boolean;
   onClick: () => void;
   label: string;
   count: number;
   accent: "amber" | "blue";
+  loading?: boolean;
 }) {
   return (
     <button
@@ -154,18 +167,22 @@ function PanelPill({
       )}
     >
       {label}
-      <span
-        className={cn(
-          "inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-xs sm:text-[10px] font-black",
-          active
-            ? "bg-white/20 text-white"
-            : accent === "amber"
-              ? "bg-amber-100 text-amber-700"
-              : "bg-blue-100 text-blue-700",
-        )}
-      >
-        {count}
-      </span>
+      {loading ? (
+        <Skeleton className="h-5 w-5 rounded-full" />
+      ) : (
+        <span
+          className={cn(
+            "inline-flex items-center justify-center min-w-5 h-5 px-1 rounded-full text-xs sm:text-[10px] font-black",
+            active
+              ? "bg-white/20 text-white"
+              : accent === "amber"
+                ? "bg-amber-100 text-amber-700"
+                : "bg-blue-100 text-blue-700",
+          )}
+        >
+          {count}
+        </span>
+      )}
     </button>
   );
 }

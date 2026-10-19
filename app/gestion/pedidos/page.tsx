@@ -14,7 +14,7 @@ import { useOrderSound } from "@/lib/use-order-sound";
 import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion, KanbanSkeleton, StatsSkeleton, TableSkeleton } from "@/components/gestion/skeletons";
 import { can } from "@/lib/abilities";
 import type { UserRole } from "@/lib/types";
 import { useSiteConfig } from "@/hooks/use-site-config";
@@ -81,7 +81,7 @@ export default function PedidosPage() {
       </div>
 
       <div className="shrink-0">
-        <OrderStatsBar orders={orders} />
+        {isLoading ? <StatsSkeleton count={4} highlightedIndex={3} /> : <OrderStatsBar orders={orders} />}
       </div>
 
       <div className="relative shrink-0">
@@ -100,11 +100,9 @@ export default function PedidosPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 min-h-0">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="rounded-2xl" />
-          ))}
-        </div>
+        <LoadingRegion label="Cargando pedidos" className="flex-1 min-h-0">
+          {view === "kanban" ? <KanbanSkeleton /> : <TableSkeleton rows={8} columns={7} />}
+        </LoadingRegion>
       ) : view === "kanban" ? (
         <div className="flex-1 min-h-0">
           <OrderKanban orders={orders} search={search} onSelectOrder={setSelectedOrderId} />

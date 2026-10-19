@@ -9,6 +9,8 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Users, MapPin, Trash2, Save, Loader2, Plus, Minus, AlertTriangle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingRegion } from "@/components/gestion/skeletons";
 import { useGestionSillas } from "../../_hooks/useGestionSillas";
 
 interface Props {
@@ -64,12 +66,17 @@ export const GestionTab = ({
   // Loader de seguridad para evitar que el usuario interactúe antes de la sincronización de estados
   if (guests === null) {
     return (
-      <div className="flex flex-col items-center justify-center h-48 gap-2 bg-muted/50">
-        <Loader2 className="animate-spin text-navy" size={24} />
-        <p className="text-xs sm:text-[10px] font-black text-muted-foreground uppercase tracking-wider">
-          Sincronizando Mobiliario...
-        </p>
-      </div>
+      <LoadingRegion
+        label="Sincronizando mobiliario"
+        className="flex h-48 flex-col justify-center gap-4 bg-muted/50 p-6"
+      >
+        <Skeleton className="h-5 w-40" />
+        <div className="grid grid-cols-2 gap-3">
+          <Skeleton className="h-10 w-full rounded-xl" />
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </div>
+        <Skeleton className="h-10 w-36 rounded-xl" />
+      </LoadingRegion>
     );
   }
 

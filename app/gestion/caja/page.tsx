@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, DollarSign, Users, ShoppingBag, Truck } from "lucide-react";
+import { DollarSign, Users, ShoppingBag, Truck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/format";
 import type { Order } from "@/lib/types";
 import { CajaStatsBar } from "./_components/caja-stats-bar";
 import { CheckoutDialog } from "@/components/gestion/checkout-dialog";
+import { AccountCardsSkeleton, LoadingRegion, StatsSkeleton } from "@/components/gestion/skeletons";
 import { summarizePayments } from "./_utils/daily-summary";
 
 const TYPE_LABEL: Record<string, { label: string; icon: typeof ShoppingBag }> = {
@@ -29,8 +30,8 @@ export default function CajaPage() {
   const [checkoutTarget, setCheckoutTarget] = useState<{ orders: Order[]; label: string; tableId?: string } | null>(null);
 
   // Órdenes pendientes de cobro (no canceladas) + cobradas de hoy para el resumen.
-  const { data: pending = [], isLoading, error } = useAllOrders({ paymentStatus: "pending" });
-  const { data: paid = [] } = useAllOrders({
+  const { data: pending = [], isLoading: pendingLoading, error } = useAllOrders({ paymentStatus: "pending" });
+  const { data: paid = [], isLoading: paidLoading } = useAllOrders({
     paymentStatus: "paid",
     completedFrom: startOfTodayISO(),
   });
@@ -67,15 +68,6 @@ export default function CajaPage() {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="size-10 animate-spin text-coral" />
-        <p className="text-muted-foreground animate-pulse">Cargando cuentas...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -84,13 +76,18 @@ export default function CajaPage() {
           <h1 className="text-xl md:text-2xl font-black text-navy uppercase italic tracking-tighter">Caja</h1>
         </div>
         <p className="text-xs sm:text-[9px] text-muted-foreground font-bold uppercase tracking-widest ml-[1.375rem]">
-          Cuentas pendientes de cobro y resumen del día · {summary.count} cobradas hoy
+          Cuentas pendientes de cobro y resumen del día ·{" "}
+          {paidLoading ? "cargando resumen del día" : `${summary.count} cobradas hoy`}
         </p>
       </div>
 
-      <CajaStatsBar summary={summary} />
+      {paidLoading ? <StatsSkeleton count={4} highlightedIndex={0} /> : <CajaStatsBar summary={summary} />}
 
-      {pendingActive.length === 0 ? (
+      {pendingLoading ? (
+        <LoadingRegion label="Cargando cuentas pendientes">
+          <AccountCardsSkeleton />
+        </LoadingRegion>
+      ) : pendingActive.length === 0 ? (
         <Empty className="py-16">
           <EmptyMedia variant="icon">
             <DollarSign className="size-8" aria-hidden="true" />
