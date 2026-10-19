@@ -40,6 +40,19 @@ if [ "$BASE" = "$UPSTREAM_HEAD" ]; then
   exit 0
 fi
 
+# Mensaje del commit: deja registro de QUÉ se integró, no solo que hubo sync.
+# Vive en .git/ para poder reutilizarlo si hay conflictos y el commit lo
+# termina haciendo una persona.
+MSG_FILE=".git/SYNC_MSG"
+{
+  echo "chore: sync upstream dev"
+  echo
+  echo "Integrates upstream/dev ($BASE -> $UPSTREAM_HEAD):"
+  git log --pretty='- %h %s' "$BASE..upstream/dev" -- . "${EXCLUDES[@]}"
+  echo
+  git diff --shortstat "$BASE..upstream/dev" -- . "${EXCLUDES[@]}"
+} > "$MSG_FILE"
+
 echo "Aplicando cambios de upstream/dev ($BASE -> $UPSTREAM_HEAD)..."
 PATCH=$(mktemp)
 git diff --binary "$BASE..upstream/dev" -- . "${EXCLUDES[@]}" > "$PATCH"
@@ -56,14 +69,14 @@ if ! git apply -3 "$PATCH"; then
   echo
   echo "CONFLICTOS: revisa los archivos con marcadores, resuélvelos y luego:"
   echo "  git add -A"
-  echo "  git commit -m 'chore: sync upstream dev'"
+  echo "  git commit -F $MSG_FILE"
   echo "  git tag -f upstream-sync upstream/dev && git push origin main"
   exit 1
 fi
 
 rm -f "$PATCH"
 git add -A
-git commit -m "chore: sync upstream dev"
+git commit -F "$MSG_FILE"
 git tag -f upstream-sync upstream/dev
 git push origin main
 echo "Listo: demo actualizada y desplegada."

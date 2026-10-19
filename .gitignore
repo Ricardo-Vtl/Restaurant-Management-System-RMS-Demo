@@ -27,10 +27,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# AI Agents & Local configs (Corregido con /) (Cambiar en caso de que se requiera trabajo en equipo)
-.agents/
-skills-lock.json
-
 .opencode/
 opencode.json
 
