@@ -1,8 +1,8 @@
 "use client";
 
 // Bienvenida de la demo: presentación breve + PINs + arranque del recorrido.
-// Se muestra cada vez que se entra (el estado del tour vive por documento: una
-// recarga lo reinicia y vuelve a presentar la demo).
+// Solo se monta en la landing; dentro de /gestion el tour se abre desde el
+// botón flotante de la guía.
 
 import { Boxes, Compass, Palette, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

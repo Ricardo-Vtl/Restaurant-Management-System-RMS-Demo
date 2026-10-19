@@ -6,7 +6,6 @@
 import { DemoDomAutoMark, DemoOrdersAutoMark } from "./demo-auto-mark";
 import { DemoTourProvider } from "./demo-tour-context";
 import { DemoTourRuntime } from "./demo-runtime";
-import { WelcomeDialog } from "./welcome-dialog";
 
 export function DemoGestion() {
   return (
@@ -14,7 +13,6 @@ export function DemoGestion() {
       <DemoTourRuntime />
       <DemoOrdersAutoMark />
       <DemoDomAutoMark />
-      <WelcomeDialog />
     </DemoTourProvider>
   );
 }

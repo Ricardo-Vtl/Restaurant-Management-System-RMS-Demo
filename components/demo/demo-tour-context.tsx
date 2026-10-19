@@ -32,7 +32,8 @@ import { demoLog } from "@/lib/demo/config";
 
 // ponytail: estado por documento (no por navegador). El singleton de módulo se
 // conserva al navegar dentro de la SPA (landing↔gestión) y se reinicia al
-// recargar la página → la bienvenida siempre aparece al entrar.
+// recargar la página → el tour vuelve a empezar; la bienvenida solo se monta
+// en la landing, no dentro de /gestion.
 let memoryState: StoredTourState | null = null;
 let memorySession: DemoSession | null = null;
 
