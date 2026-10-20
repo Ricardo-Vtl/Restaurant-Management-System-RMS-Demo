@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -83,8 +83,15 @@ export function IdentityTab({ config }: { config: FullConfig }) {
   const watchSlides = useWatch({ control: form.control, name: "hero_slides" });
   const watchColors = useWatch({ control: form.control, name: "brand_colors" });
 
+  const [previewSlide, setPreviewSlide] = useState(0);
+
   const slidesCount = watchSlides?.length ?? 0;
-  const firstSlide = watchSlides?.[0];
+  const previewIndex = slidesCount > 0 ? Math.min(previewSlide, slidesCount - 1) : 0;
+  const activeSlide = watchSlides?.[previewIndex];
+
+  useEffect(() => {
+    setPreviewSlide(0);
+  }, [slidesCount]);
 
   const handleUpload = async (file: File | undefined, kind: "hero" | "logo", index?: number) => {
     if (!file) return;
@@ -407,9 +414,9 @@ export function IdentityTab({ config }: { config: FullConfig }) {
         </p>
         <Card className="overflow-hidden">
           <div className="relative h-52" style={{ backgroundColor: watchColors?.primary ?? "#011c37" }}>
-            {firstSlide?.image_url ? (
+            {activeSlide?.image_url ? (
               <Image
-                src={firstSlide.image_url}
+                src={activeSlide.image_url}
                 alt=""
                 fill
                 sizes="(max-width: 1024px) 100vw, 360px"
@@ -430,39 +437,49 @@ export function IdentityTab({ config }: { config: FullConfig }) {
                 Abierto Ahora
               </div>
               <p className="font-serif text-2xl font-bold text-white">
-                {firstSlide?.title || watchName || "Tu restaurante"}
+                {activeSlide?.title || watchName || "Tu restaurante"}
               </p>
-              {firstSlide?.subtitle && (
+              {activeSlide?.subtitle && (
                 <p className="font-serif text-base" style={{ color: watchColors?.accent ?? "#d43a3a" }}>
-                  {firstSlide.subtitle}
+                  {activeSlide.subtitle}
                 </p>
               )}
-              {firstSlide?.description && (
-                <p className="text-xs text-white/75 max-w-[85%] leading-snug">{firstSlide.description}</p>
+              {activeSlide?.description && (
+                <p className="text-xs text-white/75 max-w-[85%] leading-snug">{activeSlide.description}</p>
               )}
-              {!firstSlide?.title && !firstSlide?.subtitle && (
+              {!activeSlide?.title && !activeSlide?.subtitle && (
                 <p className="font-serif text-base text-white/85">{watchSlogan || "Tu lema aquí"}</p>
               )}
             </div>
           </div>
           <div
-            className="flex items-center justify-between px-4 py-2.5"
+            className="flex items-center justify-between gap-2 px-4 py-1.5"
             style={{ backgroundColor: watchColors?.accent ?? "#d43a3a" }}
           >
             <span className="text-xs font-medium text-white">
               {slidesCount > 1
-                ? `${slidesCount} slides · carrusel`
+                ? `Slide ${previewIndex + 1} de ${slidesCount}`
                 : slidesCount === 1
                   ? "1 imagen · fondo fijo"
                   : "Sin imágenes · fondo de color"}
             </span>
             {slidesCount > 1 && (
-              <div className="flex gap-1" aria-hidden>
+              <div className="flex items-center gap-1" role="group" aria-label="Elegir slide de la vista previa">
                 {Array.from({ length: slidesCount }).map((_, i) => (
-                  <span
+                  <button
                     key={i}
-                    className={`h-1.5 rounded-full transition-all ${i === 0 ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
-                  />
+                    type="button"
+                    onClick={() => setPreviewSlide(i)}
+                    aria-label={`Ver slide ${i + 1}`}
+                    aria-current={i === previewIndex ? "true" : undefined}
+                    className="group flex size-6 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+                  >
+                    <span
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === previewIndex ? "w-4 bg-white" : "w-1.5 bg-white/50 group-hover:bg-white/70"
+                      }`}
+                    />
+                  </button>
                 ))}
               </div>
             )}
